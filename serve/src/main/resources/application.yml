@@ -1,0 +1,22 @@
+server:
+  port: 8080
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://
+    username: root
+    password: AAATTTRRRIII
+mybatis:
+  #  mapper映射文件包扫描 (这里是对应 resources 的文件路径)
+  mapper-locations: classpath:/mapper/*.xml
+  #  实体类别名包扫描
+  type-aliases-package: com.gzu.entity
+  configuration:
+    map-underscore-to-camel-case: true
+
+
+gzu:
+  jwt:
+     user-secret-key: student
+     user-ttl: 7200000
+     user-token-name: token
