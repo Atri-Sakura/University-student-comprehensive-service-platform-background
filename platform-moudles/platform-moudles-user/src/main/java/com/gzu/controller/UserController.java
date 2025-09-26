@@ -24,7 +24,7 @@ public class UserController {
 
     @PostMapping("/addUser")
     public R<?> addUser(@RequestBody UserBase userBase) {
-        userService.InsertUser(userBase);
+        userService.insertUser(userBase);
         return R.ok();
     }
 
