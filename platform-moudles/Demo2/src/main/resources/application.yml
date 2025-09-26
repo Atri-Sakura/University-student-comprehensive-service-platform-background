@@ -1,0 +1,37 @@
+# application.yml 完整修正版
+server:
+  port: 9090
+
+spring:
+  # 1. 全局层级：正确配置激活的环境（必须与 spring.application 同级）
+  profiles:
+    active: dev  # 关键修正：从 spring.config 下移出，放到这里
+    include: feign
+  # 2. 应用名配置（全局）
+  application:
+    name: test2
+  # 3. Nacos 配置（全局，依赖激活的环境）
+  cloud:
+    nacos:
+      server-addr: 127.0.0.1:8848  # Nacos 服务地址
+      config:
+        import-check:
+          enabled: false  # 关闭导入检查（避免无配置时报错，可选）
+        namespace: ${spring.profiles.active:public}  # 用激活的环境动态指定命名空间
+
+logging:
+  level:
+    com.gzu.feign: debug
+# 4. 配置源激活逻辑（保留需求：仅 dev 环境激活此配置）
+---
+spring:
+  config:
+    import:
+      - nacos:database.properties?group=Demo2
+    activate:
+      on-profile: dev
+---
+spring:
+  config:
+    import:
+      - nacos:database.properties?group=Demo2

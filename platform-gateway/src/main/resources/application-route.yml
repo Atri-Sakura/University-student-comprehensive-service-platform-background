@@ -1,0 +1,40 @@
+spring:
+  cloud:
+    gateway:
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOrigins: "*"
+            allowedMethods: '*'
+            allowed-headers: '*'
+      routes:
+        # 第一个路由：order-route（完整属性）
+        - id: order-route          # 路由唯一ID（必填，不能重复）
+          uri: lb://test2          # 转发目标（lb://表示服务发现，test2是服务名）
+          predicates:              # 路由断言（满足条件才转发，必填）
+            - Path=/api/order/**   # 匹配 /api/order/ 开头的请求
+          filters:
+            - RewritePath=/api/order/?(?<segment>.*), /$\{segment}
+            - OnceToken=X-Response-Token,uuid
+        # 第二个路由：product-route（完整属性）
+        - id: product-route
+          uri: lb://test
+          predicates:
+            - Path=/api/product/**
+          filters:
+            - RewritePath=/api/product/?(?<segment>.*), /$\{segment}
+            - OnceToken=X-Response-Token,uuid
+        - id: bing-route
+          uri: https://cn.bing.com/
+          predicates:
+            - name: Path
+              args:
+                pattern: /search
+            - name: Query
+              args:
+                param: q
+                regexp: haha
+            - name: Vip
+              args:
+                param: user
+                value: leifengyang
