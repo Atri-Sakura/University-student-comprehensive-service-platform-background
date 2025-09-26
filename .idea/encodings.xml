@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="Encoding">
+    <file url="file://$PROJECT_DIR$/platform-api/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/platform-api/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/platform-common/platform-common-core/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/platform-common/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/platform-common/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/platform-gateway/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/platform-gateway/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/platform-model/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/platform-moudles/Demo/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/platform-moudles/Demo2/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/platform-moudles/Demo3/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/platform-moudles/platform-moudles-merchant/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/platform-moudles/platform-moudles-message/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/platform-moudles/platform-moudles-order/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/platform-moudles/platform-moudles-order/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/platform-moudles/platform-moudles-pay/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/platform-moudles/platform-moudles-pay/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/platform-moudles/platform-moudles-rider/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/platform-moudles/platform-moudles-user/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/platform-moudles/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/platform-moudles/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/resources" charset="UTF-8" />
+  </component>
+</project>

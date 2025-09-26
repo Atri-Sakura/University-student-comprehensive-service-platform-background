@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.3.4</version>
+        <relativePath></relativePath>
+    </parent>
+
+    <groupId>com.gzu</groupId>
+    <artifactId>CollegerServicePlatform</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <name>CollegerServicePlatform</name>
+    <packaging>pom</packaging>
+    <modules>
+        <module>platform-moudles</module>
+        <module>platform-common</module>
+        <module>platform-gateway</module>
+        <module>platform-api</module>
+        <module>platform-moudles/Demo</module>
+        <module>platform-moudles/Demo2</module>
+        <module>platform-model</module>
+        <module>platform-moudles/Demo3</module>
+        <module>platform-moudles/platform-moudles-user</module>
+        <module>platform-moudles/platform-moudles-pay</module>
+        <module>platform-moudles/platform-moudles-order</module>
+        <module>platform-moudles/platform-moudles-merchant</module>
+        <module>platform-moudles/platform-moudles-message</module>
+        <module>platform-moudles/platform-moudles-rider</module>
+    </modules>
+
+    <properties>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <spring-cloud.version>2023.0.3</spring-cloud.version>
+        <spring-cloud-alibaba.version>2023.0.3.2</spring-cloud-alibaba.version>
+    </properties>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>${spring-cloud.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.alibaba.cloud</groupId>
+                <artifactId>spring-cloud-alibaba-dependencies</artifactId>
+                <version>${spring-cloud-alibaba.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+        </dependencies>
+    </dependencyManagement>
+
+</project>
