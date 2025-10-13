@@ -1,0 +1,22 @@
+#server:
+#  port: 9090
+#
+#spring:
+#  application:
+#    name: user-service
+#  profiles:
+#    active: dev
+#  cloud:
+#    nacos:
+#      server-addr: 182.254.228.15:8848
+#      config:
+#        namespace: be652ec9-7287-4078-b51c-10e62c812098
+#        group: USER_GROUP
+#        file-extension: yaml
+#
+#
+#    sentinel:
+#
+#      jvmArgs: -Dcsp.sentinel.log.dir=D:/sentinel-logs/csp/
+#  config:
+#    import: "nacos:application-dev.yml?group=USER_GROUP&namespace=be652ec9-7287-4078-b51c-10e62c812098"

@@ -16,7 +16,6 @@ spring:
         namespace: be652ec9-7287-4078-b51c-10e62c812098
         group: AUTH_GROUP
         file-extension: yaml
-        # 热更新的开关 开启会导致加载多余（不存在）的配置 关闭会导致无法热更新
         refresh-enabled: true
         extension-configs[0]:
           data-id: application-auth-dev.yml
