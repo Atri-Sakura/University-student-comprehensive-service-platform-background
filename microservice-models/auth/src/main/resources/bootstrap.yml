@@ -3,7 +3,7 @@ server:
 
 spring:
   application:
-    name: user-service
+    name: auth-service
   profiles:
     active: dev
   cloud:
@@ -11,12 +11,14 @@ spring:
       server-addr: 182.254.228.15:8848
       config:
         namespace: be652ec9-7287-4078-b51c-10e62c812098
-        group: USER_GROUP
+        group: AUTH_GROUP
         file-extension: yaml
+      discovery:
+        namespace: be652ec9-7287-4078-b51c-10e62c812098  # 把服务注册到 dev
 
 
     sentinel:
 
       jvmArgs: -Dcsp.sentinel.log.dir=D:/sentinel-logs/csp/
   config:
-    import: "nacos:application-dev.yml?group=USER_GROUP&namespace=be652ec9-7287-4078-b51c-10e62c812098"
+    import: "nacos:application-auth-dev.yml?group=AUTH_GROUP&namespace=be652ec9-7287-4078-b51c-10e62c812098"
