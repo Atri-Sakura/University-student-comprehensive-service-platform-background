@@ -27,6 +27,10 @@
         <module>microservice-model</module>
         <module>microservice-models</module>
         <module>microservice-models/auth</module>
+        <module>microservice-models/user</module>
+        <module>microservice-models/order</module>
+        <module>microservice-models/merchant</module>
+        <module>microservice-models/message</module>
     </modules>
 
     <dependencyManagement>
