@@ -1,0 +1,12 @@
+spring:
+  profiles:
+    include: route
+  application:
+    name: gateway
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 182.254.228.15:8848
+
+server:
+  port: 90
