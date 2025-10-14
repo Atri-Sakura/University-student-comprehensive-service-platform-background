@@ -15,6 +15,10 @@
     <file url="file://$PROJECT_DIR$/microservice-models/message/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/microservice-models/order/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/microservice-models/order/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/microservice-models/platform/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/microservice-models/platform/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/microservice-models/rider/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/microservice-models/rider/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/microservice-models/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/microservice-models/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/microservice-models/user/src/main/java" charset="UTF-8" />

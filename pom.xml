@@ -31,6 +31,8 @@
         <module>microservice-models/order</module>
         <module>microservice-models/merchant</module>
         <module>microservice-models/message</module>
+        <module>microservice-models/rider</module>
+        <module>microservice-models/platform</module>
     </modules>
 
     <dependencyManagement>
