@@ -33,6 +33,7 @@
         <module>microservice-models/message</module>
         <module>microservice-models/rider</module>
         <module>microservice-models/platform</module>
+        <module>microservice-models/pay</module>
     </modules>
 
     <dependencyManagement>

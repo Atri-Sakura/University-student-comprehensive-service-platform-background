@@ -12,6 +12,7 @@
         <module name="microservice-model" />
         <module name="auth" />
         <module name="merchant" />
+        <module name="pay" />
         <module name="message" />
         <module name="user" />
         <module name="rider" />
@@ -33,6 +34,7 @@
       <module name="microservice-model" options="" />
       <module name="microservice-models" options="" />
       <module name="order" options="" />
+      <module name="pay" options="" />
       <module name="rider" options="" />
       <module name="user" options="" />
     </option>

@@ -5,7 +5,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c8171213-b40b-405e-90e5-c2b6d09a0c78" name="更改" comment="添加了所有端的配置文件">
+      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources/51b976be-8f15-4bfb-9caa-e93df02b5653.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources/51b976be-8f15-4bfb-9caa-e93df02b5653.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/encodings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/encodings.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -69,7 +74,7 @@
     "WebServerToolWindowFactoryState": "false",
     "android.gradle.sync.needed": "true",
     "jdk.selected.JAVA_MODULE": "17",
-    "last_opened_file_path": "D:/大学/实训/后端/CollegeServicePlatform/microservice-models/user/src/main/resources",
+    "last_opened_file_path": "D:/大学/实训/后端/CollegeServicePlatform/microservice-models/pay/src/main/resources",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -90,11 +95,11 @@
 }]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="D:\大学\实训\后端\CollegeServicePlatform\microservice-models\pay\src\main\resources" />
       <recent name="D:\大学\实训\后端\CollegeServicePlatform\microservice-models\user\src\main\resources" />
       <recent name="D:\大学\实训\后端\CollegeServicePlatform\microservice-models\rider\src\main\resources" />
       <recent name="D:\大学\实训\后端\CollegeServicePlatform\microservice-models\platform\src\main\resources" />
       <recent name="D:\大学\实训\后端\CollegeServicePlatform\microservice-models\order\src\main\resources" />
-      <recent name="D:\大学\实训\后端\CollegeServicePlatform\microservice-models\message\src\main\resources" />
     </key>
     <key name="MoveClassesOrPackagesDialog.RECENTS_KEY">
       <recent name="com.gzu" />
@@ -167,7 +172,7 @@
       <workItem from="1760323365610" duration="3945000" />
       <workItem from="1760336293013" duration="8007000" />
       <workItem from="1760404250270" duration="2732000" />
-      <workItem from="1760409847328" duration="11000" />
+      <workItem from="1760409847328" duration="976000" />
     </task>
     <task id="LOCAL-00001" summary="111">
       <option name="closed" value="true" />
@@ -257,7 +262,15 @@
       <option name="project" value="LOCAL" />
       <updated>1760409571273</updated>
     </task>
-    <option name="localTasksCounter" value="12" />
+    <task id="LOCAL-00012" summary="添加了所有端的配置文件">
+      <option name="closed" value="true" />
+      <created>1760409870071</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1760409870071</updated>
+    </task>
+    <option name="localTasksCounter" value="13" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -298,6 +311,7 @@
       <path value="$PROJECT_DIR$/microservice-models/merchant" />
       <path value="$PROJECT_DIR$/microservice-models/message" />
       <path value="$PROJECT_DIR$/microservice-models/rider" />
+      <path value="$PROJECT_DIR$/microservice-models/pay" />
     </ignored-roots>
     <MESSAGE value="111" />
     <MESSAGE value="框架 maven重新加载就可以运行了" />

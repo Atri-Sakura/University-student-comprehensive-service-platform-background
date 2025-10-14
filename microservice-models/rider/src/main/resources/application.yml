@@ -1,0 +1,31 @@
+#server:
+#  port: 9095
+#
+#spring:
+#  application:
+#    name: rider-service
+#  profiles:
+#    active: dev
+#  cloud:
+#    nacos:
+#      # 配置中心和服务注册中心统一用server-addr
+#      server-addr: 182.254.228.15:8848
+#      config:
+#        import-check:
+#          enabled: false
+#        namespace: be652ec9-7287-4078-b51c-10e62c812098
+#        group: RIDER_GROUP
+#        file-extension: yaml
+#        # 热更新的开关 开启会导致加载多余（不存在）的配置 关闭会导致无法热更新
+#        refresh-enabled: true
+#        extension-configs[0]:
+#          data-id: application-rider-dev.yml
+#          group: RIDER_GROUP
+#          refresh: true
+#      discovery:
+#        namespace: be652ec9-7287-4078-b51c-10e62c812098  # 把服务注册到 dev
+#
+#
+#    sentinel:
+#
+#      jvmArgs: -Dcsp.sentinel.log.dir=D:/sentinel-logs/csp/
