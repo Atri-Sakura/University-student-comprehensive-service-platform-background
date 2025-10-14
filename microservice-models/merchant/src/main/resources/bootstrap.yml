@@ -1,9 +1,9 @@
 server:
-  port: 9090
+  port: 9091
 
 spring:
   application:
-    name: auth-service
+    name: merchant-service
   profiles:
     active: dev
   cloud:
@@ -14,16 +14,13 @@ spring:
         import-check:
           enabled: false
         namespace: be652ec9-7287-4078-b51c-10e62c812098
-        group: AUTH_GROUP
+        group: MERCHANT_GROUP
         file-extension: yaml
+        # 热更新的开关 开启会导致加载多余（不存在）的配置 关闭会导致无法热更新
         refresh-enabled: true
         extension-configs[0]:
-          data-id: application-auth-dev.yml
-          group: AUTH_GROUP
-          refresh: true
-        extension-configs[1]:
-          data-id: JwtProperties.yml
-          group: AUTH_GROUP
+          data-id: application-merchant-dev.yml
+          group: MERCHANT_GROUP
           refresh: true
       discovery:
         namespace: be652ec9-7287-4078-b51c-10e62c812098  # 把服务注册到 dev
