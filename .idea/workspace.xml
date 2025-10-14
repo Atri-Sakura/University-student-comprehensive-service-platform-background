@@ -4,19 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="c8171213-b40b-405e-90e5-c2b6d09a0c78" name="更改" comment="auth端添加jwt配置相关文件">
+    <list default="true" id="c8171213-b40b-405e-90e5-c2b6d09a0c78" name="更改" comment="添加了所有端的配置文件">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/microservice-common/target/classes/com/gzu/common/result/Result.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/microservice-common/target/classes/com/gzu/common/utils/JwtUtil.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/microservice-models/auth/target/classes/application.yml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/microservice-models/auth/target/classes/bootstrap.yml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/microservice-models/auth/target/classes/com/gzu/auth/AuthApplication.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/microservice-models/auth/target/classes/com/gzu/auth/controller/Controller.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/microservice-models/auth/target/classes/com/gzu/auth/properties/JwtProperties.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/microservice-models/merchant/src/main/resources/application.properties" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/microservice-models/message/src/main/resources/application.properties" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/microservice-models/order/src/main/resources/application.properties" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/microservice-models/user/src/main/resources/application.properties" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -90,7 +79,7 @@
     "project.structure.proportion": "0.0",
     "project.structure.side.proportion": "0.0",
     "settings.editor.selected.configurable": "project.propVCSSupport.DirectoryMappings",
-    "spring.configuration.checksum": "2408c861931ea760d11fea5996d2f425",
+    "spring.configuration.checksum": "c10e07d6e69d7a530b9f766e0e9ff5ab",
     "vue.rearranger.settings.migration": "true"
   },
   "keyToStringList": {
@@ -177,7 +166,8 @@
       <workItem from="1760319134515" duration="2933000" />
       <workItem from="1760323365610" duration="3945000" />
       <workItem from="1760336293013" duration="8007000" />
-      <workItem from="1760404250270" duration="2427000" />
+      <workItem from="1760404250270" duration="2732000" />
+      <workItem from="1760409847328" duration="11000" />
     </task>
     <task id="LOCAL-00001" summary="111">
       <option name="closed" value="true" />
@@ -259,7 +249,15 @@
       <option name="project" value="LOCAL" />
       <updated>1760408775576</updated>
     </task>
-    <option name="localTasksCounter" value="11" />
+    <task id="LOCAL-00011" summary="添加了所有端的配置文件">
+      <option name="closed" value="true" />
+      <created>1760409571273</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1760409571273</updated>
+    </task>
+    <option name="localTasksCounter" value="12" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -270,7 +268,19 @@
       <map>
         <entry key="MAIN">
           <value>
-            <State />
+            <State>
+              <option name="FILTERS">
+                <map>
+                  <entry key="branch">
+                    <value>
+                      <list>
+                        <option value="springcloud1/springcloud2" />
+                      </list>
+                    </value>
+                  </entry>
+                </map>
+              </option>
+            </State>
           </value>
         </entry>
       </map>
@@ -287,12 +297,14 @@
       <path value="$PROJECT_DIR$/microservice-models/user" />
       <path value="$PROJECT_DIR$/microservice-models/merchant" />
       <path value="$PROJECT_DIR$/microservice-models/message" />
+      <path value="$PROJECT_DIR$/microservice-models/rider" />
     </ignored-roots>
     <MESSAGE value="111" />
     <MESSAGE value="框架 maven重新加载就可以运行了" />
     <MESSAGE value="bootstrap.yml里面添加discovery的配置为dev" />
     <MESSAGE value="添加merchant和message端" />
     <MESSAGE value="auth端添加jwt配置相关文件" />
-    <option name="LAST_COMMIT_MESSAGE" value="auth端添加jwt配置相关文件" />
+    <MESSAGE value="添加了所有端的配置文件" />
+    <option name="LAST_COMMIT_MESSAGE" value="添加了所有端的配置文件" />
   </component>
 </project>
