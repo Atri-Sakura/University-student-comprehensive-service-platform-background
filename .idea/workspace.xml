@@ -4,13 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="c8171213-b40b-405e-90e5-c2b6d09a0c78" name="更改" comment="添加了所有端的配置文件">
-      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources/51b976be-8f15-4bfb-9caa-e93df02b5653.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources/51b976be-8f15-4bfb-9caa-e93df02b5653.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/encodings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/encodings.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+    <list default="true" id="c8171213-b40b-405e-90e5-c2b6d09a0c78" name="更改" comment="添加了支付模块">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/microservice-model/src/main/java/com/gzu/entity/chat/ChatMessageRead.java" beforeDir="false" afterPath="$PROJECT_DIR$/microservice-model/src/main/java/com/gzu/entity/chat/ChatMessageRead.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/microservice-models/auth/src/main/java/com/gzu/auth/controller/Controller.java" beforeDir="false" afterPath="$PROJECT_DIR$/microservice-models/auth/src/main/java/com/gzu/auth/controller/Controller.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -60,39 +57,39 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ASKED_ADD_EXTERNAL_FILES": "true",
-    "RequestMappingsPanelOrder0": "0",
-    "RequestMappingsPanelOrder1": "1",
-    "RequestMappingsPanelWidth0": "75",
-    "RequestMappingsPanelWidth1": "75",
-    "RunOnceActivity.OpenProjectViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "SONARLINT_PRECOMMIT_ANALYSIS": "true",
-    "WebServerToolWindowFactoryState": "false",
-    "android.gradle.sync.needed": "true",
-    "jdk.selected.JAVA_MODULE": "17",
-    "last_opened_file_path": "D:/大学/实训/后端/CollegeServicePlatform/microservice-models/pay/src/main/resources",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "project.structure.last.edited": "模块",
-    "project.structure.proportion": "0.0",
-    "project.structure.side.proportion": "0.0",
-    "settings.editor.selected.configurable": "project.propVCSSupport.DirectoryMappings",
-    "spring.configuration.checksum": "c10e07d6e69d7a530b9f766e0e9ff5ab",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ASKED_ADD_EXTERNAL_FILES&quot;: &quot;true&quot;,
+    &quot;RequestMappingsPanelOrder0&quot;: &quot;0&quot;,
+    &quot;RequestMappingsPanelOrder1&quot;: &quot;1&quot;,
+    &quot;RequestMappingsPanelWidth0&quot;: &quot;75&quot;,
+    &quot;RequestMappingsPanelWidth1&quot;: &quot;75&quot;,
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;SONARLINT_PRECOMMIT_ANALYSIS&quot;: &quot;true&quot;,
+    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
+    &quot;android.gradle.sync.needed&quot;: &quot;true&quot;,
+    &quot;jdk.selected.JAVA_MODULE&quot;: &quot;17&quot;,
+    &quot;last_opened_file_path&quot;: &quot;D:/大学/实训/后端/CollegeServicePlatform/microservice-models/pay/src/main/resources&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;模块&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.0&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.0&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;project.propVCSSupport.DirectoryMappings&quot;,
+    &quot;spring.configuration.checksum&quot;: &quot;20db23170f79385a0ba913029a76c05b&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   },
-  "keyToStringList": {
-    "DatabaseDriversLRU": [
-      "mysql"
+  &quot;keyToStringList&quot;: {
+    &quot;DatabaseDriversLRU&quot;: [
+      &quot;mysql&quot;
     ]
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="D:\大学\实训\后端\CollegeServicePlatform\microservice-models\pay\src\main\resources" />
@@ -172,7 +169,9 @@
       <workItem from="1760323365610" duration="3945000" />
       <workItem from="1760336293013" duration="8007000" />
       <workItem from="1760404250270" duration="2732000" />
-      <workItem from="1760409847328" duration="976000" />
+      <workItem from="1760409847328" duration="1563000" />
+      <workItem from="1760411418500" duration="2449000" />
+      <workItem from="1760490991918" duration="5320000" />
     </task>
     <task id="LOCAL-00001" summary="111">
       <option name="closed" value="true" />
@@ -270,7 +269,23 @@
       <option name="project" value="LOCAL" />
       <updated>1760409870071</updated>
     </task>
-    <option name="localTasksCounter" value="13" />
+    <task id="LOCAL-00013" summary="添加了支付模块">
+      <option name="closed" value="true" />
+      <created>1760410864998</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1760410864998</updated>
+    </task>
+    <task id="LOCAL-00014" summary="添加了支付模块">
+      <option name="closed" value="true" />
+      <created>1760414257516</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1760414257516</updated>
+    </task>
+    <option name="localTasksCounter" value="15" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -287,7 +302,7 @@
                   <entry key="branch">
                     <value>
                       <list>
-                        <option value="springcloud1/springcloud2" />
+                        <option value="master" />
                       </list>
                     </value>
                   </entry>
@@ -319,6 +334,7 @@
     <MESSAGE value="添加merchant和message端" />
     <MESSAGE value="auth端添加jwt配置相关文件" />
     <MESSAGE value="添加了所有端的配置文件" />
-    <option name="LAST_COMMIT_MESSAGE" value="添加了所有端的配置文件" />
+    <MESSAGE value="添加了支付模块" />
+    <option name="LAST_COMMIT_MESSAGE" value="添加了支付模块" />
   </component>
 </project>

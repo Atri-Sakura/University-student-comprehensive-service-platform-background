@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RefreshScope
-@RequestMapping("/auth")
+@RequestMapping("/test")
 public class Controller {
     @Autowired
     private JwtProperties jwtProperties;
