@@ -1,0 +1,61 @@
+package com.ruoyi.platform.mapper;
+
+import java.util.List;
+import com.ruoyi.platform.domain.ChatMessageRead;
+
+/**
+ * 消息已读状态（追踪每条消息的已读情况，支撑群聊扩展）Mapper接口
+ * 
+ * @author ruoyi
+ * @date 2025-10-16
+ */
+public interface ChatMessageReadMapper 
+{
+    /**
+     * 查询消息已读状态（追踪每条消息的已读情况，支撑群聊扩展）
+     * 
+     * @param readId 消息已读状态（追踪每条消息的已读情况，支撑群聊扩展）主键
+     * @return 消息已读状态（追踪每条消息的已读情况，支撑群聊扩展）
+     */
+    public ChatMessageRead selectChatMessageReadByReadId(Long readId);
+
+    /**
+     * 查询消息已读状态（追踪每条消息的已读情况，支撑群聊扩展）列表
+     * 
+     * @param chatMessageRead 消息已读状态（追踪每条消息的已读情况，支撑群聊扩展）
+     * @return 消息已读状态（追踪每条消息的已读情况，支撑群聊扩展）集合
+     */
+    public List<ChatMessageRead> selectChatMessageReadList(ChatMessageRead chatMessageRead);
+
+    /**
+     * 新增消息已读状态（追踪每条消息的已读情况，支撑群聊扩展）
+     * 
+     * @param chatMessageRead 消息已读状态（追踪每条消息的已读情况，支撑群聊扩展）
+     * @return 结果
+     */
+    public int insertChatMessageRead(ChatMessageRead chatMessageRead);
+
+    /**
+     * 修改消息已读状态（追踪每条消息的已读情况，支撑群聊扩展）
+     * 
+     * @param chatMessageRead 消息已读状态（追踪每条消息的已读情况，支撑群聊扩展）
+     * @return 结果
+     */
+    public int updateChatMessageRead(ChatMessageRead chatMessageRead);
+
+    /**
+     * 删除消息已读状态（追踪每条消息的已读情况，支撑群聊扩展）
+     * 
+     * @param readId 消息已读状态（追踪每条消息的已读情况，支撑群聊扩展）主键
+     * @return 结果
+     */
+    public int deleteChatMessageReadByReadId(Long readId);
+
+    /**
+     * 批量删除消息已读状态（追踪每条消息的已读情况，支撑群聊扩展）
+     * 
+     * @param readIds 需要删除的数据主键集合
+     * @return 结果
+     */
+    public int deleteChatMessageReadByReadIds(Long[] readIds);
+}

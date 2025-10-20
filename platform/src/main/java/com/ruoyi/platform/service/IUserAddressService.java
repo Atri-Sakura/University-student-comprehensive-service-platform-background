@@ -1,0 +1,61 @@
+package com.ruoyi.platform.service;
+
+import java.util.List;
+import com.ruoyi.platform.domain.UserAddress;
+
+/**
+ * 用户地址Service接口
+ * 
+ * @author ruoyi
+ * @date 2025-10-16
+ */
+public interface IUserAddressService 
+{
+    /**
+     * 查询用户地址
+     * 
+     * @param userAddressId 用户地址主键
+     * @return 用户地址
+     */
+    public UserAddress selectUserAddressByUserAddressId(Long userAddressId);
+
+    /**
+     * 查询用户地址列表
+     * 
+     * @param userAddress 用户地址
+     * @return 用户地址集合
+     */
+    public List<UserAddress> selectUserAddressList(UserAddress userAddress);
+
+    /**
+     * 新增用户地址
+     * 
+     * @param userAddress 用户地址
+     * @return 结果
+     */
+    public int insertUserAddress(UserAddress userAddress);
+
+    /**
+     * 修改用户地址
+     * 
+     * @param userAddress 用户地址
+     * @return 结果
+     */
+    public int updateUserAddress(UserAddress userAddress);
+
+    /**
+     * 批量删除用户地址
+     * 
+     * @param userAddressIds 需要删除的用户地址主键集合
+     * @return 结果
+     */
+    public int deleteUserAddressByUserAddressIds(Long[] userAddressIds);
+
+    /**
+     * 删除用户地址信息
+     * 
+     * @param userAddressId 用户地址主键
+     * @return 结果
+     */
+    public int deleteUserAddressByUserAddressId(Long userAddressId);
+}
