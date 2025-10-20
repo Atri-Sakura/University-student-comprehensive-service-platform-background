@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.platform.mapper.UserTimetableMapper">
+    
+    <resultMap type="UserTimetable" id="UserTimetableResult">
+        <result property="userTimetableId"    column="user_timetable_id"    />
+        <result property="userBaseId"    column="user_base_id"    />
+        <result property="courseName"    column="course_name"    />
+        <result property="teacherName"    column="teacher_name"    />
+        <result property="classRoom"    column="class_room"    />
+        <result property="weekDay"    column="week_day"    />
+        <result property="startPeriod"    column="start_period"    />
+        <result property="endPeriod"    column="end_period"    />
+        <result property="startTime"    column="start_time"    />
+        <result property="endTime"    column="end_time"    />
+        <result property="startDate"    column="start_date"    />
+        <result property="endDate"    column="end_date"    />
+        <result property="importSource"    column="import_source"    />
+        <result property="createTime"    column="create_time"    />
+    </resultMap>
+
+    <sql id="selectUserTimetableVo">
+        select user_timetable_id, user_base_id, course_name, teacher_name, class_room, week_day, start_period, end_period, start_time, end_time, start_date, end_date, import_source, create_time from user_timetable
+    </sql>
+
+    <select id="selectUserTimetableList" parameterType="UserTimetable" resultMap="UserTimetableResult">
+        <include refid="selectUserTimetableVo"/>
+        <where>  
+            <if test="userBaseId != null "> and user_base_id = #{userBaseId}</if>
+            <if test="courseName != null  and courseName != ''"> and course_name like concat('%', #{courseName}, '%')</if>
+            <if test="teacherName != null  and teacherName != ''"> and teacher_name like concat('%', #{teacherName}, '%')</if>
+            <if test="classRoom != null  and classRoom != ''"> and class_room = #{classRoom}</if>
+            <if test="weekDay != null "> and week_day = #{weekDay}</if>
+            <if test="startPeriod != null "> and start_period = #{startPeriod}</if>
+            <if test="endPeriod != null "> and end_period = #{endPeriod}</if>
+            <if test="startTime != null  and startTime != ''"> and start_time = #{startTime}</if>
+            <if test="endTime != null  and endTime != ''"> and end_time = #{endTime}</if>
+            <if test="startDate != null "> and start_date = #{startDate}</if>
+            <if test="endDate != null "> and end_date = #{endDate}</if>
+            <if test="importSource != null  and importSource != ''"> and import_source = #{importSource}</if>
+        </where>
+    </select>
+    
+    <select id="selectUserTimetableByUserTimetableId" parameterType="Long" resultMap="UserTimetableResult">
+        <include refid="selectUserTimetableVo"/>
+        where user_timetable_id = #{userTimetableId}
+    </select>
+
+    <insert id="insertUserTimetable" parameterType="UserTimetable">
+        insert into user_timetable
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="userTimetableId != null">user_timetable_id,</if>
+            <if test="userBaseId != null">user_base_id,</if>
+            <if test="courseName != null and courseName != ''">course_name,</if>
+            <if test="teacherName != null">teacher_name,</if>
+            <if test="classRoom != null and classRoom != ''">class_room,</if>
+            <if test="weekDay != null">week_day,</if>
+            <if test="startPeriod != null">start_period,</if>
+            <if test="endPeriod != null">end_period,</if>
+            <if test="startTime != null and startTime != ''">start_time,</if>
+            <if test="endTime != null and endTime != ''">end_time,</if>
+            <if test="startDate != null">start_date,</if>
+            <if test="endDate != null">end_date,</if>
+            <if test="importSource != null">import_source,</if>
+            <if test="createTime != null">create_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="userTimetableId != null">#{userTimetableId},</if>
+            <if test="userBaseId != null">#{userBaseId},</if>
+            <if test="courseName != null and courseName != ''">#{courseName},</if>
+            <if test="teacherName != null">#{teacherName},</if>
+            <if test="classRoom != null and classRoom != ''">#{classRoom},</if>
+            <if test="weekDay != null">#{weekDay},</if>
+            <if test="startPeriod != null">#{startPeriod},</if>
+            <if test="endPeriod != null">#{endPeriod},</if>
+            <if test="startTime != null and startTime != ''">#{startTime},</if>
+            <if test="endTime != null and endTime != ''">#{endTime},</if>
+            <if test="startDate != null">#{startDate},</if>
+            <if test="endDate != null">#{endDate},</if>
+            <if test="importSource != null">#{importSource},</if>
+            <if test="createTime != null">#{createTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateUserTimetable" parameterType="UserTimetable">
+        update user_timetable
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="userBaseId != null">user_base_id = #{userBaseId},</if>
+            <if test="courseName != null and courseName != ''">course_name = #{courseName},</if>
+            <if test="teacherName != null">teacher_name = #{teacherName},</if>
+            <if test="classRoom != null and classRoom != ''">class_room = #{classRoom},</if>
+            <if test="weekDay != null">week_day = #{weekDay},</if>
+            <if test="startPeriod != null">start_period = #{startPeriod},</if>
+            <if test="endPeriod != null">end_period = #{endPeriod},</if>
+            <if test="startTime != null and startTime != ''">start_time = #{startTime},</if>
+            <if test="endTime != null and endTime != ''">end_time = #{endTime},</if>
+            <if test="startDate != null">start_date = #{startDate},</if>
+            <if test="endDate != null">end_date = #{endDate},</if>
+            <if test="importSource != null">import_source = #{importSource},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+        </trim>
+        where user_timetable_id = #{userTimetableId}
+    </update>
+
+    <delete id="deleteUserTimetableByUserTimetableId" parameterType="Long">
+        delete from user_timetable where user_timetable_id = #{userTimetableId}
+    </delete>
+
+    <delete id="deleteUserTimetableByUserTimetableIds" parameterType="String">
+        delete from user_timetable where user_timetable_id in 
+        <foreach item="userTimetableId" collection="array" open="(" separator="," close=")">
+            #{userTimetableId}
+        </foreach>
+    </delete>
+</mapper>

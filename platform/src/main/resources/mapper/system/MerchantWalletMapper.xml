@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.platform.mapper.MerchantWalletMapper">
+    
+    <resultMap type="MerchantWallet" id="MerchantWalletResult">
+        <result property="merchantWalletId"    column="merchant_wallet_id"    />
+        <result property="merchantBaseId"    column="merchant_base_id"    />
+        <result property="balance"    column="balance"    />
+        <result property="freezeAmount"    column="freeze_amount"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateTime"    column="update_time"    />
+    </resultMap>
+
+    <sql id="selectMerchantWalletVo">
+        select merchant_wallet_id, merchant_base_id, balance, freeze_amount, create_time, update_time from merchant_wallet
+    </sql>
+
+    <select id="selectMerchantWalletList" parameterType="MerchantWallet" resultMap="MerchantWalletResult">
+        <include refid="selectMerchantWalletVo"/>
+        <where>  
+            <if test="merchantBaseId != null "> and merchant_base_id = #{merchantBaseId}</if>
+            <if test="balance != null "> and balance = #{balance}</if>
+            <if test="freezeAmount != null "> and freeze_amount = #{freezeAmount}</if>
+        </where>
+    </select>
+    
+    <select id="selectMerchantWalletByMerchantWalletId" parameterType="Long" resultMap="MerchantWalletResult">
+        <include refid="selectMerchantWalletVo"/>
+        where merchant_wallet_id = #{merchantWalletId}
+    </select>
+
+    <insert id="insertMerchantWallet" parameterType="MerchantWallet">
+        insert into merchant_wallet
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="merchantWalletId != null">merchant_wallet_id,</if>
+            <if test="merchantBaseId != null">merchant_base_id,</if>
+            <if test="balance != null">balance,</if>
+            <if test="freezeAmount != null">freeze_amount,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="merchantWalletId != null">#{merchantWalletId},</if>
+            <if test="merchantBaseId != null">#{merchantBaseId},</if>
+            <if test="balance != null">#{balance},</if>
+            <if test="freezeAmount != null">#{freezeAmount},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateMerchantWallet" parameterType="MerchantWallet">
+        update merchant_wallet
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="merchantBaseId != null">merchant_base_id = #{merchantBaseId},</if>
+            <if test="balance != null">balance = #{balance},</if>
+            <if test="freezeAmount != null">freeze_amount = #{freezeAmount},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where merchant_wallet_id = #{merchantWalletId}
+    </update>
+
+    <delete id="deleteMerchantWalletByMerchantWalletId" parameterType="Long">
+        delete from merchant_wallet where merchant_wallet_id = #{merchantWalletId}
+    </delete>
+
+    <delete id="deleteMerchantWalletByMerchantWalletIds" parameterType="String">
+        delete from merchant_wallet where merchant_wallet_id in 
+        <foreach item="merchantWalletId" collection="array" open="(" separator="," close=")">
+            #{merchantWalletId}
+        </foreach>
+    </delete>
+</mapper>

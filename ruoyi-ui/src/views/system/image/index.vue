@@ -1,26 +1,42 @@
 <template>
   <div class="app-container">
     <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
-      <el-form-item label="角色名称" prop="roleName">
+      <el-form-item label="关联商品ID" prop="merchantGoodsId">
         <el-input
-          v-model="queryParams.roleName"
-          placeholder="请输入角色名称"
+          v-model="queryParams.merchantGoodsId"
+          placeholder="请输入关联商品ID"
           clearable
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="角色编码" prop="roleCode">
+      <el-form-item label="图片URL" prop="imageUrl">
         <el-input
-          v-model="queryParams.roleCode"
-          placeholder="请输入角色编码"
+          v-model="queryParams.imageUrl"
+          placeholder="请输入图片URL"
           clearable
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="角色描述" prop="roleDesc">
+      <el-form-item label="图片描述" prop="imageDesc">
         <el-input
-          v-model="queryParams.roleDesc"
-          placeholder="请输入角色描述"
+          v-model="queryParams.imageDesc"
+          placeholder="请输入图片描述"
+          clearable
+          @keyup.enter.native="handleQuery"
+        />
+      </el-form-item>
+      <el-form-item label="排序序号" prop="sortOrder">
+        <el-input
+          v-model="queryParams.sortOrder"
+          placeholder="请输入排序序号"
+          clearable
+          @keyup.enter.native="handleQuery"
+        />
+      </el-form-item>
+      <el-form-item label="是否主图：0-否 1-是" prop="isMain">
+        <el-input
+          v-model="queryParams.isMain"
+          placeholder="请输入是否主图：0-否 1-是"
           clearable
           @keyup.enter.native="handleQuery"
         />
@@ -39,7 +55,7 @@
           icon="el-icon-plus"
           size="mini"
           @click="handleAdd"
-          v-hasPermi="['system:role:add']"
+          v-hasPermi="['system:image:add']"
         >新增</el-button>
       </el-col>
       <el-col :span="1.5">
@@ -50,7 +66,7 @@
           size="mini"
           :disabled="single"
           @click="handleUpdate"
-          v-hasPermi="['system:role:edit']"
+          v-hasPermi="['system:image:edit']"
         >修改</el-button>
       </el-col>
       <el-col :span="1.5">
@@ -61,7 +77,7 @@
           size="mini"
           :disabled="multiple"
           @click="handleDelete"
-          v-hasPermi="['system:role:remove']"
+          v-hasPermi="['system:image:remove']"
         >删除</el-button>
       </el-col>
       <el-col :span="1.5">
@@ -71,18 +87,20 @@
           icon="el-icon-download"
           size="mini"
           @click="handleExport"
-          v-hasPermi="['system:role:export']"
+          v-hasPermi="['system:image:export']"
         >导出</el-button>
       </el-col>
       <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
-    <el-table v-loading="loading" :data="roleList" @selection-change="handleSelectionChange">
+    <el-table v-loading="loading" :data="imageList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="角色唯一ID" align="center" prop="platformRoleId" />
-      <el-table-column label="角色名称" align="center" prop="roleName" />
-      <el-table-column label="角色编码" align="center" prop="roleCode" />
-      <el-table-column label="角色描述" align="center" prop="roleDesc" />
+      <el-table-column label="图片ID" align="center" prop="merchantGoodsImageId" />
+      <el-table-column label="关联商品ID" align="center" prop="merchantGoodsId" />
+      <el-table-column label="图片URL" align="center" prop="imageUrl" />
+      <el-table-column label="图片描述" align="center" prop="imageDesc" />
+      <el-table-column label="排序序号" align="center" prop="sortOrder" />
+      <el-table-column label="是否主图：0-否 1-是" align="center" prop="isMain" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button
@@ -90,14 +108,14 @@
             type="text"
             icon="el-icon-edit"
             @click="handleUpdate(scope.row)"
-            v-hasPermi="['system:role:edit']"
+            v-hasPermi="['system:image:edit']"
           >修改</el-button>
           <el-button
             size="mini"
             type="text"
             icon="el-icon-delete"
             @click="handleDelete(scope.row)"
-            v-hasPermi="['system:role:remove']"
+            v-hasPermi="['system:image:remove']"
           >删除</el-button>
         </template>
       </el-table-column>
@@ -111,17 +129,23 @@
       @pagination="getList"
     />
 
-    <!-- 添加或修改角色对话框 -->
+    <!-- 添加或修改商品图片关联（支持多图展示）对话框 -->
     <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
       <el-form ref="form" :model="form" :rules="rules" label-width="80px">
-        <el-form-item label="角色名称" prop="roleName">
-          <el-input v-model="form.roleName" placeholder="请输入角色名称" />
+        <el-form-item label="关联商品ID" prop="merchantGoodsId">
+          <el-input v-model="form.merchantGoodsId" placeholder="请输入关联商品ID" />
         </el-form-item>
-        <el-form-item label="角色编码" prop="roleCode">
-          <el-input v-model="form.roleCode" placeholder="请输入角色编码" />
+        <el-form-item label="图片URL" prop="imageUrl">
+          <el-input v-model="form.imageUrl" placeholder="请输入图片URL" />
         </el-form-item>
-        <el-form-item label="角色描述" prop="roleDesc">
-          <el-input v-model="form.roleDesc" placeholder="请输入角色描述" />
+        <el-form-item label="图片描述" prop="imageDesc">
+          <el-input v-model="form.imageDesc" placeholder="请输入图片描述" />
+        </el-form-item>
+        <el-form-item label="排序序号" prop="sortOrder">
+          <el-input v-model="form.sortOrder" placeholder="请输入排序序号" />
+        </el-form-item>
+        <el-form-item label="是否主图：0-否 1-是" prop="isMain">
+          <el-input v-model="form.isMain" placeholder="请输入是否主图：0-否 1-是" />
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -133,10 +157,10 @@
 </template>
 
 <script>
-import { listRole, getRole, delRole, addRole, updateRole } from "@/api/system/role"
+import { listImage, getImage, delImage, addImage, updateImage } from "@/api/system/image"
 
 export default {
-  name: "Role",
+  name: "Image",
   data() {
     return {
       // 遮罩层
@@ -151,8 +175,8 @@ export default {
       showSearch: true,
       // 总条数
       total: 0,
-      // 角色表格数据
-      roleList: [],
+      // 商品图片关联（支持多图展示）表格数据
+      imageList: [],
       // 弹出层标题
       title: "",
       // 是否显示弹出层
@@ -161,25 +185,33 @@ export default {
       queryParams: {
         pageNum: 1,
         pageSize: 10,
-        roleName: null,
-        roleCode: null,
-        roleDesc: null,
+        merchantGoodsId: null,
+        imageUrl: null,
+        imageDesc: null,
+        sortOrder: null,
+        isMain: null,
       },
       // 表单参数
       form: {},
       // 表单校验
       rules: {
-        roleName: [
-          { required: true, message: "角色名称不能为空", trigger: "blur" }
+        merchantGoodsId: [
+          { required: true, message: "关联商品ID不能为空", trigger: "blur" }
         ],
-        roleCode: [
-          { required: true, message: "角色编码不能为空", trigger: "blur" }
+        imageUrl: [
+          { required: true, message: "图片URL不能为空", trigger: "blur" }
+        ],
+        sortOrder: [
+          { required: true, message: "排序序号不能为空", trigger: "blur" }
+        ],
+        isMain: [
+          { required: true, message: "是否主图：0-否 1-是不能为空", trigger: "blur" }
         ],
         createTime: [
           { required: true, message: "创建时间不能为空", trigger: "blur" }
         ],
         updateTime: [
-          { required: true, message: "最后更新时间不能为空", trigger: "blur" }
+          { required: true, message: "更新时间不能为空", trigger: "blur" }
         ]
       }
     }
@@ -188,11 +220,11 @@ export default {
     this.getList()
   },
   methods: {
-    /** 查询角色列表 */
+    /** 查询商品图片关联（支持多图展示）列表 */
     getList() {
       this.loading = true
-      listRole(this.queryParams).then(response => {
-        this.roleList = response.rows
+      listImage(this.queryParams).then(response => {
+        this.imageList = response.rows
         this.total = response.total
         this.loading = false
       })
@@ -205,10 +237,12 @@ export default {
     // 表单重置
     reset() {
       this.form = {
-        platformRoleId: null,
-        roleName: null,
-        roleCode: null,
-        roleDesc: null,
+        merchantGoodsImageId: null,
+        merchantGoodsId: null,
+        imageUrl: null,
+        imageDesc: null,
+        sortOrder: null,
+        isMain: null,
         createTime: null,
         updateTime: null
       }
@@ -226,7 +260,7 @@ export default {
     },
     // 多选框选中数据
     handleSelectionChange(selection) {
-      this.ids = selection.map(item => item.platformRoleId)
+      this.ids = selection.map(item => item.merchantGoodsImageId)
       this.single = selection.length!==1
       this.multiple = !selection.length
     },
@@ -234,30 +268,30 @@ export default {
     handleAdd() {
       this.reset()
       this.open = true
-      this.title = "添加角色"
+      this.title = "添加商品图片关联（支持多图展示）"
     },
     /** 修改按钮操作 */
     handleUpdate(row) {
       this.reset()
-      const platformRoleId = row.platformRoleId || this.ids
-      getRole(platformRoleId).then(response => {
+      const merchantGoodsImageId = row.merchantGoodsImageId || this.ids
+      getImage(merchantGoodsImageId).then(response => {
         this.form = response.data
         this.open = true
-        this.title = "修改角色"
+        this.title = "修改商品图片关联（支持多图展示）"
       })
     },
     /** 提交按钮 */
     submitForm() {
       this.$refs["form"].validate(valid => {
         if (valid) {
-          if (this.form.platformRoleId != null) {
-            updateRole(this.form).then(response => {
+          if (this.form.merchantGoodsImageId != null) {
+            updateImage(this.form).then(response => {
               this.$modal.msgSuccess("修改成功")
               this.open = false
               this.getList()
             })
           } else {
-            addRole(this.form).then(response => {
+            addImage(this.form).then(response => {
               this.$modal.msgSuccess("新增成功")
               this.open = false
               this.getList()
@@ -268,9 +302,9 @@ export default {
     },
     /** 删除按钮操作 */
     handleDelete(row) {
-      const platformRoleIds = row.platformRoleId || this.ids
-      this.$modal.confirm('是否确认删除角色编号为"' + platformRoleIds + '"的数据项？').then(function() {
-        return delRole(platformRoleIds)
+      const merchantGoodsImageIds = row.merchantGoodsImageId || this.ids
+      this.$modal.confirm('是否确认删除商品图片关联（支持多图展示）编号为"' + merchantGoodsImageIds + '"的数据项？').then(function() {
+        return delImage(merchantGoodsImageIds)
       }).then(() => {
         this.getList()
         this.$modal.msgSuccess("删除成功")
@@ -278,9 +312,9 @@ export default {
     },
     /** 导出按钮操作 */
     handleExport() {
-      this.download('system/role/export', {
+      this.download('system/image/export', {
         ...this.queryParams
-      }, `role_${new Date().getTime()}.xlsx`)
+      }, `image_${new Date().getTime()}.xlsx`)
     }
   }
 }

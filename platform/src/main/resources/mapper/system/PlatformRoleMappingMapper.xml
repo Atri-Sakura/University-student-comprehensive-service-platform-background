@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.platform.mapper.PlatformRoleMappingMapper">
+    
+    <resultMap type="PlatformRoleMapping" id="PlatformRoleMappingResult">
+        <result property="platformRoleMappingId"    column="platform_role_mapping_id"    />
+        <result property="username"    column="username"    />
+        <result property="roleType"    column="role_type"    />
+        <result property="targetDb"    column="target_db"    />
+        <result property="targetTable"    column="target_table"    />
+        <result property="accountStatus"    column="account_status"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateTime"    column="update_time"    />
+    </resultMap>
+
+    <sql id="selectPlatformRoleMappingVo">
+        select platform_role_mapping_id, username, role_type, target_db, target_table, account_status, create_time, update_time from platform_role_mapping
+    </sql>
+
+    <select id="selectPlatformRoleMappingList" parameterType="PlatformRoleMapping" resultMap="PlatformRoleMappingResult">
+        <include refid="selectPlatformRoleMappingVo"/>
+        <where>  
+            <if test="username != null  and username != ''"> and username like concat('%', #{username}, '%')</if>
+            <if test="roleType != null "> and role_type = #{roleType}</if>
+            <if test="targetDb != null  and targetDb != ''"> and target_db = #{targetDb}</if>
+            <if test="targetTable != null  and targetTable != ''"> and target_table = #{targetTable}</if>
+            <if test="accountStatus != null "> and account_status = #{accountStatus}</if>
+        </where>
+    </select>
+    
+    <select id="selectPlatformRoleMappingByPlatformRoleMappingId" parameterType="Long" resultMap="PlatformRoleMappingResult">
+        <include refid="selectPlatformRoleMappingVo"/>
+        where platform_role_mapping_id = #{platformRoleMappingId}
+    </select>
+
+    <insert id="insertPlatformRoleMapping" parameterType="PlatformRoleMapping">
+        insert into platform_role_mapping
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="platformRoleMappingId != null">platform_role_mapping_id,</if>
+            <if test="username != null and username != ''">username,</if>
+            <if test="roleType != null">role_type,</if>
+            <if test="targetDb != null and targetDb != ''">target_db,</if>
+            <if test="targetTable != null and targetTable != ''">target_table,</if>
+            <if test="accountStatus != null">account_status,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="platformRoleMappingId != null">#{platformRoleMappingId},</if>
+            <if test="username != null and username != ''">#{username},</if>
+            <if test="roleType != null">#{roleType},</if>
+            <if test="targetDb != null and targetDb != ''">#{targetDb},</if>
+            <if test="targetTable != null and targetTable != ''">#{targetTable},</if>
+            <if test="accountStatus != null">#{accountStatus},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updatePlatformRoleMapping" parameterType="PlatformRoleMapping">
+        update platform_role_mapping
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="username != null and username != ''">username = #{username},</if>
+            <if test="roleType != null">role_type = #{roleType},</if>
+            <if test="targetDb != null and targetDb != ''">target_db = #{targetDb},</if>
+            <if test="targetTable != null and targetTable != ''">target_table = #{targetTable},</if>
+            <if test="accountStatus != null">account_status = #{accountStatus},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where platform_role_mapping_id = #{platformRoleMappingId}
+    </update>
+
+    <delete id="deletePlatformRoleMappingByPlatformRoleMappingId" parameterType="Long">
+        delete from platform_role_mapping where platform_role_mapping_id = #{platformRoleMappingId}
+    </delete>
+
+    <delete id="deletePlatformRoleMappingByPlatformRoleMappingIds" parameterType="String">
+        delete from platform_role_mapping where platform_role_mapping_id in 
+        <foreach item="platformRoleMappingId" collection="array" open="(" separator="," close=")">
+            #{platformRoleMappingId}
+        </foreach>
+    </delete>
+</mapper>

@@ -1,29 +1,37 @@
 <template>
   <div class="app-container">
     <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
-      <el-form-item label="角色名称" prop="roleName">
+      <el-form-item label="所属商家ID" prop="merchantBaseId">
         <el-input
-          v-model="queryParams.roleName"
-          placeholder="请输入角色名称"
+          v-model="queryParams.merchantBaseId"
+          placeholder="请输入所属商家ID"
           clearable
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="角色编码" prop="roleCode">
+      <el-form-item label="活动名称" prop="activityName">
         <el-input
-          v-model="queryParams.roleCode"
-          placeholder="请输入角色编码"
+          v-model="queryParams.activityName"
+          placeholder="请输入活动名称"
           clearable
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="角色描述" prop="roleDesc">
-        <el-input
-          v-model="queryParams.roleDesc"
-          placeholder="请输入角色描述"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
+      <el-form-item label="开始时间" prop="startTime">
+        <el-date-picker clearable
+          v-model="queryParams.startTime"
+          type="date"
+          value-format="yyyy-MM-dd"
+          placeholder="请选择开始时间">
+        </el-date-picker>
+      </el-form-item>
+      <el-form-item label="结束时间" prop="endTime">
+        <el-date-picker clearable
+          v-model="queryParams.endTime"
+          type="date"
+          value-format="yyyy-MM-dd"
+          placeholder="请选择结束时间">
+        </el-date-picker>
       </el-form-item>
       <el-form-item>
         <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
@@ -39,7 +47,7 @@
           icon="el-icon-plus"
           size="mini"
           @click="handleAdd"
-          v-hasPermi="['system:role:add']"
+          v-hasPermi="['system:activity:add']"
         >新增</el-button>
       </el-col>
       <el-col :span="1.5">
@@ -50,7 +58,7 @@
           size="mini"
           :disabled="single"
           @click="handleUpdate"
-          v-hasPermi="['system:role:edit']"
+          v-hasPermi="['system:activity:edit']"
         >修改</el-button>
       </el-col>
       <el-col :span="1.5">
@@ -61,7 +69,7 @@
           size="mini"
           :disabled="multiple"
           @click="handleDelete"
-          v-hasPermi="['system:role:remove']"
+          v-hasPermi="['system:activity:remove']"
         >删除</el-button>
       </el-col>
       <el-col :span="1.5">
@@ -71,18 +79,30 @@
           icon="el-icon-download"
           size="mini"
           @click="handleExport"
-          v-hasPermi="['system:role:export']"
+          v-hasPermi="['system:activity:export']"
         >导出</el-button>
       </el-col>
       <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
-    <el-table v-loading="loading" :data="roleList" @selection-change="handleSelectionChange">
+    <el-table v-loading="loading" :data="activityList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="角色唯一ID" align="center" prop="platformRoleId" />
-      <el-table-column label="角色名称" align="center" prop="roleName" />
-      <el-table-column label="角色编码" align="center" prop="roleCode" />
-      <el-table-column label="角色描述" align="center" prop="roleDesc" />
+      <el-table-column label="活动唯一ID" align="center" prop="merchantActivityId" />
+      <el-table-column label="所属商家ID" align="center" prop="merchantBaseId" />
+      <el-table-column label="活动名称" align="center" prop="activityName" />
+      <el-table-column label="活动类型" align="center" prop="activityType" />
+      <el-table-column label="开始时间" align="center" prop="startTime" width="180">
+        <template slot-scope="scope">
+          <span>{{ parseTime(scope.row.startTime, '{y}-{m}-{d}') }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="结束时间" align="center" prop="endTime" width="180">
+        <template slot-scope="scope">
+          <span>{{ parseTime(scope.row.endTime, '{y}-{m}-{d}') }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="活动内容" align="center" prop="content" />
+      <el-table-column label="状态：0-未开始 1-进行中 2-已结束" align="center" prop="status" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button
@@ -90,14 +110,14 @@
             type="text"
             icon="el-icon-edit"
             @click="handleUpdate(scope.row)"
-            v-hasPermi="['system:role:edit']"
+            v-hasPermi="['system:activity:edit']"
           >修改</el-button>
           <el-button
             size="mini"
             type="text"
             icon="el-icon-delete"
             @click="handleDelete(scope.row)"
-            v-hasPermi="['system:role:remove']"
+            v-hasPermi="['system:activity:remove']"
           >删除</el-button>
         </template>
       </el-table-column>
@@ -111,17 +131,33 @@
       @pagination="getList"
     />
 
-    <!-- 添加或修改角色对话框 -->
+    <!-- 添加或修改商家活动对话框 -->
     <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
       <el-form ref="form" :model="form" :rules="rules" label-width="80px">
-        <el-form-item label="角色名称" prop="roleName">
-          <el-input v-model="form.roleName" placeholder="请输入角色名称" />
+        <el-form-item label="所属商家ID" prop="merchantBaseId">
+          <el-input v-model="form.merchantBaseId" placeholder="请输入所属商家ID" />
         </el-form-item>
-        <el-form-item label="角色编码" prop="roleCode">
-          <el-input v-model="form.roleCode" placeholder="请输入角色编码" />
+        <el-form-item label="活动名称" prop="activityName">
+          <el-input v-model="form.activityName" placeholder="请输入活动名称" />
         </el-form-item>
-        <el-form-item label="角色描述" prop="roleDesc">
-          <el-input v-model="form.roleDesc" placeholder="请输入角色描述" />
+        <el-form-item label="开始时间" prop="startTime">
+          <el-date-picker clearable
+            v-model="form.startTime"
+            type="date"
+            value-format="yyyy-MM-dd"
+            placeholder="请选择开始时间">
+          </el-date-picker>
+        </el-form-item>
+        <el-form-item label="结束时间" prop="endTime">
+          <el-date-picker clearable
+            v-model="form.endTime"
+            type="date"
+            value-format="yyyy-MM-dd"
+            placeholder="请选择结束时间">
+          </el-date-picker>
+        </el-form-item>
+        <el-form-item label="活动内容">
+          <editor v-model="form.content" :min-height="192"/>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -133,10 +169,10 @@
 </template>
 
 <script>
-import { listRole, getRole, delRole, addRole, updateRole } from "@/api/system/role"
+import { listActivity, getActivity, delActivity, addActivity, updateActivity } from "@/api/system/activity"
 
 export default {
-  name: "Role",
+  name: "Activity",
   data() {
     return {
       // 遮罩层
@@ -151,8 +187,8 @@ export default {
       showSearch: true,
       // 总条数
       total: 0,
-      // 角色表格数据
-      roleList: [],
+      // 商家活动表格数据
+      activityList: [],
       // 弹出层标题
       title: "",
       // 是否显示弹出层
@@ -161,19 +197,35 @@ export default {
       queryParams: {
         pageNum: 1,
         pageSize: 10,
-        roleName: null,
-        roleCode: null,
-        roleDesc: null,
+        merchantBaseId: null,
+        activityName: null,
+        activityType: null,
+        startTime: null,
+        endTime: null,
+        content: null,
+        status: null,
       },
       // 表单参数
       form: {},
       // 表单校验
       rules: {
-        roleName: [
-          { required: true, message: "角色名称不能为空", trigger: "blur" }
+        merchantBaseId: [
+          { required: true, message: "所属商家ID不能为空", trigger: "blur" }
         ],
-        roleCode: [
-          { required: true, message: "角色编码不能为空", trigger: "blur" }
+        activityName: [
+          { required: true, message: "活动名称不能为空", trigger: "blur" }
+        ],
+        activityType: [
+          { required: true, message: "活动类型不能为空", trigger: "change" }
+        ],
+        startTime: [
+          { required: true, message: "开始时间不能为空", trigger: "blur" }
+        ],
+        endTime: [
+          { required: true, message: "结束时间不能为空", trigger: "blur" }
+        ],
+        status: [
+          { required: true, message: "状态：0-未开始 1-进行中 2-已结束不能为空", trigger: "change" }
         ],
         createTime: [
           { required: true, message: "创建时间不能为空", trigger: "blur" }
@@ -188,11 +240,11 @@ export default {
     this.getList()
   },
   methods: {
-    /** 查询角色列表 */
+    /** 查询商家活动列表 */
     getList() {
       this.loading = true
-      listRole(this.queryParams).then(response => {
-        this.roleList = response.rows
+      listActivity(this.queryParams).then(response => {
+        this.activityList = response.rows
         this.total = response.total
         this.loading = false
       })
@@ -205,10 +257,14 @@ export default {
     // 表单重置
     reset() {
       this.form = {
-        platformRoleId: null,
-        roleName: null,
-        roleCode: null,
-        roleDesc: null,
+        merchantActivityId: null,
+        merchantBaseId: null,
+        activityName: null,
+        activityType: null,
+        startTime: null,
+        endTime: null,
+        content: null,
+        status: null,
         createTime: null,
         updateTime: null
       }
@@ -226,7 +282,7 @@ export default {
     },
     // 多选框选中数据
     handleSelectionChange(selection) {
-      this.ids = selection.map(item => item.platformRoleId)
+      this.ids = selection.map(item => item.merchantActivityId)
       this.single = selection.length!==1
       this.multiple = !selection.length
     },
@@ -234,30 +290,30 @@ export default {
     handleAdd() {
       this.reset()
       this.open = true
-      this.title = "添加角色"
+      this.title = "添加商家活动"
     },
     /** 修改按钮操作 */
     handleUpdate(row) {
       this.reset()
-      const platformRoleId = row.platformRoleId || this.ids
-      getRole(platformRoleId).then(response => {
+      const merchantActivityId = row.merchantActivityId || this.ids
+      getActivity(merchantActivityId).then(response => {
         this.form = response.data
         this.open = true
-        this.title = "修改角色"
+        this.title = "修改商家活动"
       })
     },
     /** 提交按钮 */
     submitForm() {
       this.$refs["form"].validate(valid => {
         if (valid) {
-          if (this.form.platformRoleId != null) {
-            updateRole(this.form).then(response => {
+          if (this.form.merchantActivityId != null) {
+            updateActivity(this.form).then(response => {
               this.$modal.msgSuccess("修改成功")
               this.open = false
               this.getList()
             })
           } else {
-            addRole(this.form).then(response => {
+            addActivity(this.form).then(response => {
               this.$modal.msgSuccess("新增成功")
               this.open = false
               this.getList()
@@ -268,9 +324,9 @@ export default {
     },
     /** 删除按钮操作 */
     handleDelete(row) {
-      const platformRoleIds = row.platformRoleId || this.ids
-      this.$modal.confirm('是否确认删除角色编号为"' + platformRoleIds + '"的数据项？').then(function() {
-        return delRole(platformRoleIds)
+      const merchantActivityIds = row.merchantActivityId || this.ids
+      this.$modal.confirm('是否确认删除商家活动编号为"' + merchantActivityIds + '"的数据项？').then(function() {
+        return delActivity(merchantActivityIds)
       }).then(() => {
         this.getList()
         this.$modal.msgSuccess("删除成功")
@@ -278,9 +334,9 @@ export default {
     },
     /** 导出按钮操作 */
     handleExport() {
-      this.download('system/role/export', {
+      this.download('system/activity/export', {
         ...this.queryParams
-      }, `role_${new Date().getTime()}.xlsx`)
+      }, `activity_${new Date().getTime()}.xlsx`)
     }
   }
 }

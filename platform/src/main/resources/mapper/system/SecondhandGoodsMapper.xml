@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.platform.mapper.SecondhandGoodsMapper">
+    
+    <resultMap type="SecondhandGoods" id="SecondhandGoodsResult">
+        <result property="secondhandGoodsId"    column="secondhand_goods_id"    />
+        <result property="userBaseId"    column="user_base_id"    />
+        <result property="goodsName"    column="goods_name"    />
+        <result property="category"    column="category"    />
+        <result property="price"    column="price"    />
+        <result property="description"    column="description"    />
+        <result property="status"    column="status"    />
+        <result property="viewCount"    column="view_count"    />
+        <result property="favoriteCount"    column="favorite_count"    />
+        <result property="shareCount"    column="share_count"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="soldTime"    column="sold_time"    />
+    </resultMap>
+
+    <sql id="selectSecondhandGoodsVo">
+        select secondhand_goods_id, user_base_id, goods_name, category, price, description, status, view_count, favorite_count, share_count, create_time, update_time, sold_time from secondhand_goods
+    </sql>
+
+    <select id="selectSecondhandGoodsList" parameterType="SecondhandGoods" resultMap="SecondhandGoodsResult">
+        <include refid="selectSecondhandGoodsVo"/>
+        <where>  
+            <if test="userBaseId != null "> and user_base_id = #{userBaseId}</if>
+            <if test="goodsName != null  and goodsName != ''"> and goods_name like concat('%', #{goodsName}, '%')</if>
+            <if test="category != null  and category != ''"> and category = #{category}</if>
+            <if test="price != null "> and price = #{price}</if>
+            <if test="description != null  and description != ''"> and description = #{description}</if>
+            <if test="status != null "> and status = #{status}</if>
+            <if test="viewCount != null "> and view_count = #{viewCount}</if>
+            <if test="favoriteCount != null "> and favorite_count = #{favoriteCount}</if>
+            <if test="shareCount != null "> and share_count = #{shareCount}</if>
+            <if test="soldTime != null "> and sold_time = #{soldTime}</if>
+        </where>
+    </select>
+    
+    <select id="selectSecondhandGoodsBySecondhandGoodsId" parameterType="Long" resultMap="SecondhandGoodsResult">
+        <include refid="selectSecondhandGoodsVo"/>
+        where secondhand_goods_id = #{secondhandGoodsId}
+    </select>
+
+    <insert id="insertSecondhandGoods" parameterType="SecondhandGoods" useGeneratedKeys="true" keyProperty="secondhandGoodsId">
+        insert into secondhand_goods
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="userBaseId != null">user_base_id,</if>
+            <if test="goodsName != null and goodsName != ''">goods_name,</if>
+            <if test="category != null and category != ''">category,</if>
+            <if test="price != null">price,</if>
+            <if test="description != null">description,</if>
+            <if test="status != null">status,</if>
+            <if test="viewCount != null">view_count,</if>
+            <if test="favoriteCount != null">favorite_count,</if>
+            <if test="shareCount != null">share_count,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="soldTime != null">sold_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="userBaseId != null">#{userBaseId},</if>
+            <if test="goodsName != null and goodsName != ''">#{goodsName},</if>
+            <if test="category != null and category != ''">#{category},</if>
+            <if test="price != null">#{price},</if>
+            <if test="description != null">#{description},</if>
+            <if test="status != null">#{status},</if>
+            <if test="viewCount != null">#{viewCount},</if>
+            <if test="favoriteCount != null">#{favoriteCount},</if>
+            <if test="shareCount != null">#{shareCount},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="soldTime != null">#{soldTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateSecondhandGoods" parameterType="SecondhandGoods">
+        update secondhand_goods
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="userBaseId != null">user_base_id = #{userBaseId},</if>
+            <if test="goodsName != null and goodsName != ''">goods_name = #{goodsName},</if>
+            <if test="category != null and category != ''">category = #{category},</if>
+            <if test="price != null">price = #{price},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="viewCount != null">view_count = #{viewCount},</if>
+            <if test="favoriteCount != null">favorite_count = #{favoriteCount},</if>
+            <if test="shareCount != null">share_count = #{shareCount},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="soldTime != null">sold_time = #{soldTime},</if>
+        </trim>
+        where secondhand_goods_id = #{secondhandGoodsId}
+    </update>
+
+    <delete id="deleteSecondhandGoodsBySecondhandGoodsId" parameterType="Long">
+        delete from secondhand_goods where secondhand_goods_id = #{secondhandGoodsId}
+    </delete>
+
+    <delete id="deleteSecondhandGoodsBySecondhandGoodsIds" parameterType="String">
+        delete from secondhand_goods where secondhand_goods_id in 
+        <foreach item="secondhandGoodsId" collection="array" open="(" separator="," close=")">
+            #{secondhandGoodsId}
+        </foreach>
+    </delete>
+</mapper>

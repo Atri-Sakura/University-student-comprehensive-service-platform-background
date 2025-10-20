@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.platform.mapper.UserBankCardMapper">
+    
+    <resultMap type="UserBankCard" id="UserBankCardResult">
+        <result property="id"    column="id"    />
+        <result property="userBaseId"    column="user_base_id"    />
+        <result property="bankName"    column="bank_name"    />
+        <result property="bankCardType"    column="bank_card_type"    />
+        <result property="cardNumber"    column="card_number"    />
+        <result property="cardTailNumber"    column="card_tail_number"    />
+        <result property="holderName"    column="holder_name"    />
+        <result property="idNumber"    column="id_number"    />
+        <result property="reservePhone"    column="reserve_phone"    />
+        <result property="bindStatus"    column="bind_status"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateTime"    column="update_time"    />
+    </resultMap>
+
+    <sql id="selectUserBankCardVo">
+        select id, user_base_id, bank_name, bank_card_type, card_number, card_tail_number, holder_name, id_number, reserve_phone, bind_status, create_time, update_time from user_bank_card
+    </sql>
+
+    <select id="selectUserBankCardList" parameterType="UserBankCard" resultMap="UserBankCardResult">
+        <include refid="selectUserBankCardVo"/>
+        <where>  
+            <if test="userBaseId != null "> and user_base_id = #{userBaseId}</if>
+            <if test="bankName != null  and bankName != ''"> and bank_name like concat('%', #{bankName}, '%')</if>
+            <if test="bankCardType != null "> and bank_card_type = #{bankCardType}</if>
+            <if test="cardNumber != null  and cardNumber != ''"> and card_number = #{cardNumber}</if>
+            <if test="cardTailNumber != null  and cardTailNumber != ''"> and card_tail_number = #{cardTailNumber}</if>
+            <if test="holderName != null  and holderName != ''"> and holder_name like concat('%', #{holderName}, '%')</if>
+            <if test="idNumber != null  and idNumber != ''"> and id_number = #{idNumber}</if>
+            <if test="reservePhone != null  and reservePhone != ''"> and reserve_phone = #{reservePhone}</if>
+            <if test="bindStatus != null "> and bind_status = #{bindStatus}</if>
+        </where>
+    </select>
+    
+    <select id="selectUserBankCardById" parameterType="Long" resultMap="UserBankCardResult">
+        <include refid="selectUserBankCardVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertUserBankCard" parameterType="UserBankCard" useGeneratedKeys="true" keyProperty="id">
+        insert into user_bank_card
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="userBaseId != null">user_base_id,</if>
+            <if test="bankName != null and bankName != ''">bank_name,</if>
+            <if test="bankCardType != null">bank_card_type,</if>
+            <if test="cardNumber != null and cardNumber != ''">card_number,</if>
+            <if test="cardTailNumber != null and cardTailNumber != ''">card_tail_number,</if>
+            <if test="holderName != null and holderName != ''">holder_name,</if>
+            <if test="idNumber != null and idNumber != ''">id_number,</if>
+            <if test="reservePhone != null and reservePhone != ''">reserve_phone,</if>
+            <if test="bindStatus != null">bind_status,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="userBaseId != null">#{userBaseId},</if>
+            <if test="bankName != null and bankName != ''">#{bankName},</if>
+            <if test="bankCardType != null">#{bankCardType},</if>
+            <if test="cardNumber != null and cardNumber != ''">#{cardNumber},</if>
+            <if test="cardTailNumber != null and cardTailNumber != ''">#{cardTailNumber},</if>
+            <if test="holderName != null and holderName != ''">#{holderName},</if>
+            <if test="idNumber != null and idNumber != ''">#{idNumber},</if>
+            <if test="reservePhone != null and reservePhone != ''">#{reservePhone},</if>
+            <if test="bindStatus != null">#{bindStatus},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateUserBankCard" parameterType="UserBankCard">
+        update user_bank_card
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="userBaseId != null">user_base_id = #{userBaseId},</if>
+            <if test="bankName != null and bankName != ''">bank_name = #{bankName},</if>
+            <if test="bankCardType != null">bank_card_type = #{bankCardType},</if>
+            <if test="cardNumber != null and cardNumber != ''">card_number = #{cardNumber},</if>
+            <if test="cardTailNumber != null and cardTailNumber != ''">card_tail_number = #{cardTailNumber},</if>
+            <if test="holderName != null and holderName != ''">holder_name = #{holderName},</if>
+            <if test="idNumber != null and idNumber != ''">id_number = #{idNumber},</if>
+            <if test="reservePhone != null and reservePhone != ''">reserve_phone = #{reservePhone},</if>
+            <if test="bindStatus != null">bind_status = #{bindStatus},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteUserBankCardById" parameterType="Long">
+        delete from user_bank_card where id = #{id}
+    </delete>
+
+    <delete id="deleteUserBankCardByIds" parameterType="String">
+        delete from user_bank_card where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

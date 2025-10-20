@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.platform.mapper.RiderWalletMapper">
+    
+    <resultMap type="RiderWallet" id="RiderWalletResult">
+        <result property="riderWalletId"    column="rider_wallet_id"    />
+        <result property="riderBaseId"    column="rider_base_id"    />
+        <result property="balance"    column="balance"    />
+        <result property="freezeAmount"    column="freeze_amount"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateTime"    column="update_time"    />
+    </resultMap>
+
+    <sql id="selectRiderWalletVo">
+        select rider_wallet_id, rider_base_id, balance, freeze_amount, create_time, update_time from rider_wallet
+    </sql>
+
+    <select id="selectRiderWalletList" parameterType="RiderWallet" resultMap="RiderWalletResult">
+        <include refid="selectRiderWalletVo"/>
+        <where>  
+            <if test="riderBaseId != null "> and rider_base_id = #{riderBaseId}</if>
+            <if test="balance != null "> and balance = #{balance}</if>
+            <if test="freezeAmount != null "> and freeze_amount = #{freezeAmount}</if>
+        </where>
+    </select>
+    
+    <select id="selectRiderWalletByRiderWalletId" parameterType="Long" resultMap="RiderWalletResult">
+        <include refid="selectRiderWalletVo"/>
+        where rider_wallet_id = #{riderWalletId}
+    </select>
+
+    <insert id="insertRiderWallet" parameterType="RiderWallet">
+        insert into rider_wallet
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="riderWalletId != null">rider_wallet_id,</if>
+            <if test="riderBaseId != null">rider_base_id,</if>
+            <if test="balance != null">balance,</if>
+            <if test="freezeAmount != null">freeze_amount,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="riderWalletId != null">#{riderWalletId},</if>
+            <if test="riderBaseId != null">#{riderBaseId},</if>
+            <if test="balance != null">#{balance},</if>
+            <if test="freezeAmount != null">#{freezeAmount},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateRiderWallet" parameterType="RiderWallet">
+        update rider_wallet
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="riderBaseId != null">rider_base_id = #{riderBaseId},</if>
+            <if test="balance != null">balance = #{balance},</if>
+            <if test="freezeAmount != null">freeze_amount = #{freezeAmount},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where rider_wallet_id = #{riderWalletId}
+    </update>
+
+    <delete id="deleteRiderWalletByRiderWalletId" parameterType="Long">
+        delete from rider_wallet where rider_wallet_id = #{riderWalletId}
+    </delete>
+
+    <delete id="deleteRiderWalletByRiderWalletIds" parameterType="String">
+        delete from rider_wallet where rider_wallet_id in 
+        <foreach item="riderWalletId" collection="array" open="(" separator="," close=")">
+            #{riderWalletId}
+        </foreach>
+    </delete>
+</mapper>

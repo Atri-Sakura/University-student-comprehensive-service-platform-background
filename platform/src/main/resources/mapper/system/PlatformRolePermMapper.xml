@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.platform.mapper.PlatformRolePermMapper">
+    
+    <resultMap type="PlatformRolePerm" id="PlatformRolePermResult">
+        <result property="platformRolePermId"    column="platform_role_perm_id"    />
+        <result property="platformRoleId"    column="platform_role_id"    />
+        <result property="platformPermissionId"    column="platform_permission_id"    />
+        <result property="createTime"    column="create_time"    />
+    </resultMap>
+
+    <sql id="selectPlatformRolePermVo">
+        select platform_role_perm_id, platform_role_id, platform_permission_id, create_time from platform_role_perm
+    </sql>
+
+    <select id="selectPlatformRolePermList" parameterType="PlatformRolePerm" resultMap="PlatformRolePermResult">
+        <include refid="selectPlatformRolePermVo"/>
+        <where>  
+            <if test="platformRoleId != null "> and platform_role_id = #{platformRoleId}</if>
+            <if test="platformPermissionId != null "> and platform_permission_id = #{platformPermissionId}</if>
+        </where>
+    </select>
+    
+    <select id="selectPlatformRolePermByPlatformRolePermId" parameterType="Long" resultMap="PlatformRolePermResult">
+        <include refid="selectPlatformRolePermVo"/>
+        where platform_role_perm_id = #{platformRolePermId}
+    </select>
+
+    <insert id="insertPlatformRolePerm" parameterType="PlatformRolePerm">
+        insert into platform_role_perm
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="platformRolePermId != null">platform_role_perm_id,</if>
+            <if test="platformRoleId != null">platform_role_id,</if>
+            <if test="platformPermissionId != null">platform_permission_id,</if>
+            <if test="createTime != null">create_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="platformRolePermId != null">#{platformRolePermId},</if>
+            <if test="platformRoleId != null">#{platformRoleId},</if>
+            <if test="platformPermissionId != null">#{platformPermissionId},</if>
+            <if test="createTime != null">#{createTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updatePlatformRolePerm" parameterType="PlatformRolePerm">
+        update platform_role_perm
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="platformRoleId != null">platform_role_id = #{platformRoleId},</if>
+            <if test="platformPermissionId != null">platform_permission_id = #{platformPermissionId},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+        </trim>
+        where platform_role_perm_id = #{platformRolePermId}
+    </update>
+
+    <delete id="deletePlatformRolePermByPlatformRolePermId" parameterType="Long">
+        delete from platform_role_perm where platform_role_perm_id = #{platformRolePermId}
+    </delete>
+
+    <delete id="deletePlatformRolePermByPlatformRolePermIds" parameterType="String">
+        delete from platform_role_perm where platform_role_perm_id in 
+        <foreach item="platformRolePermId" collection="array" open="(" separator="," close=")">
+            #{platformRolePermId}
+        </foreach>
+    </delete>
+</mapper>

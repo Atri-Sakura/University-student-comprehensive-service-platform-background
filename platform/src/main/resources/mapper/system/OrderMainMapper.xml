@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.platform.mapper.OrderMainMapper">
+    
+    <resultMap type="OrderMain" id="OrderMainResult">
+        <result property="orderMainId"    column="order_main_id"    />
+        <result property="orderNo"    column="order_no"    />
+        <result property="userId"    column="user_id"    />
+        <result property="userNickname"    column="user_nickname"    />
+        <result property="orderType"    column="order_type"    />
+        <result property="totalAmount"    column="total_amount"    />
+        <result property="payAmount"    column="pay_amount"    />
+        <result property="discountAmount"    column="discount_amount"    />
+        <result property="payStatus"    column="pay_status"    />
+        <result property="payTime"    column="pay_time"    />
+        <result property="payType"    column="pay_type"    />
+        <result property="orderStatus"    column="order_status"    />
+        <result property="cancelReason"    column="cancel_reason"    />
+        <result property="cancelOperator"    column="cancel_operator"    />
+        <result property="pickAddressId"    column="pick_address_id"    />
+        <result property="pickAddress"    column="pick_address"    />
+        <result property="pickContact"    column="pick_contact"    />
+        <result property="pickPhone"    column="pick_phone"    />
+        <result property="pickLongitude"    column="pick_longitude"    />
+        <result property="pickLatitude"    column="pick_latitude"    />
+        <result property="deliverAddressId"    column="deliver_address_id"    />
+        <result property="deliverAddress"    column="deliver_address"    />
+        <result property="deliverContact"    column="deliver_contact"    />
+        <result property="deliverPhone"    column="deliver_phone"    />
+        <result property="deliverLongitude"    column="deliver_longitude"    />
+        <result property="deliverLatitude"    column="deliver_latitude"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="completeTime"    column="complete_time"    />
+    </resultMap>
+
+    <sql id="selectOrderMainVo">
+        select order_main_id, order_no, user_id, user_nickname, order_type, total_amount, pay_amount, discount_amount, pay_status, pay_time, pay_type, order_status, cancel_reason, cancel_operator, pick_address_id, pick_address, pick_contact, pick_phone, pick_longitude, pick_latitude, deliver_address_id, deliver_address, deliver_contact, deliver_phone, deliver_longitude, deliver_latitude, create_time, update_time, complete_time from order_main
+    </sql>
+
+    <select id="selectOrderMainList" parameterType="OrderMain" resultMap="OrderMainResult">
+        <include refid="selectOrderMainVo"/>
+        <where>  
+            <if test="orderNo != null  and orderNo != ''"> and order_no = #{orderNo}</if>
+            <if test="userId != null "> and user_id = #{userId}</if>
+            <if test="userNickname != null  and userNickname != ''"> and user_nickname like concat('%', #{userNickname}, '%')</if>
+            <if test="orderType != null "> and order_type = #{orderType}</if>
+            <if test="totalAmount != null "> and total_amount = #{totalAmount}</if>
+            <if test="payAmount != null "> and pay_amount = #{payAmount}</if>
+            <if test="discountAmount != null "> and discount_amount = #{discountAmount}</if>
+            <if test="payStatus != null "> and pay_status = #{payStatus}</if>
+            <if test="payTime != null "> and pay_time = #{payTime}</if>
+            <if test="payType != null "> and pay_type = #{payType}</if>
+            <if test="orderStatus != null "> and order_status = #{orderStatus}</if>
+            <if test="cancelReason != null  and cancelReason != ''"> and cancel_reason = #{cancelReason}</if>
+            <if test="cancelOperator != null  and cancelOperator != ''"> and cancel_operator = #{cancelOperator}</if>
+            <if test="pickAddressId != null "> and pick_address_id = #{pickAddressId}</if>
+            <if test="pickAddress != null  and pickAddress != ''"> and pick_address = #{pickAddress}</if>
+            <if test="pickContact != null  and pickContact != ''"> and pick_contact = #{pickContact}</if>
+            <if test="pickPhone != null  and pickPhone != ''"> and pick_phone = #{pickPhone}</if>
+            <if test="pickLongitude != null "> and pick_longitude = #{pickLongitude}</if>
+            <if test="pickLatitude != null "> and pick_latitude = #{pickLatitude}</if>
+            <if test="deliverAddressId != null "> and deliver_address_id = #{deliverAddressId}</if>
+            <if test="deliverAddress != null  and deliverAddress != ''"> and deliver_address = #{deliverAddress}</if>
+            <if test="deliverContact != null  and deliverContact != ''"> and deliver_contact = #{deliverContact}</if>
+            <if test="deliverPhone != null  and deliverPhone != ''"> and deliver_phone = #{deliverPhone}</if>
+            <if test="deliverLongitude != null "> and deliver_longitude = #{deliverLongitude}</if>
+            <if test="deliverLatitude != null "> and deliver_latitude = #{deliverLatitude}</if>
+            <if test="completeTime != null "> and complete_time = #{completeTime}</if>
+        </where>
+    </select>
+    
+    <select id="selectOrderMainByOrderMainId" parameterType="Long" resultMap="OrderMainResult">
+        <include refid="selectOrderMainVo"/>
+        where order_main_id = #{orderMainId}
+    </select>
+
+    <insert id="insertOrderMain" parameterType="OrderMain">
+        insert into order_main
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="orderMainId != null">order_main_id,</if>
+            <if test="orderNo != null and orderNo != ''">order_no,</if>
+            <if test="userId != null">user_id,</if>
+            <if test="userNickname != null and userNickname != ''">user_nickname,</if>
+            <if test="orderType != null">order_type,</if>
+            <if test="totalAmount != null">total_amount,</if>
+            <if test="payAmount != null">pay_amount,</if>
+            <if test="discountAmount != null">discount_amount,</if>
+            <if test="payStatus != null">pay_status,</if>
+            <if test="payTime != null">pay_time,</if>
+            <if test="payType != null">pay_type,</if>
+            <if test="orderStatus != null">order_status,</if>
+            <if test="cancelReason != null">cancel_reason,</if>
+            <if test="cancelOperator != null">cancel_operator,</if>
+            <if test="pickAddressId != null">pick_address_id,</if>
+            <if test="pickAddress != null and pickAddress != ''">pick_address,</if>
+            <if test="pickContact != null and pickContact != ''">pick_contact,</if>
+            <if test="pickPhone != null and pickPhone != ''">pick_phone,</if>
+            <if test="pickLongitude != null">pick_longitude,</if>
+            <if test="pickLatitude != null">pick_latitude,</if>
+            <if test="deliverAddressId != null">deliver_address_id,</if>
+            <if test="deliverAddress != null">deliver_address,</if>
+            <if test="deliverContact != null">deliver_contact,</if>
+            <if test="deliverPhone != null">deliver_phone,</if>
+            <if test="deliverLongitude != null">deliver_longitude,</if>
+            <if test="deliverLatitude != null">deliver_latitude,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="completeTime != null">complete_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="orderMainId != null">#{orderMainId},</if>
+            <if test="orderNo != null and orderNo != ''">#{orderNo},</if>
+            <if test="userId != null">#{userId},</if>
+            <if test="userNickname != null and userNickname != ''">#{userNickname},</if>
+            <if test="orderType != null">#{orderType},</if>
+            <if test="totalAmount != null">#{totalAmount},</if>
+            <if test="payAmount != null">#{payAmount},</if>
+            <if test="discountAmount != null">#{discountAmount},</if>
+            <if test="payStatus != null">#{payStatus},</if>
+            <if test="payTime != null">#{payTime},</if>
+            <if test="payType != null">#{payType},</if>
+            <if test="orderStatus != null">#{orderStatus},</if>
+            <if test="cancelReason != null">#{cancelReason},</if>
+            <if test="cancelOperator != null">#{cancelOperator},</if>
+            <if test="pickAddressId != null">#{pickAddressId},</if>
+            <if test="pickAddress != null and pickAddress != ''">#{pickAddress},</if>
+            <if test="pickContact != null and pickContact != ''">#{pickContact},</if>
+            <if test="pickPhone != null and pickPhone != ''">#{pickPhone},</if>
+            <if test="pickLongitude != null">#{pickLongitude},</if>
+            <if test="pickLatitude != null">#{pickLatitude},</if>
+            <if test="deliverAddressId != null">#{deliverAddressId},</if>
+            <if test="deliverAddress != null">#{deliverAddress},</if>
+            <if test="deliverContact != null">#{deliverContact},</if>
+            <if test="deliverPhone != null">#{deliverPhone},</if>
+            <if test="deliverLongitude != null">#{deliverLongitude},</if>
+            <if test="deliverLatitude != null">#{deliverLatitude},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="completeTime != null">#{completeTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateOrderMain" parameterType="OrderMain">
+        update order_main
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="orderNo != null and orderNo != ''">order_no = #{orderNo},</if>
+            <if test="userId != null">user_id = #{userId},</if>
+            <if test="userNickname != null and userNickname != ''">user_nickname = #{userNickname},</if>
+            <if test="orderType != null">order_type = #{orderType},</if>
+            <if test="totalAmount != null">total_amount = #{totalAmount},</if>
+            <if test="payAmount != null">pay_amount = #{payAmount},</if>
+            <if test="discountAmount != null">discount_amount = #{discountAmount},</if>
+            <if test="payStatus != null">pay_status = #{payStatus},</if>
+            <if test="payTime != null">pay_time = #{payTime},</if>
+            <if test="payType != null">pay_type = #{payType},</if>
+            <if test="orderStatus != null">order_status = #{orderStatus},</if>
+            <if test="cancelReason != null">cancel_reason = #{cancelReason},</if>
+            <if test="cancelOperator != null">cancel_operator = #{cancelOperator},</if>
+            <if test="pickAddressId != null">pick_address_id = #{pickAddressId},</if>
+            <if test="pickAddress != null and pickAddress != ''">pick_address = #{pickAddress},</if>
+            <if test="pickContact != null and pickContact != ''">pick_contact = #{pickContact},</if>
+            <if test="pickPhone != null and pickPhone != ''">pick_phone = #{pickPhone},</if>
+            <if test="pickLongitude != null">pick_longitude = #{pickLongitude},</if>
+            <if test="pickLatitude != null">pick_latitude = #{pickLatitude},</if>
+            <if test="deliverAddressId != null">deliver_address_id = #{deliverAddressId},</if>
+            <if test="deliverAddress != null">deliver_address = #{deliverAddress},</if>
+            <if test="deliverContact != null">deliver_contact = #{deliverContact},</if>
+            <if test="deliverPhone != null">deliver_phone = #{deliverPhone},</if>
+            <if test="deliverLongitude != null">deliver_longitude = #{deliverLongitude},</if>
+            <if test="deliverLatitude != null">deliver_latitude = #{deliverLatitude},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="completeTime != null">complete_time = #{completeTime},</if>
+        </trim>
+        where order_main_id = #{orderMainId}
+    </update>
+
+    <delete id="deleteOrderMainByOrderMainId" parameterType="Long">
+        delete from order_main where order_main_id = #{orderMainId}
+    </delete>
+
+    <delete id="deleteOrderMainByOrderMainIds" parameterType="String">
+        delete from order_main where order_main_id in 
+        <foreach item="orderMainId" collection="array" open="(" separator="," close=")">
+            #{orderMainId}
+        </foreach>
+    </delete>
+</mapper>

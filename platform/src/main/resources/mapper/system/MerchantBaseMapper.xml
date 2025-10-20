@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.platform.mapper.MerchantBaseMapper">
+    
+    <resultMap type="MerchantBase" id="MerchantBaseResult">
+        <result property="merchantBaseId"    column="merchant_base_id"    />
+        <result property="username"    column="username"    />
+        <result property="password"    column="password"    />
+        <result property="merchantName"    column="merchant_name"    />
+        <result property="logo"    column="logo"    />
+        <result property="merchantAddressId"    column="merchant_address_id"    />
+        <result property="businessScope"    column="business_scope"    />
+        <result property="businessHours"    column="business_hours"    />
+        <result property="deliveryRange"    column="delivery_range"    />
+        <result property="minOrderAmount"    column="min_order_amount"    />
+        <result property="deliveryFee"    column="delivery_fee"    />
+        <result property="licenseImg"    column="license_img"    />
+        <result property="rating"    column="rating"    />
+        <result property="monthSales"    column="month_sales"    />
+        <result property="auditStatus"    column="audit_status"    />
+        <result property="businessStatus"    column="business_status"    />
+        <result property="longitude"    column="longitude"    />
+        <result property="latitude"    column="latitude"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateTime"    column="update_time"    />
+    </resultMap>
+
+    <sql id="selectMerchantBaseVo">
+        select merchant_base_id, username, password, merchant_name, logo, merchant_address_id, business_scope, business_hours, delivery_range, min_order_amount, delivery_fee, license_img, rating, month_sales, audit_status, business_status, longitude, latitude, create_time, update_time from merchant_base
+    </sql>
+
+    <select id="selectMerchantBaseList" parameterType="MerchantBase" resultMap="MerchantBaseResult">
+        <include refid="selectMerchantBaseVo"/>
+        <where>  
+            <if test="username != null  and username != ''"> and username like concat('%', #{username}, '%')</if>
+            <if test="password != null  and password != ''"> and password = #{password}</if>
+            <if test="merchantName != null  and merchantName != ''"> and merchant_name like concat('%', #{merchantName}, '%')</if>
+            <if test="logo != null  and logo != ''"> and logo = #{logo}</if>
+            <if test="merchantAddressId != null "> and merchant_address_id = #{merchantAddressId}</if>
+            <if test="businessScope != null  and businessScope != ''"> and business_scope = #{businessScope}</if>
+            <if test="businessHours != null  and businessHours != ''"> and business_hours = #{businessHours}</if>
+            <if test="deliveryRange != null "> and delivery_range = #{deliveryRange}</if>
+            <if test="minOrderAmount != null "> and min_order_amount = #{minOrderAmount}</if>
+            <if test="deliveryFee != null "> and delivery_fee = #{deliveryFee}</if>
+            <if test="licenseImg != null  and licenseImg != ''"> and license_img = #{licenseImg}</if>
+            <if test="rating != null "> and rating = #{rating}</if>
+            <if test="monthSales != null "> and month_sales = #{monthSales}</if>
+            <if test="auditStatus != null "> and audit_status = #{auditStatus}</if>
+            <if test="businessStatus != null "> and business_status = #{businessStatus}</if>
+            <if test="longitude != null "> and longitude = #{longitude}</if>
+            <if test="latitude != null "> and latitude = #{latitude}</if>
+        </where>
+    </select>
+    
+    <select id="selectMerchantBaseByMerchantBaseId" parameterType="Long" resultMap="MerchantBaseResult">
+        <include refid="selectMerchantBaseVo"/>
+        where merchant_base_id = #{merchantBaseId}
+    </select>
+
+    <insert id="insertMerchantBase" parameterType="MerchantBase">
+        insert into merchant_base
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="merchantBaseId != null">merchant_base_id,</if>
+            <if test="username != null and username != ''">username,</if>
+            <if test="password != null and password != ''">password,</if>
+            <if test="merchantName != null and merchantName != ''">merchant_name,</if>
+            <if test="logo != null">logo,</if>
+            <if test="merchantAddressId != null">merchant_address_id,</if>
+            <if test="businessScope != null and businessScope != ''">business_scope,</if>
+            <if test="businessHours != null and businessHours != ''">business_hours,</if>
+            <if test="deliveryRange != null">delivery_range,</if>
+            <if test="minOrderAmount != null">min_order_amount,</if>
+            <if test="deliveryFee != null">delivery_fee,</if>
+            <if test="licenseImg != null and licenseImg != ''">license_img,</if>
+            <if test="rating != null">rating,</if>
+            <if test="monthSales != null">month_sales,</if>
+            <if test="auditStatus != null">audit_status,</if>
+            <if test="businessStatus != null">business_status,</if>
+            <if test="longitude != null">longitude,</if>
+            <if test="latitude != null">latitude,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="merchantBaseId != null">#{merchantBaseId},</if>
+            <if test="username != null and username != ''">#{username},</if>
+            <if test="password != null and password != ''">#{password},</if>
+            <if test="merchantName != null and merchantName != ''">#{merchantName},</if>
+            <if test="logo != null">#{logo},</if>
+            <if test="merchantAddressId != null">#{merchantAddressId},</if>
+            <if test="businessScope != null and businessScope != ''">#{businessScope},</if>
+            <if test="businessHours != null and businessHours != ''">#{businessHours},</if>
+            <if test="deliveryRange != null">#{deliveryRange},</if>
+            <if test="minOrderAmount != null">#{minOrderAmount},</if>
+            <if test="deliveryFee != null">#{deliveryFee},</if>
+            <if test="licenseImg != null and licenseImg != ''">#{licenseImg},</if>
+            <if test="rating != null">#{rating},</if>
+            <if test="monthSales != null">#{monthSales},</if>
+            <if test="auditStatus != null">#{auditStatus},</if>
+            <if test="businessStatus != null">#{businessStatus},</if>
+            <if test="longitude != null">#{longitude},</if>
+            <if test="latitude != null">#{latitude},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateMerchantBase" parameterType="MerchantBase">
+        update merchant_base
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="username != null and username != ''">username = #{username},</if>
+            <if test="password != null and password != ''">password = #{password},</if>
+            <if test="merchantName != null and merchantName != ''">merchant_name = #{merchantName},</if>
+            <if test="logo != null">logo = #{logo},</if>
+            <if test="merchantAddressId != null">merchant_address_id = #{merchantAddressId},</if>
+            <if test="businessScope != null and businessScope != ''">business_scope = #{businessScope},</if>
+            <if test="businessHours != null and businessHours != ''">business_hours = #{businessHours},</if>
+            <if test="deliveryRange != null">delivery_range = #{deliveryRange},</if>
+            <if test="minOrderAmount != null">min_order_amount = #{minOrderAmount},</if>
+            <if test="deliveryFee != null">delivery_fee = #{deliveryFee},</if>
+            <if test="licenseImg != null and licenseImg != ''">license_img = #{licenseImg},</if>
+            <if test="rating != null">rating = #{rating},</if>
+            <if test="monthSales != null">month_sales = #{monthSales},</if>
+            <if test="auditStatus != null">audit_status = #{auditStatus},</if>
+            <if test="businessStatus != null">business_status = #{businessStatus},</if>
+            <if test="longitude != null">longitude = #{longitude},</if>
+            <if test="latitude != null">latitude = #{latitude},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where merchant_base_id = #{merchantBaseId}
+    </update>
+
+    <delete id="deleteMerchantBaseByMerchantBaseId" parameterType="Long">
+        delete from merchant_base where merchant_base_id = #{merchantBaseId}
+    </delete>
+
+    <delete id="deleteMerchantBaseByMerchantBaseIds" parameterType="String">
+        delete from merchant_base where merchant_base_id in 
+        <foreach item="merchantBaseId" collection="array" open="(" separator="," close=")">
+            #{merchantBaseId}
+        </foreach>
+    </delete>
+</mapper>

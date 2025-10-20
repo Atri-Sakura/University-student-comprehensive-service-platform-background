@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.platform.mapper.GoodsEvaluationMapper">
+    
+    <resultMap type="GoodsEvaluation" id="GoodsEvaluationResult">
+        <result property="goodsEvaluationId"    column="goods_evaluation_id"    />
+        <result property="merchantGoodsId"    column="merchant_goods_id"    />
+        <result property="merchantBaseId"    column="merchant_base_id"    />
+        <result property="userId"    column="user_id"    />
+        <result property="orderId"    column="order_id"    />
+        <result property="orderItemId"    column="order_item_id"    />
+        <result property="rating"    column="rating"    />
+        <result property="content"    column="content"    />
+        <result property="isAnonymous"    column="is_anonymous"    />
+        <result property="merchantReply"    column="merchant_reply"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="replyTime"    column="reply_time"    />
+        <result property="usefulCount"    column="useful_count"    />
+    </resultMap>
+
+    <sql id="selectGoodsEvaluationVo">
+        select goods_evaluation_id, merchant_goods_id, merchant_base_id, user_id, order_id, order_item_id, rating, content, is_anonymous, merchant_reply, create_time, reply_time, useful_count from goods_evaluation
+    </sql>
+
+    <select id="selectGoodsEvaluationList" parameterType="GoodsEvaluation" resultMap="GoodsEvaluationResult">
+        <include refid="selectGoodsEvaluationVo"/>
+        <where>  
+            <if test="merchantGoodsId != null "> and merchant_goods_id = #{merchantGoodsId}</if>
+            <if test="merchantBaseId != null "> and merchant_base_id = #{merchantBaseId}</if>
+            <if test="userId != null "> and user_id = #{userId}</if>
+            <if test="orderId != null "> and order_id = #{orderId}</if>
+            <if test="orderItemId != null "> and order_item_id = #{orderItemId}</if>
+            <if test="rating != null "> and rating = #{rating}</if>
+            <if test="content != null  and content != ''"> and content = #{content}</if>
+            <if test="isAnonymous != null "> and is_anonymous = #{isAnonymous}</if>
+            <if test="merchantReply != null  and merchantReply != ''"> and merchant_reply = #{merchantReply}</if>
+            <if test="replyTime != null "> and reply_time = #{replyTime}</if>
+            <if test="usefulCount != null "> and useful_count = #{usefulCount}</if>
+        </where>
+    </select>
+    
+    <select id="selectGoodsEvaluationByGoodsEvaluationId" parameterType="Long" resultMap="GoodsEvaluationResult">
+        <include refid="selectGoodsEvaluationVo"/>
+        where goods_evaluation_id = #{goodsEvaluationId}
+    </select>
+
+    <insert id="insertGoodsEvaluation" parameterType="GoodsEvaluation">
+        insert into goods_evaluation
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="goodsEvaluationId != null">goods_evaluation_id,</if>
+            <if test="merchantGoodsId != null">merchant_goods_id,</if>
+            <if test="merchantBaseId != null">merchant_base_id,</if>
+            <if test="userId != null">user_id,</if>
+            <if test="orderId != null">order_id,</if>
+            <if test="orderItemId != null">order_item_id,</if>
+            <if test="rating != null">rating,</if>
+            <if test="content != null">content,</if>
+            <if test="isAnonymous != null">is_anonymous,</if>
+            <if test="merchantReply != null">merchant_reply,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="replyTime != null">reply_time,</if>
+            <if test="usefulCount != null">useful_count,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="goodsEvaluationId != null">#{goodsEvaluationId},</if>
+            <if test="merchantGoodsId != null">#{merchantGoodsId},</if>
+            <if test="merchantBaseId != null">#{merchantBaseId},</if>
+            <if test="userId != null">#{userId},</if>
+            <if test="orderId != null">#{orderId},</if>
+            <if test="orderItemId != null">#{orderItemId},</if>
+            <if test="rating != null">#{rating},</if>
+            <if test="content != null">#{content},</if>
+            <if test="isAnonymous != null">#{isAnonymous},</if>
+            <if test="merchantReply != null">#{merchantReply},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="replyTime != null">#{replyTime},</if>
+            <if test="usefulCount != null">#{usefulCount},</if>
+         </trim>
+    </insert>
+
+    <update id="updateGoodsEvaluation" parameterType="GoodsEvaluation">
+        update goods_evaluation
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="merchantGoodsId != null">merchant_goods_id = #{merchantGoodsId},</if>
+            <if test="merchantBaseId != null">merchant_base_id = #{merchantBaseId},</if>
+            <if test="userId != null">user_id = #{userId},</if>
+            <if test="orderId != null">order_id = #{orderId},</if>
+            <if test="orderItemId != null">order_item_id = #{orderItemId},</if>
+            <if test="rating != null">rating = #{rating},</if>
+            <if test="content != null">content = #{content},</if>
+            <if test="isAnonymous != null">is_anonymous = #{isAnonymous},</if>
+            <if test="merchantReply != null">merchant_reply = #{merchantReply},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="replyTime != null">reply_time = #{replyTime},</if>
+            <if test="usefulCount != null">useful_count = #{usefulCount},</if>
+        </trim>
+        where goods_evaluation_id = #{goodsEvaluationId}
+    </update>
+
+    <delete id="deleteGoodsEvaluationByGoodsEvaluationId" parameterType="Long">
+        delete from goods_evaluation where goods_evaluation_id = #{goodsEvaluationId}
+    </delete>
+
+    <delete id="deleteGoodsEvaluationByGoodsEvaluationIds" parameterType="String">
+        delete from goods_evaluation where goods_evaluation_id in 
+        <foreach item="goodsEvaluationId" collection="array" open="(" separator="," close=")">
+            #{goodsEvaluationId}
+        </foreach>
+    </delete>
+</mapper>

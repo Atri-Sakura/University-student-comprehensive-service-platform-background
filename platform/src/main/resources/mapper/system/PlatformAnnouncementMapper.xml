@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.platform.mapper.PlatformAnnouncementMapper">
+    
+    <resultMap type="PlatformAnnouncement" id="PlatformAnnouncementResult">
+        <result property="platformAnnouncementId"    column="platform_announcement_id"    />
+        <result property="title"    column="title"    />
+        <result property="content"    column="content"    />
+        <result property="publisherId"    column="publisher_id"    />
+        <result property="publisherName"    column="publisher_name"    />
+        <result property="publishTime"    column="publish_time"    />
+        <result property="status"    column="status"    />
+        <result property="readCount"    column="read_count"    />
+        <result property="isTop"    column="is_top"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateTime"    column="update_time"    />
+    </resultMap>
+
+    <sql id="selectPlatformAnnouncementVo">
+        select platform_announcement_id, title, content, publisher_id, publisher_name, publish_time, status, read_count, is_top, create_time, update_time from platform_announcement
+    </sql>
+
+    <select id="selectPlatformAnnouncementList" parameterType="PlatformAnnouncement" resultMap="PlatformAnnouncementResult">
+        <include refid="selectPlatformAnnouncementVo"/>
+        <where>  
+            <if test="title != null  and title != ''"> and title = #{title}</if>
+            <if test="content != null  and content != ''"> and content = #{content}</if>
+            <if test="publisherId != null "> and publisher_id = #{publisherId}</if>
+            <if test="publisherName != null  and publisherName != ''"> and publisher_name like concat('%', #{publisherName}, '%')</if>
+            <if test="publishTime != null "> and publish_time = #{publishTime}</if>
+            <if test="status != null "> and status = #{status}</if>
+            <if test="readCount != null "> and read_count = #{readCount}</if>
+            <if test="isTop != null "> and is_top = #{isTop}</if>
+        </where>
+    </select>
+    
+    <select id="selectPlatformAnnouncementByPlatformAnnouncementId" parameterType="Long" resultMap="PlatformAnnouncementResult">
+        <include refid="selectPlatformAnnouncementVo"/>
+        where platform_announcement_id = #{platformAnnouncementId}
+    </select>
+
+    <insert id="insertPlatformAnnouncement" parameterType="PlatformAnnouncement">
+        insert into platform_announcement
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="platformAnnouncementId != null">platform_announcement_id,</if>
+            <if test="title != null and title != ''">title,</if>
+            <if test="content != null and content != ''">content,</if>
+            <if test="publisherId != null">publisher_id,</if>
+            <if test="publisherName != null and publisherName != ''">publisher_name,</if>
+            <if test="publishTime != null">publish_time,</if>
+            <if test="status != null">status,</if>
+            <if test="readCount != null">read_count,</if>
+            <if test="isTop != null">is_top,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="platformAnnouncementId != null">#{platformAnnouncementId},</if>
+            <if test="title != null and title != ''">#{title},</if>
+            <if test="content != null and content != ''">#{content},</if>
+            <if test="publisherId != null">#{publisherId},</if>
+            <if test="publisherName != null and publisherName != ''">#{publisherName},</if>
+            <if test="publishTime != null">#{publishTime},</if>
+            <if test="status != null">#{status},</if>
+            <if test="readCount != null">#{readCount},</if>
+            <if test="isTop != null">#{isTop},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updatePlatformAnnouncement" parameterType="PlatformAnnouncement">
+        update platform_announcement
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="title != null and title != ''">title = #{title},</if>
+            <if test="content != null and content != ''">content = #{content},</if>
+            <if test="publisherId != null">publisher_id = #{publisherId},</if>
+            <if test="publisherName != null and publisherName != ''">publisher_name = #{publisherName},</if>
+            <if test="publishTime != null">publish_time = #{publishTime},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="readCount != null">read_count = #{readCount},</if>
+            <if test="isTop != null">is_top = #{isTop},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where platform_announcement_id = #{platformAnnouncementId}
+    </update>
+
+    <delete id="deletePlatformAnnouncementByPlatformAnnouncementId" parameterType="Long">
+        delete from platform_announcement where platform_announcement_id = #{platformAnnouncementId}
+    </delete>
+
+    <delete id="deletePlatformAnnouncementByPlatformAnnouncementIds" parameterType="String">
+        delete from platform_announcement where platform_announcement_id in 
+        <foreach item="platformAnnouncementId" collection="array" open="(" separator="," close=")">
+            #{platformAnnouncementId}
+        </foreach>
+    </delete>
+</mapper>

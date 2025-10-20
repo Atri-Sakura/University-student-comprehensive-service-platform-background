@@ -1,26 +1,18 @@
 <template>
   <div class="app-container">
     <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
-      <el-form-item label="角色名称" prop="roleName">
+      <el-form-item label="角色ID" prop="platformRoleId">
         <el-input
-          v-model="queryParams.roleName"
-          placeholder="请输入角色名称"
+          v-model="queryParams.platformRoleId"
+          placeholder="请输入角色ID"
           clearable
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="角色编码" prop="roleCode">
+      <el-form-item label="权限ID" prop="platformPermissionId">
         <el-input
-          v-model="queryParams.roleCode"
-          placeholder="请输入角色编码"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="角色描述" prop="roleDesc">
-        <el-input
-          v-model="queryParams.roleDesc"
-          placeholder="请输入角色描述"
+          v-model="queryParams.platformPermissionId"
+          placeholder="请输入权限ID"
           clearable
           @keyup.enter.native="handleQuery"
         />
@@ -39,7 +31,7 @@
           icon="el-icon-plus"
           size="mini"
           @click="handleAdd"
-          v-hasPermi="['system:role:add']"
+          v-hasPermi="['system:perm:add']"
         >新增</el-button>
       </el-col>
       <el-col :span="1.5">
@@ -50,7 +42,7 @@
           size="mini"
           :disabled="single"
           @click="handleUpdate"
-          v-hasPermi="['system:role:edit']"
+          v-hasPermi="['system:perm:edit']"
         >修改</el-button>
       </el-col>
       <el-col :span="1.5">
@@ -61,7 +53,7 @@
           size="mini"
           :disabled="multiple"
           @click="handleDelete"
-          v-hasPermi="['system:role:remove']"
+          v-hasPermi="['system:perm:remove']"
         >删除</el-button>
       </el-col>
       <el-col :span="1.5">
@@ -71,18 +63,17 @@
           icon="el-icon-download"
           size="mini"
           @click="handleExport"
-          v-hasPermi="['system:role:export']"
+          v-hasPermi="['system:perm:export']"
         >导出</el-button>
       </el-col>
       <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
-    <el-table v-loading="loading" :data="roleList" @selection-change="handleSelectionChange">
+    <el-table v-loading="loading" :data="permList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="角色唯一ID" align="center" prop="platformRoleId" />
-      <el-table-column label="角色名称" align="center" prop="roleName" />
-      <el-table-column label="角色编码" align="center" prop="roleCode" />
-      <el-table-column label="角色描述" align="center" prop="roleDesc" />
+      <el-table-column label="关联唯一ID" align="center" prop="platformRolePermId" />
+      <el-table-column label="角色ID" align="center" prop="platformRoleId" />
+      <el-table-column label="权限ID" align="center" prop="platformPermissionId" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button
@@ -90,14 +81,14 @@
             type="text"
             icon="el-icon-edit"
             @click="handleUpdate(scope.row)"
-            v-hasPermi="['system:role:edit']"
+            v-hasPermi="['system:perm:edit']"
           >修改</el-button>
           <el-button
             size="mini"
             type="text"
             icon="el-icon-delete"
             @click="handleDelete(scope.row)"
-            v-hasPermi="['system:role:remove']"
+            v-hasPermi="['system:perm:remove']"
           >删除</el-button>
         </template>
       </el-table-column>
@@ -111,17 +102,14 @@
       @pagination="getList"
     />
 
-    <!-- 添加或修改角色对话框 -->
+    <!-- 添加或修改角色权限关联对话框 -->
     <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
       <el-form ref="form" :model="form" :rules="rules" label-width="80px">
-        <el-form-item label="角色名称" prop="roleName">
-          <el-input v-model="form.roleName" placeholder="请输入角色名称" />
+        <el-form-item label="角色ID" prop="platformRoleId">
+          <el-input v-model="form.platformRoleId" placeholder="请输入角色ID" />
         </el-form-item>
-        <el-form-item label="角色编码" prop="roleCode">
-          <el-input v-model="form.roleCode" placeholder="请输入角色编码" />
-        </el-form-item>
-        <el-form-item label="角色描述" prop="roleDesc">
-          <el-input v-model="form.roleDesc" placeholder="请输入角色描述" />
+        <el-form-item label="权限ID" prop="platformPermissionId">
+          <el-input v-model="form.platformPermissionId" placeholder="请输入权限ID" />
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -133,10 +121,10 @@
 </template>
 
 <script>
-import { listRole, getRole, delRole, addRole, updateRole } from "@/api/system/role"
+import { listPerm, getPerm, delPerm, addPerm, updatePerm } from "@/api/system/perm"
 
 export default {
-  name: "Role",
+  name: "Perm",
   data() {
     return {
       // 遮罩层
@@ -151,8 +139,8 @@ export default {
       showSearch: true,
       // 总条数
       total: 0,
-      // 角色表格数据
-      roleList: [],
+      // 角色权限关联表格数据
+      permList: [],
       // 弹出层标题
       title: "",
       // 是否显示弹出层
@@ -161,25 +149,21 @@ export default {
       queryParams: {
         pageNum: 1,
         pageSize: 10,
-        roleName: null,
-        roleCode: null,
-        roleDesc: null,
+        platformRoleId: null,
+        platformPermissionId: null,
       },
       // 表单参数
       form: {},
       // 表单校验
       rules: {
-        roleName: [
-          { required: true, message: "角色名称不能为空", trigger: "blur" }
+        platformRoleId: [
+          { required: true, message: "角色ID不能为空", trigger: "blur" }
         ],
-        roleCode: [
-          { required: true, message: "角色编码不能为空", trigger: "blur" }
+        platformPermissionId: [
+          { required: true, message: "权限ID不能为空", trigger: "blur" }
         ],
         createTime: [
           { required: true, message: "创建时间不能为空", trigger: "blur" }
-        ],
-        updateTime: [
-          { required: true, message: "最后更新时间不能为空", trigger: "blur" }
         ]
       }
     }
@@ -188,11 +172,11 @@ export default {
     this.getList()
   },
   methods: {
-    /** 查询角色列表 */
+    /** 查询角色权限关联列表 */
     getList() {
       this.loading = true
-      listRole(this.queryParams).then(response => {
-        this.roleList = response.rows
+      listPerm(this.queryParams).then(response => {
+        this.permList = response.rows
         this.total = response.total
         this.loading = false
       })
@@ -205,12 +189,10 @@ export default {
     // 表单重置
     reset() {
       this.form = {
+        platformRolePermId: null,
         platformRoleId: null,
-        roleName: null,
-        roleCode: null,
-        roleDesc: null,
-        createTime: null,
-        updateTime: null
+        platformPermissionId: null,
+        createTime: null
       }
       this.resetForm("form")
     },
@@ -226,7 +208,7 @@ export default {
     },
     // 多选框选中数据
     handleSelectionChange(selection) {
-      this.ids = selection.map(item => item.platformRoleId)
+      this.ids = selection.map(item => item.platformRolePermId)
       this.single = selection.length!==1
       this.multiple = !selection.length
     },
@@ -234,30 +216,30 @@ export default {
     handleAdd() {
       this.reset()
       this.open = true
-      this.title = "添加角色"
+      this.title = "添加角色权限关联"
     },
     /** 修改按钮操作 */
     handleUpdate(row) {
       this.reset()
-      const platformRoleId = row.platformRoleId || this.ids
-      getRole(platformRoleId).then(response => {
+      const platformRolePermId = row.platformRolePermId || this.ids
+      getPerm(platformRolePermId).then(response => {
         this.form = response.data
         this.open = true
-        this.title = "修改角色"
+        this.title = "修改角色权限关联"
       })
     },
     /** 提交按钮 */
     submitForm() {
       this.$refs["form"].validate(valid => {
         if (valid) {
-          if (this.form.platformRoleId != null) {
-            updateRole(this.form).then(response => {
+          if (this.form.platformRolePermId != null) {
+            updatePerm(this.form).then(response => {
               this.$modal.msgSuccess("修改成功")
               this.open = false
               this.getList()
             })
           } else {
-            addRole(this.form).then(response => {
+            addPerm(this.form).then(response => {
               this.$modal.msgSuccess("新增成功")
               this.open = false
               this.getList()
@@ -268,9 +250,9 @@ export default {
     },
     /** 删除按钮操作 */
     handleDelete(row) {
-      const platformRoleIds = row.platformRoleId || this.ids
-      this.$modal.confirm('是否确认删除角色编号为"' + platformRoleIds + '"的数据项？').then(function() {
-        return delRole(platformRoleIds)
+      const platformRolePermIds = row.platformRolePermId || this.ids
+      this.$modal.confirm('是否确认删除角色权限关联编号为"' + platformRolePermIds + '"的数据项？').then(function() {
+        return delPerm(platformRolePermIds)
       }).then(() => {
         this.getList()
         this.$modal.msgSuccess("删除成功")
@@ -278,9 +260,9 @@ export default {
     },
     /** 导出按钮操作 */
     handleExport() {
-      this.download('system/role/export', {
+      this.download('system/perm/export', {
         ...this.queryParams
-      }, `role_${new Date().getTime()}.xlsx`)
+      }, `perm_${new Date().getTime()}.xlsx`)
     }
   }
 }
