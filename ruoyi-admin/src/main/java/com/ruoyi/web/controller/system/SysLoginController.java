@@ -26,7 +26,7 @@ import com.ruoyi.system.service.ISysMenuService;
 
 /**
  * 登录验证
- * 
+ *
  * @author ruoyi
  */
 @RestController
@@ -48,8 +48,8 @@ public class SysLoginController
     private ISysConfigService configService;
 
     /**
-     * 登录方法
-     * 
+     * 登录方法 (修改为支持手机号登录)
+     *
      * @param loginBody 登录信息
      * @return 结果
      */
@@ -57,16 +57,16 @@ public class SysLoginController
     public AjaxResult login(@RequestBody LoginBody loginBody)
     {
         AjaxResult ajax = AjaxResult.success();
-        // 生成令牌
-        String token = loginService.login(loginBody.getUsername(), loginBody.getPassword(), loginBody.getCode(),
-                loginBody.getUuid());
+        // 生成令牌 (使用手机号登录)
+        String token = loginService.login(loginBody.getPhonenumber(), loginBody.getPassword(),
+                loginBody.getCode(), loginBody.getUuid());
         ajax.put(Constants.TOKEN, token);
         return ajax;
     }
 
     /**
      * 获取用户信息
-     * 
+     *
      * @return 用户信息
      */
     @GetMapping("getInfo")
@@ -94,7 +94,7 @@ public class SysLoginController
 
     /**
      * 获取路由信息
-     * 
+     *
      * @return 路由信息
      */
     @GetMapping("getRouters")
@@ -104,7 +104,7 @@ public class SysLoginController
         List<SysMenu> menus = menuService.selectMenuTreeByUserId(userId);
         return AjaxResult.success(menuService.buildMenus(menus));
     }
-    
+
     // 检查初始密码是否提醒修改
     public boolean initPasswordIsModify(Date pwdUpdateDate)
     {

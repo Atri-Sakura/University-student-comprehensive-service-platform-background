@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.MerchantAddressMapper">
+    
+    <resultMap type="MerchantAddress" id="MerchantAddressResult">
+        <result property="merchantAddressId"    column="merchant_address_id"    />
+        <result property="merchantBaseId"    column="merchant_base_id"    />
+        <result property="province"    column="province"    />
+        <result property="city"    column="city"    />
+        <result property="district"    column="district"    />
+        <result property="detailAddress"    column="detail_address"    />
+        <result property="contactPerson"    column="contact_person"    />
+        <result property="contactPhone"    column="contact_phone"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateTime"    column="update_time"    />
+    </resultMap>
+
+    <sql id="selectMerchantAddressVo">
+        select merchant_address_id, merchant_base_id, province, city, district, detail_address, contact_person, contact_phone, create_time, update_time from merchant_address
+    </sql>
+
+    <select id="selectMerchantAddressList" parameterType="MerchantAddress" resultMap="MerchantAddressResult">
+        <include refid="selectMerchantAddressVo"/>
+        <where>  
+            <if test="merchantBaseId != null "> and merchant_base_id = #{merchantBaseId}</if>
+            <if test="province != null  and province != ''"> and province = #{province}</if>
+            <if test="city != null  and city != ''"> and city = #{city}</if>
+            <if test="district != null  and district != ''"> and district = #{district}</if>
+            <if test="detailAddress != null  and detailAddress != ''"> and detail_address = #{detailAddress}</if>
+            <if test="contactPerson != null  and contactPerson != ''"> and contact_person = #{contactPerson}</if>
+            <if test="contactPhone != null  and contactPhone != ''"> and contact_phone = #{contactPhone}</if>
+        </where>
+    </select>
+    
+    <select id="selectMerchantAddressByMerchantAddressId" parameterType="Long" resultMap="MerchantAddressResult">
+        <include refid="selectMerchantAddressVo"/>
+        where merchant_address_id = #{merchantAddressId}
+    </select>
+
+    <insert id="insertMerchantAddress" parameterType="MerchantAddress">
+        insert into merchant_address
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="merchantAddressId != null">merchant_address_id,</if>
+            <if test="merchantBaseId != null">merchant_base_id,</if>
+            <if test="province != null and province != ''">province,</if>
+            <if test="city != null and city != ''">city,</if>
+            <if test="district != null and district != ''">district,</if>
+            <if test="detailAddress != null and detailAddress != ''">detail_address,</if>
+            <if test="contactPerson != null and contactPerson != ''">contact_person,</if>
+            <if test="contactPhone != null and contactPhone != ''">contact_phone,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="merchantAddressId != null">#{merchantAddressId},</if>
+            <if test="merchantBaseId != null">#{merchantBaseId},</if>
+            <if test="province != null and province != ''">#{province},</if>
+            <if test="city != null and city != ''">#{city},</if>
+            <if test="district != null and district != ''">#{district},</if>
+            <if test="detailAddress != null and detailAddress != ''">#{detailAddress},</if>
+            <if test="contactPerson != null and contactPerson != ''">#{contactPerson},</if>
+            <if test="contactPhone != null and contactPhone != ''">#{contactPhone},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateMerchantAddress" parameterType="MerchantAddress">
+        update merchant_address
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="merchantBaseId != null">merchant_base_id = #{merchantBaseId},</if>
+            <if test="province != null and province != ''">province = #{province},</if>
+            <if test="city != null and city != ''">city = #{city},</if>
+            <if test="district != null and district != ''">district = #{district},</if>
+            <if test="detailAddress != null and detailAddress != ''">detail_address = #{detailAddress},</if>
+            <if test="contactPerson != null and contactPerson != ''">contact_person = #{contactPerson},</if>
+            <if test="contactPhone != null and contactPhone != ''">contact_phone = #{contactPhone},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where merchant_address_id = #{merchantAddressId}
+    </update>
+
+    <delete id="deleteMerchantAddressByMerchantAddressId" parameterType="Long">
+        delete from merchant_address where merchant_address_id = #{merchantAddressId}
+    </delete>
+
+    <delete id="deleteMerchantAddressByMerchantAddressIds" parameterType="String">
+        delete from merchant_address where merchant_address_id in 
+        <foreach item="merchantAddressId" collection="array" open="(" separator="," close=")">
+            #{merchantAddressId}
+        </foreach>
+    </delete>
+</mapper>

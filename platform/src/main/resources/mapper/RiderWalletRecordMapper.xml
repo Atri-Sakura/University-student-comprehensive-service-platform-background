@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.RiderWalletRecordMapper">
+    
+    <resultMap type="RiderWalletRecord" id="RiderWalletRecordResult">
+        <result property="riderWalletRecordId"    column="rider_wallet_record_id"    />
+        <result property="riderWalletId"    column="rider_wallet_id"    />
+        <result property="riderBaseId"    column="rider_base_id"    />
+        <result property="amount"    column="amount"    />
+        <result property="tradeType"    column="trade_type"    />
+        <result property="relatedId"    column="related_id"    />
+        <result property="tradeStatus"    column="trade_status"    />
+        <result property="tradeTime"    column="trade_time"    />
+        <result property="remark"    column="remark"    />
+    </resultMap>
+
+    <sql id="selectRiderWalletRecordVo">
+        select rider_wallet_record_id, rider_wallet_id, rider_base_id, amount, trade_type, related_id, trade_status, trade_time, remark from rider_wallet_record
+    </sql>
+
+    <select id="selectRiderWalletRecordList" parameterType="RiderWalletRecord" resultMap="RiderWalletRecordResult">
+        <include refid="selectRiderWalletRecordVo"/>
+        <where>  
+            <if test="riderWalletId != null "> and rider_wallet_id = #{riderWalletId}</if>
+            <if test="riderBaseId != null "> and rider_base_id = #{riderBaseId}</if>
+            <if test="amount != null "> and amount = #{amount}</if>
+            <if test="tradeType != null "> and trade_type = #{tradeType}</if>
+            <if test="relatedId != null "> and related_id = #{relatedId}</if>
+            <if test="tradeStatus != null "> and trade_status = #{tradeStatus}</if>
+            <if test="tradeTime != null "> and trade_time = #{tradeTime}</if>
+        </where>
+    </select>
+    
+    <select id="selectRiderWalletRecordByRiderWalletRecordId" parameterType="Long" resultMap="RiderWalletRecordResult">
+        <include refid="selectRiderWalletRecordVo"/>
+        where rider_wallet_record_id = #{riderWalletRecordId}
+    </select>
+
+    <insert id="insertRiderWalletRecord" parameterType="RiderWalletRecord">
+        insert into rider_wallet_record
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="riderWalletRecordId != null">rider_wallet_record_id,</if>
+            <if test="riderWalletId != null">rider_wallet_id,</if>
+            <if test="riderBaseId != null">rider_base_id,</if>
+            <if test="amount != null">amount,</if>
+            <if test="tradeType != null">trade_type,</if>
+            <if test="relatedId != null">related_id,</if>
+            <if test="tradeStatus != null">trade_status,</if>
+            <if test="tradeTime != null">trade_time,</if>
+            <if test="remark != null">remark,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="riderWalletRecordId != null">#{riderWalletRecordId},</if>
+            <if test="riderWalletId != null">#{riderWalletId},</if>
+            <if test="riderBaseId != null">#{riderBaseId},</if>
+            <if test="amount != null">#{amount},</if>
+            <if test="tradeType != null">#{tradeType},</if>
+            <if test="relatedId != null">#{relatedId},</if>
+            <if test="tradeStatus != null">#{tradeStatus},</if>
+            <if test="tradeTime != null">#{tradeTime},</if>
+            <if test="remark != null">#{remark},</if>
+         </trim>
+    </insert>
+
+    <update id="updateRiderWalletRecord" parameterType="RiderWalletRecord">
+        update rider_wallet_record
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="riderWalletId != null">rider_wallet_id = #{riderWalletId},</if>
+            <if test="riderBaseId != null">rider_base_id = #{riderBaseId},</if>
+            <if test="amount != null">amount = #{amount},</if>
+            <if test="tradeType != null">trade_type = #{tradeType},</if>
+            <if test="relatedId != null">related_id = #{relatedId},</if>
+            <if test="tradeStatus != null">trade_status = #{tradeStatus},</if>
+            <if test="tradeTime != null">trade_time = #{tradeTime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+        </trim>
+        where rider_wallet_record_id = #{riderWalletRecordId}
+    </update>
+
+    <delete id="deleteRiderWalletRecordByRiderWalletRecordId" parameterType="Long">
+        delete from rider_wallet_record where rider_wallet_record_id = #{riderWalletRecordId}
+    </delete>
+
+    <delete id="deleteRiderWalletRecordByRiderWalletRecordIds" parameterType="String">
+        delete from rider_wallet_record where rider_wallet_record_id in 
+        <foreach item="riderWalletRecordId" collection="array" open="(" separator="," close=")">
+            #{riderWalletRecordId}
+        </foreach>
+    </delete>
+</mapper>

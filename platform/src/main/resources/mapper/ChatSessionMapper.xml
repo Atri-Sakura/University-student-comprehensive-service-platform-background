@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.ChatSessionMapper">
+    
+    <resultMap type="ChatSession" id="ChatSessionResult">
+        <result property="sessionId"    column="session_id"    />
+        <result property="fromType"    column="from_type"    />
+        <result property="fromId"    column="from_id"    />
+        <result property="toType"    column="to_type"    />
+        <result property="toId"    column="to_id"    />
+        <result property="lastMsgId"    column="last_msg_id"    />
+        <result property="lastMsgContent"    column="last_msg_content"    />
+        <result property="lastMsgType"    column="last_msg_type"    />
+        <result property="lastMsgTime"    column="last_msg_time"    />
+        <result property="unreadCount"    column="unread_count"    />
+        <result property="sessionStatus"    column="session_status"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateTime"    column="update_time"    />
+    </resultMap>
+
+    <sql id="selectChatSessionVo">
+        select session_id, from_type, from_id, to_type, to_id, last_msg_id, last_msg_content, last_msg_type, last_msg_time, unread_count, session_status, create_time, update_time from chat_session
+    </sql>
+
+    <select id="selectChatSessionList" parameterType="ChatSession" resultMap="ChatSessionResult">
+        <include refid="selectChatSessionVo"/>
+        <where>  
+            <if test="fromType != null "> and from_type = #{fromType}</if>
+            <if test="fromId != null "> and from_id = #{fromId}</if>
+            <if test="toType != null "> and to_type = #{toType}</if>
+            <if test="toId != null "> and to_id = #{toId}</if>
+            <if test="lastMsgId != null "> and last_msg_id = #{lastMsgId}</if>
+            <if test="lastMsgContent != null  and lastMsgContent != ''"> and last_msg_content = #{lastMsgContent}</if>
+            <if test="lastMsgType != null "> and last_msg_type = #{lastMsgType}</if>
+            <if test="lastMsgTime != null "> and last_msg_time = #{lastMsgTime}</if>
+            <if test="unreadCount != null "> and unread_count = #{unreadCount}</if>
+            <if test="sessionStatus != null "> and session_status = #{sessionStatus}</if>
+        </where>
+    </select>
+    
+    <select id="selectChatSessionBySessionId" parameterType="Long" resultMap="ChatSessionResult">
+        <include refid="selectChatSessionVo"/>
+        where session_id = #{sessionId}
+    </select>
+
+    <insert id="insertChatSession" parameterType="ChatSession">
+        insert into chat_session
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="sessionId != null">session_id,</if>
+            <if test="fromType != null">from_type,</if>
+            <if test="fromId != null">from_id,</if>
+            <if test="toType != null">to_type,</if>
+            <if test="toId != null">to_id,</if>
+            <if test="lastMsgId != null">last_msg_id,</if>
+            <if test="lastMsgContent != null">last_msg_content,</if>
+            <if test="lastMsgType != null">last_msg_type,</if>
+            <if test="lastMsgTime != null">last_msg_time,</if>
+            <if test="unreadCount != null">unread_count,</if>
+            <if test="sessionStatus != null">session_status,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="sessionId != null">#{sessionId},</if>
+            <if test="fromType != null">#{fromType},</if>
+            <if test="fromId != null">#{fromId},</if>
+            <if test="toType != null">#{toType},</if>
+            <if test="toId != null">#{toId},</if>
+            <if test="lastMsgId != null">#{lastMsgId},</if>
+            <if test="lastMsgContent != null">#{lastMsgContent},</if>
+            <if test="lastMsgType != null">#{lastMsgType},</if>
+            <if test="lastMsgTime != null">#{lastMsgTime},</if>
+            <if test="unreadCount != null">#{unreadCount},</if>
+            <if test="sessionStatus != null">#{sessionStatus},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateChatSession" parameterType="ChatSession">
+        update chat_session
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="fromType != null">from_type = #{fromType},</if>
+            <if test="fromId != null">from_id = #{fromId},</if>
+            <if test="toType != null">to_type = #{toType},</if>
+            <if test="toId != null">to_id = #{toId},</if>
+            <if test="lastMsgId != null">last_msg_id = #{lastMsgId},</if>
+            <if test="lastMsgContent != null">last_msg_content = #{lastMsgContent},</if>
+            <if test="lastMsgType != null">last_msg_type = #{lastMsgType},</if>
+            <if test="lastMsgTime != null">last_msg_time = #{lastMsgTime},</if>
+            <if test="unreadCount != null">unread_count = #{unreadCount},</if>
+            <if test="sessionStatus != null">session_status = #{sessionStatus},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where session_id = #{sessionId}
+    </update>
+
+    <delete id="deleteChatSessionBySessionId" parameterType="Long">
+        delete from chat_session where session_id = #{sessionId}
+    </delete>
+
+    <delete id="deleteChatSessionBySessionIds" parameterType="String">
+        delete from chat_session where session_id in 
+        <foreach item="sessionId" collection="array" open="(" separator="," close=")">
+            #{sessionId}
+        </foreach>
+    </delete>
+</mapper>

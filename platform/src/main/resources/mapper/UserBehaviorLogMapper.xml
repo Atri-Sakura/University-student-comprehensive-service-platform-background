@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.UserBehaviorLogMapper">
+    
+    <resultMap type="UserBehaviorLog" id="UserBehaviorLogResult">
+        <result property="userBehaviorLogId"    column="user_behavior_log_id"    />
+        <result property="userBaseId"    column="user_base_id"    />
+        <result property="behaviorType"    column="behavior_type"    />
+        <result property="targetId"    column="target_id"    />
+        <result property="targetType"    column="target_type"    />
+        <result property="targetName"    column="target_name"    />
+        <result property="behaviorTime"    column="behavior_time"    />
+        <result property="device"    column="device"    />
+        <result property="scene"    column="scene"    />
+        <result property="duration"    column="duration"    />
+        <result property="extra"    column="extra"    />
+    </resultMap>
+
+    <sql id="selectUserBehaviorLogVo">
+        select user_behavior_log_id, user_base_id, behavior_type, target_id, target_type, target_name, behavior_time, device, scene, duration, extra from user_behavior_log
+    </sql>
+
+    <select id="selectUserBehaviorLogList" parameterType="UserBehaviorLog" resultMap="UserBehaviorLogResult">
+        <include refid="selectUserBehaviorLogVo"/>
+        <where>  
+            <if test="userBaseId != null "> and user_base_id = #{userBaseId}</if>
+            <if test="behaviorType != null "> and behavior_type = #{behaviorType}</if>
+            <if test="targetId != null "> and target_id = #{targetId}</if>
+            <if test="targetType != null "> and target_type = #{targetType}</if>
+            <if test="targetName != null  and targetName != ''"> and target_name like concat('%', #{targetName}, '%')</if>
+            <if test="behaviorTime != null "> and behavior_time = #{behaviorTime}</if>
+            <if test="device != null  and device != ''"> and device = #{device}</if>
+            <if test="scene != null  and scene != ''"> and scene = #{scene}</if>
+            <if test="duration != null "> and duration = #{duration}</if>
+            <if test="extra != null  and extra != ''"> and extra = #{extra}</if>
+        </where>
+    </select>
+    
+    <select id="selectUserBehaviorLogByUserBehaviorLogId" parameterType="Long" resultMap="UserBehaviorLogResult">
+        <include refid="selectUserBehaviorLogVo"/>
+        where user_behavior_log_id = #{userBehaviorLogId}
+    </select>
+
+    <insert id="insertUserBehaviorLog" parameterType="UserBehaviorLog">
+        insert into user_behavior_log
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="userBehaviorLogId != null">user_behavior_log_id,</if>
+            <if test="userBaseId != null">user_base_id,</if>
+            <if test="behaviorType != null">behavior_type,</if>
+            <if test="targetId != null">target_id,</if>
+            <if test="targetType != null">target_type,</if>
+            <if test="targetName != null">target_name,</if>
+            <if test="behaviorTime != null">behavior_time,</if>
+            <if test="device != null">device,</if>
+            <if test="scene != null">scene,</if>
+            <if test="duration != null">duration,</if>
+            <if test="extra != null">extra,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="userBehaviorLogId != null">#{userBehaviorLogId},</if>
+            <if test="userBaseId != null">#{userBaseId},</if>
+            <if test="behaviorType != null">#{behaviorType},</if>
+            <if test="targetId != null">#{targetId},</if>
+            <if test="targetType != null">#{targetType},</if>
+            <if test="targetName != null">#{targetName},</if>
+            <if test="behaviorTime != null">#{behaviorTime},</if>
+            <if test="device != null">#{device},</if>
+            <if test="scene != null">#{scene},</if>
+            <if test="duration != null">#{duration},</if>
+            <if test="extra != null">#{extra},</if>
+         </trim>
+    </insert>
+
+    <update id="updateUserBehaviorLog" parameterType="UserBehaviorLog">
+        update user_behavior_log
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="userBaseId != null">user_base_id = #{userBaseId},</if>
+            <if test="behaviorType != null">behavior_type = #{behaviorType},</if>
+            <if test="targetId != null">target_id = #{targetId},</if>
+            <if test="targetType != null">target_type = #{targetType},</if>
+            <if test="targetName != null">target_name = #{targetName},</if>
+            <if test="behaviorTime != null">behavior_time = #{behaviorTime},</if>
+            <if test="device != null">device = #{device},</if>
+            <if test="scene != null">scene = #{scene},</if>
+            <if test="duration != null">duration = #{duration},</if>
+            <if test="extra != null">extra = #{extra},</if>
+        </trim>
+        where user_behavior_log_id = #{userBehaviorLogId}
+    </update>
+
+    <delete id="deleteUserBehaviorLogByUserBehaviorLogId" parameterType="Long">
+        delete from user_behavior_log where user_behavior_log_id = #{userBehaviorLogId}
+    </delete>
+
+    <delete id="deleteUserBehaviorLogByUserBehaviorLogIds" parameterType="String">
+        delete from user_behavior_log where user_behavior_log_id in 
+        <foreach item="userBehaviorLogId" collection="array" open="(" separator="," close=")">
+            #{userBehaviorLogId}
+        </foreach>
+    </delete>
+</mapper>

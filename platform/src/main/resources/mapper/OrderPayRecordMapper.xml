@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.OrderPayRecordMapper">
+    
+    <resultMap type="OrderPayRecord" id="OrderPayRecordResult">
+        <result property="orderPayRecordId"    column="order_pay_record_id"    />
+        <result property="orderMainId"    column="order_main_id"    />
+        <result property="payNo"    column="pay_no"    />
+        <result property="payAmount"    column="pay_amount"    />
+        <result property="payType"    column="pay_type"    />
+        <result property="payStatus"    column="pay_status"    />
+        <result property="payTime"    column="pay_time"    />
+        <result property="callbackData"    column="callback_data"    />
+    </resultMap>
+
+    <sql id="selectOrderPayRecordVo">
+        select order_pay_record_id, order_main_id, pay_no, pay_amount, pay_type, pay_status, pay_time, callback_data from order_pay_record
+    </sql>
+
+    <select id="selectOrderPayRecordList" parameterType="OrderPayRecord" resultMap="OrderPayRecordResult">
+        <include refid="selectOrderPayRecordVo"/>
+        <where>  
+            <if test="orderMainId != null "> and order_main_id = #{orderMainId}</if>
+            <if test="payNo != null  and payNo != ''"> and pay_no = #{payNo}</if>
+            <if test="payAmount != null "> and pay_amount = #{payAmount}</if>
+            <if test="payType != null "> and pay_type = #{payType}</if>
+            <if test="payStatus != null "> and pay_status = #{payStatus}</if>
+            <if test="payTime != null "> and pay_time = #{payTime}</if>
+            <if test="callbackData != null  and callbackData != ''"> and callback_data = #{callbackData}</if>
+        </where>
+    </select>
+    
+    <select id="selectOrderPayRecordByOrderPayRecordId" parameterType="Long" resultMap="OrderPayRecordResult">
+        <include refid="selectOrderPayRecordVo"/>
+        where order_pay_record_id = #{orderPayRecordId}
+    </select>
+
+    <insert id="insertOrderPayRecord" parameterType="OrderPayRecord">
+        insert into order_pay_record
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="orderPayRecordId != null">order_pay_record_id,</if>
+            <if test="orderMainId != null">order_main_id,</if>
+            <if test="payNo != null">pay_no,</if>
+            <if test="payAmount != null">pay_amount,</if>
+            <if test="payType != null">pay_type,</if>
+            <if test="payStatus != null">pay_status,</if>
+            <if test="payTime != null">pay_time,</if>
+            <if test="callbackData != null">callback_data,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="orderPayRecordId != null">#{orderPayRecordId},</if>
+            <if test="orderMainId != null">#{orderMainId},</if>
+            <if test="payNo != null">#{payNo},</if>
+            <if test="payAmount != null">#{payAmount},</if>
+            <if test="payType != null">#{payType},</if>
+            <if test="payStatus != null">#{payStatus},</if>
+            <if test="payTime != null">#{payTime},</if>
+            <if test="callbackData != null">#{callbackData},</if>
+         </trim>
+    </insert>
+
+    <update id="updateOrderPayRecord" parameterType="OrderPayRecord">
+        update order_pay_record
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="orderMainId != null">order_main_id = #{orderMainId},</if>
+            <if test="payNo != null">pay_no = #{payNo},</if>
+            <if test="payAmount != null">pay_amount = #{payAmount},</if>
+            <if test="payType != null">pay_type = #{payType},</if>
+            <if test="payStatus != null">pay_status = #{payStatus},</if>
+            <if test="payTime != null">pay_time = #{payTime},</if>
+            <if test="callbackData != null">callback_data = #{callbackData},</if>
+        </trim>
+        where order_pay_record_id = #{orderPayRecordId}
+    </update>
+
+    <delete id="deleteOrderPayRecordByOrderPayRecordId" parameterType="Long">
+        delete from order_pay_record where order_pay_record_id = #{orderPayRecordId}
+    </delete>
+
+    <delete id="deleteOrderPayRecordByOrderPayRecordIds" parameterType="String">
+        delete from order_pay_record where order_pay_record_id in 
+        <foreach item="orderPayRecordId" collection="array" open="(" separator="," close=")">
+            #{orderPayRecordId}
+        </foreach>
+    </delete>
+</mapper>

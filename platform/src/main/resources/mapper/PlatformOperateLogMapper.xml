@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.PlatformOperateLogMapper">
+    
+    <resultMap type="PlatformOperateLog" id="PlatformOperateLogResult">
+        <result property="platformOperateLogId"    column="platform_operate_log_id"    />
+        <result property="adminId"    column="admin_id"    />
+        <result property="adminName"    column="admin_name"    />
+        <result property="operType"    column="oper_type"    />
+        <result property="operModule"    column="oper_module"    />
+        <result property="operContent"    column="oper_content"    />
+        <result property="ipAddress"    column="ip_address"    />
+        <result property="operTime"    column="oper_time"    />
+        <result property="userAgent"    column="user_agent"    />
+    </resultMap>
+
+    <sql id="selectPlatformOperateLogVo">
+        select platform_operate_log_id, admin_id, admin_name, oper_type, oper_module, oper_content, ip_address, oper_time, user_agent from platform_operate_log
+    </sql>
+
+    <select id="selectPlatformOperateLogList" parameterType="PlatformOperateLog" resultMap="PlatformOperateLogResult">
+        <include refid="selectPlatformOperateLogVo"/>
+        <where>  
+            <if test="adminId != null "> and admin_id = #{adminId}</if>
+            <if test="adminName != null  and adminName != ''"> and admin_name like concat('%', #{adminName}, '%')</if>
+            <if test="operType != null  and operType != ''"> and oper_type = #{operType}</if>
+            <if test="operModule != null  and operModule != ''"> and oper_module = #{operModule}</if>
+            <if test="operContent != null  and operContent != ''"> and oper_content = #{operContent}</if>
+            <if test="ipAddress != null  and ipAddress != ''"> and ip_address = #{ipAddress}</if>
+            <if test="operTime != null "> and oper_time = #{operTime}</if>
+            <if test="userAgent != null  and userAgent != ''"> and user_agent = #{userAgent}</if>
+        </where>
+    </select>
+    
+    <select id="selectPlatformOperateLogByPlatformOperateLogId" parameterType="Long" resultMap="PlatformOperateLogResult">
+        <include refid="selectPlatformOperateLogVo"/>
+        where platform_operate_log_id = #{platformOperateLogId}
+    </select>
+
+    <insert id="insertPlatformOperateLog" parameterType="PlatformOperateLog">
+        insert into platform_operate_log
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="platformOperateLogId != null">platform_operate_log_id,</if>
+            <if test="adminId != null">admin_id,</if>
+            <if test="adminName != null and adminName != ''">admin_name,</if>
+            <if test="operType != null and operType != ''">oper_type,</if>
+            <if test="operModule != null and operModule != ''">oper_module,</if>
+            <if test="operContent != null and operContent != ''">oper_content,</if>
+            <if test="ipAddress != null and ipAddress != ''">ip_address,</if>
+            <if test="operTime != null">oper_time,</if>
+            <if test="userAgent != null">user_agent,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="platformOperateLogId != null">#{platformOperateLogId},</if>
+            <if test="adminId != null">#{adminId},</if>
+            <if test="adminName != null and adminName != ''">#{adminName},</if>
+            <if test="operType != null and operType != ''">#{operType},</if>
+            <if test="operModule != null and operModule != ''">#{operModule},</if>
+            <if test="operContent != null and operContent != ''">#{operContent},</if>
+            <if test="ipAddress != null and ipAddress != ''">#{ipAddress},</if>
+            <if test="operTime != null">#{operTime},</if>
+            <if test="userAgent != null">#{userAgent},</if>
+         </trim>
+    </insert>
+
+    <update id="updatePlatformOperateLog" parameterType="PlatformOperateLog">
+        update platform_operate_log
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="adminId != null">admin_id = #{adminId},</if>
+            <if test="adminName != null and adminName != ''">admin_name = #{adminName},</if>
+            <if test="operType != null and operType != ''">oper_type = #{operType},</if>
+            <if test="operModule != null and operModule != ''">oper_module = #{operModule},</if>
+            <if test="operContent != null and operContent != ''">oper_content = #{operContent},</if>
+            <if test="ipAddress != null and ipAddress != ''">ip_address = #{ipAddress},</if>
+            <if test="operTime != null">oper_time = #{operTime},</if>
+            <if test="userAgent != null">user_agent = #{userAgent},</if>
+        </trim>
+        where platform_operate_log_id = #{platformOperateLogId}
+    </update>
+
+    <delete id="deletePlatformOperateLogByPlatformOperateLogId" parameterType="Long">
+        delete from platform_operate_log where platform_operate_log_id = #{platformOperateLogId}
+    </delete>
+
+    <delete id="deletePlatformOperateLogByPlatformOperateLogIds" parameterType="String">
+        delete from platform_operate_log where platform_operate_log_id in 
+        <foreach item="platformOperateLogId" collection="array" open="(" separator="," close=")">
+            #{platformOperateLogId}
+        </foreach>
+    </delete>
+</mapper>

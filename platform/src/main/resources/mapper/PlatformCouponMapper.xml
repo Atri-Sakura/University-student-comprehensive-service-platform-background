@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.PlatformCouponMapper">
+    
+    <resultMap type="PlatformCoupon" id="PlatformCouponResult">
+        <result property="platformCouponId"    column="platform_coupon_id"    />
+        <result property="couponNo"    column="coupon_no"    />
+        <result property="couponName"    column="coupon_name"    />
+        <result property="couponType"    column="coupon_type"    />
+        <result property="faceValue"    column="face_value"    />
+        <result property="minSpend"    column="min_spend"    />
+        <result property="discount"    column="discount"    />
+        <result property="startTime"    column="start_time"    />
+        <result property="endTime"    column="end_time"    />
+        <result property="totalCount"    column="total_count"    />
+        <result property="remainCount"    column="remain_count"    />
+        <result property="status"    column="status"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateTime"    column="update_time"    />
+    </resultMap>
+
+    <sql id="selectPlatformCouponVo">
+        select platform_coupon_id, coupon_no, coupon_name, coupon_type, face_value, min_spend, discount, start_time, end_time, total_count, remain_count, status, create_time, update_time from platform_coupon
+    </sql>
+
+    <select id="selectPlatformCouponList" parameterType="PlatformCoupon" resultMap="PlatformCouponResult">
+        <include refid="selectPlatformCouponVo"/>
+        <where>  
+            <if test="couponNo != null  and couponNo != ''"> and coupon_no = #{couponNo}</if>
+            <if test="couponName != null  and couponName != ''"> and coupon_name like concat('%', #{couponName}, '%')</if>
+            <if test="couponType != null "> and coupon_type = #{couponType}</if>
+            <if test="faceValue != null "> and face_value = #{faceValue}</if>
+            <if test="minSpend != null "> and min_spend = #{minSpend}</if>
+            <if test="discount != null "> and discount = #{discount}</if>
+            <if test="startTime != null "> and start_time = #{startTime}</if>
+            <if test="endTime != null "> and end_time = #{endTime}</if>
+            <if test="totalCount != null "> and total_count = #{totalCount}</if>
+            <if test="remainCount != null "> and remain_count = #{remainCount}</if>
+            <if test="status != null "> and status = #{status}</if>
+        </where>
+    </select>
+    
+    <select id="selectPlatformCouponByPlatformCouponId" parameterType="Long" resultMap="PlatformCouponResult">
+        <include refid="selectPlatformCouponVo"/>
+        where platform_coupon_id = #{platformCouponId}
+    </select>
+
+    <insert id="insertPlatformCoupon" parameterType="PlatformCoupon">
+        insert into platform_coupon
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="platformCouponId != null">platform_coupon_id,</if>
+            <if test="couponNo != null and couponNo != ''">coupon_no,</if>
+            <if test="couponName != null and couponName != ''">coupon_name,</if>
+            <if test="couponType != null">coupon_type,</if>
+            <if test="faceValue != null">face_value,</if>
+            <if test="minSpend != null">min_spend,</if>
+            <if test="discount != null">discount,</if>
+            <if test="startTime != null">start_time,</if>
+            <if test="endTime != null">end_time,</if>
+            <if test="totalCount != null">total_count,</if>
+            <if test="remainCount != null">remain_count,</if>
+            <if test="status != null">status,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="platformCouponId != null">#{platformCouponId},</if>
+            <if test="couponNo != null and couponNo != ''">#{couponNo},</if>
+            <if test="couponName != null and couponName != ''">#{couponName},</if>
+            <if test="couponType != null">#{couponType},</if>
+            <if test="faceValue != null">#{faceValue},</if>
+            <if test="minSpend != null">#{minSpend},</if>
+            <if test="discount != null">#{discount},</if>
+            <if test="startTime != null">#{startTime},</if>
+            <if test="endTime != null">#{endTime},</if>
+            <if test="totalCount != null">#{totalCount},</if>
+            <if test="remainCount != null">#{remainCount},</if>
+            <if test="status != null">#{status},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updatePlatformCoupon" parameterType="PlatformCoupon">
+        update platform_coupon
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="couponNo != null and couponNo != ''">coupon_no = #{couponNo},</if>
+            <if test="couponName != null and couponName != ''">coupon_name = #{couponName},</if>
+            <if test="couponType != null">coupon_type = #{couponType},</if>
+            <if test="faceValue != null">face_value = #{faceValue},</if>
+            <if test="minSpend != null">min_spend = #{minSpend},</if>
+            <if test="discount != null">discount = #{discount},</if>
+            <if test="startTime != null">start_time = #{startTime},</if>
+            <if test="endTime != null">end_time = #{endTime},</if>
+            <if test="totalCount != null">total_count = #{totalCount},</if>
+            <if test="remainCount != null">remain_count = #{remainCount},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where platform_coupon_id = #{platformCouponId}
+    </update>
+
+    <delete id="deletePlatformCouponByPlatformCouponId" parameterType="Long">
+        delete from platform_coupon where platform_coupon_id = #{platformCouponId}
+    </delete>
+
+    <delete id="deletePlatformCouponByPlatformCouponIds" parameterType="String">
+        delete from platform_coupon where platform_coupon_id in 
+        <foreach item="platformCouponId" collection="array" open="(" separator="," close=")">
+            #{platformCouponId}
+        </foreach>
+    </delete>
+</mapper>
