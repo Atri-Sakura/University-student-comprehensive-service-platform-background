@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.UserRecommendSettingMapper">
+    
+    <resultMap type="UserRecommendSetting" id="UserRecommendSettingResult">
+        <result property="userRecommendSettingId"    column="user_recommend_setting_id"    />
+        <result property="userBaseId"    column="user_base_id"    />
+        <result property="isRecommendEnabled"    column="is_recommend_enabled"    />
+        <result property="recommendFreq"    column="recommend_freq"    />
+        <result property="shieldedTagCodes"    column="shielded_tag_codes"    />
+        <result property="preferredScene"    column="preferred_scene"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="createTime"    column="create_time"    />
+    </resultMap>
+
+    <sql id="selectUserRecommendSettingVo">
+        select user_recommend_setting_id, user_base_id, is_recommend_enabled, recommend_freq, shielded_tag_codes, preferred_scene, update_time, create_time from user_recommend_setting
+    </sql>
+
+    <select id="selectUserRecommendSettingList" parameterType="UserRecommendSetting" resultMap="UserRecommendSettingResult">
+        <include refid="selectUserRecommendSettingVo"/>
+        <where>  
+            <if test="userBaseId != null "> and user_base_id = #{userBaseId}</if>
+            <if test="isRecommendEnabled != null "> and is_recommend_enabled = #{isRecommendEnabled}</if>
+            <if test="recommendFreq != null "> and recommend_freq = #{recommendFreq}</if>
+            <if test="shieldedTagCodes != null  and shieldedTagCodes != ''"> and shielded_tag_codes = #{shieldedTagCodes}</if>
+            <if test="preferredScene != null  and preferredScene != ''"> and preferred_scene = #{preferredScene}</if>
+        </where>
+    </select>
+    
+    <select id="selectUserRecommendSettingByUserRecommendSettingId" parameterType="Long" resultMap="UserRecommendSettingResult">
+        <include refid="selectUserRecommendSettingVo"/>
+        where user_recommend_setting_id = #{userRecommendSettingId}
+    </select>
+
+    <insert id="insertUserRecommendSetting" parameterType="UserRecommendSetting">
+        insert into user_recommend_setting
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="userRecommendSettingId != null">user_recommend_setting_id,</if>
+            <if test="userBaseId != null">user_base_id,</if>
+            <if test="isRecommendEnabled != null">is_recommend_enabled,</if>
+            <if test="recommendFreq != null">recommend_freq,</if>
+            <if test="shieldedTagCodes != null">shielded_tag_codes,</if>
+            <if test="preferredScene != null">preferred_scene,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="createTime != null">create_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="userRecommendSettingId != null">#{userRecommendSettingId},</if>
+            <if test="userBaseId != null">#{userBaseId},</if>
+            <if test="isRecommendEnabled != null">#{isRecommendEnabled},</if>
+            <if test="recommendFreq != null">#{recommendFreq},</if>
+            <if test="shieldedTagCodes != null">#{shieldedTagCodes},</if>
+            <if test="preferredScene != null">#{preferredScene},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="createTime != null">#{createTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateUserRecommendSetting" parameterType="UserRecommendSetting">
+        update user_recommend_setting
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="userBaseId != null">user_base_id = #{userBaseId},</if>
+            <if test="isRecommendEnabled != null">is_recommend_enabled = #{isRecommendEnabled},</if>
+            <if test="recommendFreq != null">recommend_freq = #{recommendFreq},</if>
+            <if test="shieldedTagCodes != null">shielded_tag_codes = #{shieldedTagCodes},</if>
+            <if test="preferredScene != null">preferred_scene = #{preferredScene},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+        </trim>
+        where user_recommend_setting_id = #{userRecommendSettingId}
+    </update>
+
+    <delete id="deleteUserRecommendSettingByUserRecommendSettingId" parameterType="Long">
+        delete from user_recommend_setting where user_recommend_setting_id = #{userRecommendSettingId}
+    </delete>
+
+    <delete id="deleteUserRecommendSettingByUserRecommendSettingIds" parameterType="String">
+        delete from user_recommend_setting where user_recommend_setting_id in 
+        <foreach item="userRecommendSettingId" collection="array" open="(" separator="," close=")">
+            #{userRecommendSettingId}
+        </foreach>
+    </delete>
+</mapper>

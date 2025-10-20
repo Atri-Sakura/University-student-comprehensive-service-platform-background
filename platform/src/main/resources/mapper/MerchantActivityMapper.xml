@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.MerchantActivityMapper">
+    
+    <resultMap type="MerchantActivity" id="MerchantActivityResult">
+        <result property="merchantActivityId"    column="merchant_activity_id"    />
+        <result property="merchantBaseId"    column="merchant_base_id"    />
+        <result property="activityName"    column="activity_name"    />
+        <result property="activityType"    column="activity_type"    />
+        <result property="startTime"    column="start_time"    />
+        <result property="endTime"    column="end_time"    />
+        <result property="content"    column="content"    />
+        <result property="status"    column="status"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateTime"    column="update_time"    />
+    </resultMap>
+
+    <sql id="selectMerchantActivityVo">
+        select merchant_activity_id, merchant_base_id, activity_name, activity_type, start_time, end_time, content, status, create_time, update_time from merchant_activity
+    </sql>
+
+    <select id="selectMerchantActivityList" parameterType="MerchantActivity" resultMap="MerchantActivityResult">
+        <include refid="selectMerchantActivityVo"/>
+        <where>  
+            <if test="merchantBaseId != null "> and merchant_base_id = #{merchantBaseId}</if>
+            <if test="activityName != null  and activityName != ''"> and activity_name like concat('%', #{activityName}, '%')</if>
+            <if test="activityType != null  and activityType != ''"> and activity_type = #{activityType}</if>
+            <if test="startTime != null "> and start_time = #{startTime}</if>
+            <if test="endTime != null "> and end_time = #{endTime}</if>
+            <if test="content != null  and content != ''"> and content = #{content}</if>
+            <if test="status != null "> and status = #{status}</if>
+        </where>
+    </select>
+    
+    <select id="selectMerchantActivityByMerchantActivityId" parameterType="Long" resultMap="MerchantActivityResult">
+        <include refid="selectMerchantActivityVo"/>
+        where merchant_activity_id = #{merchantActivityId}
+    </select>
+
+    <insert id="insertMerchantActivity" parameterType="MerchantActivity">
+        insert into merchant_activity
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="merchantActivityId != null">merchant_activity_id,</if>
+            <if test="merchantBaseId != null">merchant_base_id,</if>
+            <if test="activityName != null and activityName != ''">activity_name,</if>
+            <if test="activityType != null and activityType != ''">activity_type,</if>
+            <if test="startTime != null">start_time,</if>
+            <if test="endTime != null">end_time,</if>
+            <if test="content != null">content,</if>
+            <if test="status != null">status,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="merchantActivityId != null">#{merchantActivityId},</if>
+            <if test="merchantBaseId != null">#{merchantBaseId},</if>
+            <if test="activityName != null and activityName != ''">#{activityName},</if>
+            <if test="activityType != null and activityType != ''">#{activityType},</if>
+            <if test="startTime != null">#{startTime},</if>
+            <if test="endTime != null">#{endTime},</if>
+            <if test="content != null">#{content},</if>
+            <if test="status != null">#{status},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateMerchantActivity" parameterType="MerchantActivity">
+        update merchant_activity
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="merchantBaseId != null">merchant_base_id = #{merchantBaseId},</if>
+            <if test="activityName != null and activityName != ''">activity_name = #{activityName},</if>
+            <if test="activityType != null and activityType != ''">activity_type = #{activityType},</if>
+            <if test="startTime != null">start_time = #{startTime},</if>
+            <if test="endTime != null">end_time = #{endTime},</if>
+            <if test="content != null">content = #{content},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where merchant_activity_id = #{merchantActivityId}
+    </update>
+
+    <delete id="deleteMerchantActivityByMerchantActivityId" parameterType="Long">
+        delete from merchant_activity where merchant_activity_id = #{merchantActivityId}
+    </delete>
+
+    <delete id="deleteMerchantActivityByMerchantActivityIds" parameterType="String">
+        delete from merchant_activity where merchant_activity_id in 
+        <foreach item="merchantActivityId" collection="array" open="(" separator="," close=")">
+            #{merchantActivityId}
+        </foreach>
+    </delete>
+</mapper>

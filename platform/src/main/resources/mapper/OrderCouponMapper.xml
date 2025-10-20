@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.OrderCouponMapper">
+    
+    <resultMap type="OrderCoupon" id="OrderCouponResult">
+        <result property="orderCouponId"    column="order_coupon_id"    />
+        <result property="orderMainId"    column="order_main_id"    />
+        <result property="couponId"    column="coupon_id"    />
+        <result property="couponName"    column="coupon_name"    />
+        <result property="discountAmount"    column="discount_amount"    />
+        <result property="createTime"    column="create_time"    />
+    </resultMap>
+
+    <sql id="selectOrderCouponVo">
+        select order_coupon_id, order_main_id, coupon_id, coupon_name, discount_amount, create_time from order_coupon
+    </sql>
+
+    <select id="selectOrderCouponList" parameterType="OrderCoupon" resultMap="OrderCouponResult">
+        <include refid="selectOrderCouponVo"/>
+        <where>  
+            <if test="orderMainId != null "> and order_main_id = #{orderMainId}</if>
+            <if test="couponId != null "> and coupon_id = #{couponId}</if>
+            <if test="couponName != null  and couponName != ''"> and coupon_name like concat('%', #{couponName}, '%')</if>
+            <if test="discountAmount != null "> and discount_amount = #{discountAmount}</if>
+        </where>
+    </select>
+    
+    <select id="selectOrderCouponByOrderCouponId" parameterType="Long" resultMap="OrderCouponResult">
+        <include refid="selectOrderCouponVo"/>
+        where order_coupon_id = #{orderCouponId}
+    </select>
+
+    <insert id="insertOrderCoupon" parameterType="OrderCoupon">
+        insert into order_coupon
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="orderCouponId != null">order_coupon_id,</if>
+            <if test="orderMainId != null">order_main_id,</if>
+            <if test="couponId != null">coupon_id,</if>
+            <if test="couponName != null and couponName != ''">coupon_name,</if>
+            <if test="discountAmount != null">discount_amount,</if>
+            <if test="createTime != null">create_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="orderCouponId != null">#{orderCouponId},</if>
+            <if test="orderMainId != null">#{orderMainId},</if>
+            <if test="couponId != null">#{couponId},</if>
+            <if test="couponName != null and couponName != ''">#{couponName},</if>
+            <if test="discountAmount != null">#{discountAmount},</if>
+            <if test="createTime != null">#{createTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateOrderCoupon" parameterType="OrderCoupon">
+        update order_coupon
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="orderMainId != null">order_main_id = #{orderMainId},</if>
+            <if test="couponId != null">coupon_id = #{couponId},</if>
+            <if test="couponName != null and couponName != ''">coupon_name = #{couponName},</if>
+            <if test="discountAmount != null">discount_amount = #{discountAmount},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+        </trim>
+        where order_coupon_id = #{orderCouponId}
+    </update>
+
+    <delete id="deleteOrderCouponByOrderCouponId" parameterType="Long">
+        delete from order_coupon where order_coupon_id = #{orderCouponId}
+    </delete>
+
+    <delete id="deleteOrderCouponByOrderCouponIds" parameterType="String">
+        delete from order_coupon where order_coupon_id in 
+        <foreach item="orderCouponId" collection="array" open="(" separator="," close=")">
+            #{orderCouponId}
+        </foreach>
+    </delete>
+</mapper>

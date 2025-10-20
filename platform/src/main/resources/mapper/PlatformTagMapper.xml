@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.PlatformTagMapper">
+    
+    <resultMap type="PlatformTag" id="PlatformTagResult">
+        <result property="platformTagId"    column="platform_tag_id"    />
+        <result property="tagCode"    column="tag_code"    />
+        <result property="tagName"    column="tag_name"    />
+        <result property="tagType"    column="tag_type"    />
+        <result property="tagDesc"    column="tag_desc"    />
+        <result property="parentCode"    column="parent_code"    />
+        <result property="status"    column="status"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateTime"    column="update_time"    />
+    </resultMap>
+
+    <sql id="selectPlatformTagVo">
+        select platform_tag_id, tag_code, tag_name, tag_type, tag_desc, parent_code, status, create_time, update_time from platform_tag
+    </sql>
+
+    <select id="selectPlatformTagList" parameterType="PlatformTag" resultMap="PlatformTagResult">
+        <include refid="selectPlatformTagVo"/>
+        <where>  
+            <if test="tagCode != null  and tagCode != ''"> and tag_code = #{tagCode}</if>
+            <if test="tagName != null  and tagName != ''"> and tag_name like concat('%', #{tagName}, '%')</if>
+            <if test="tagType != null  and tagType != ''"> and tag_type = #{tagType}</if>
+            <if test="tagDesc != null  and tagDesc != ''"> and tag_desc = #{tagDesc}</if>
+            <if test="parentCode != null  and parentCode != ''"> and parent_code = #{parentCode}</if>
+            <if test="status != null "> and status = #{status}</if>
+        </where>
+    </select>
+    
+    <select id="selectPlatformTagByPlatformTagId" parameterType="Long" resultMap="PlatformTagResult">
+        <include refid="selectPlatformTagVo"/>
+        where platform_tag_id = #{platformTagId}
+    </select>
+
+    <insert id="insertPlatformTag" parameterType="PlatformTag">
+        insert into platform_tag
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="platformTagId != null">platform_tag_id,</if>
+            <if test="tagCode != null and tagCode != ''">tag_code,</if>
+            <if test="tagName != null and tagName != ''">tag_name,</if>
+            <if test="tagType != null and tagType != ''">tag_type,</if>
+            <if test="tagDesc != null">tag_desc,</if>
+            <if test="parentCode != null">parent_code,</if>
+            <if test="status != null">status,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="platformTagId != null">#{platformTagId},</if>
+            <if test="tagCode != null and tagCode != ''">#{tagCode},</if>
+            <if test="tagName != null and tagName != ''">#{tagName},</if>
+            <if test="tagType != null and tagType != ''">#{tagType},</if>
+            <if test="tagDesc != null">#{tagDesc},</if>
+            <if test="parentCode != null">#{parentCode},</if>
+            <if test="status != null">#{status},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updatePlatformTag" parameterType="PlatformTag">
+        update platform_tag
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="tagCode != null and tagCode != ''">tag_code = #{tagCode},</if>
+            <if test="tagName != null and tagName != ''">tag_name = #{tagName},</if>
+            <if test="tagType != null and tagType != ''">tag_type = #{tagType},</if>
+            <if test="tagDesc != null">tag_desc = #{tagDesc},</if>
+            <if test="parentCode != null">parent_code = #{parentCode},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where platform_tag_id = #{platformTagId}
+    </update>
+
+    <delete id="deletePlatformTagByPlatformTagId" parameterType="Long">
+        delete from platform_tag where platform_tag_id = #{platformTagId}
+    </delete>
+
+    <delete id="deletePlatformTagByPlatformTagIds" parameterType="String">
+        delete from platform_tag where platform_tag_id in 
+        <foreach item="platformTagId" collection="array" open="(" separator="," close=")">
+            #{platformTagId}
+        </foreach>
+    </delete>
+</mapper>

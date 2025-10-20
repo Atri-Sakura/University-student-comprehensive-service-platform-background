@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.MerchantEvaluationMapper">
+    
+    <resultMap type="MerchantEvaluation" id="MerchantEvaluationResult">
+        <result property="merchantEvaluationId"    column="merchant_evaluation_id"    />
+        <result property="merchantBaseId"    column="merchant_base_id"    />
+        <result property="userId"    column="user_id"    />
+        <result property="orderId"    column="order_id"    />
+        <result property="rating"    column="rating"    />
+        <result property="tasteScore"    column="taste_score"    />
+        <result property="packageScore"    column="package_score"    />
+        <result property="content"    column="content"    />
+        <result property="imgUrls"    column="img_urls"    />
+        <result property="merchantReply"    column="merchant_reply"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="replyTime"    column="reply_time"    />
+    </resultMap>
+
+    <sql id="selectMerchantEvaluationVo">
+        select merchant_evaluation_id, merchant_base_id, user_id, order_id, rating, taste_score, package_score, content, img_urls, merchant_reply, create_time, reply_time from merchant_evaluation
+    </sql>
+
+    <select id="selectMerchantEvaluationList" parameterType="MerchantEvaluation" resultMap="MerchantEvaluationResult">
+        <include refid="selectMerchantEvaluationVo"/>
+        <where>  
+            <if test="merchantBaseId != null "> and merchant_base_id = #{merchantBaseId}</if>
+            <if test="userId != null "> and user_id = #{userId}</if>
+            <if test="orderId != null "> and order_id = #{orderId}</if>
+            <if test="rating != null "> and rating = #{rating}</if>
+            <if test="tasteScore != null "> and taste_score = #{tasteScore}</if>
+            <if test="packageScore != null "> and package_score = #{packageScore}</if>
+            <if test="content != null  and content != ''"> and content = #{content}</if>
+            <if test="imgUrls != null  and imgUrls != ''"> and img_urls = #{imgUrls}</if>
+            <if test="merchantReply != null  and merchantReply != ''"> and merchant_reply = #{merchantReply}</if>
+            <if test="replyTime != null "> and reply_time = #{replyTime}</if>
+        </where>
+    </select>
+    
+    <select id="selectMerchantEvaluationByMerchantEvaluationId" parameterType="Long" resultMap="MerchantEvaluationResult">
+        <include refid="selectMerchantEvaluationVo"/>
+        where merchant_evaluation_id = #{merchantEvaluationId}
+    </select>
+
+    <insert id="insertMerchantEvaluation" parameterType="MerchantEvaluation">
+        insert into merchant_evaluation
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="merchantEvaluationId != null">merchant_evaluation_id,</if>
+            <if test="merchantBaseId != null">merchant_base_id,</if>
+            <if test="userId != null">user_id,</if>
+            <if test="orderId != null">order_id,</if>
+            <if test="rating != null">rating,</if>
+            <if test="tasteScore != null">taste_score,</if>
+            <if test="packageScore != null">package_score,</if>
+            <if test="content != null">content,</if>
+            <if test="imgUrls != null">img_urls,</if>
+            <if test="merchantReply != null">merchant_reply,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="replyTime != null">reply_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="merchantEvaluationId != null">#{merchantEvaluationId},</if>
+            <if test="merchantBaseId != null">#{merchantBaseId},</if>
+            <if test="userId != null">#{userId},</if>
+            <if test="orderId != null">#{orderId},</if>
+            <if test="rating != null">#{rating},</if>
+            <if test="tasteScore != null">#{tasteScore},</if>
+            <if test="packageScore != null">#{packageScore},</if>
+            <if test="content != null">#{content},</if>
+            <if test="imgUrls != null">#{imgUrls},</if>
+            <if test="merchantReply != null">#{merchantReply},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="replyTime != null">#{replyTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateMerchantEvaluation" parameterType="MerchantEvaluation">
+        update merchant_evaluation
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="merchantBaseId != null">merchant_base_id = #{merchantBaseId},</if>
+            <if test="userId != null">user_id = #{userId},</if>
+            <if test="orderId != null">order_id = #{orderId},</if>
+            <if test="rating != null">rating = #{rating},</if>
+            <if test="tasteScore != null">taste_score = #{tasteScore},</if>
+            <if test="packageScore != null">package_score = #{packageScore},</if>
+            <if test="content != null">content = #{content},</if>
+            <if test="imgUrls != null">img_urls = #{imgUrls},</if>
+            <if test="merchantReply != null">merchant_reply = #{merchantReply},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="replyTime != null">reply_time = #{replyTime},</if>
+        </trim>
+        where merchant_evaluation_id = #{merchantEvaluationId}
+    </update>
+
+    <delete id="deleteMerchantEvaluationByMerchantEvaluationId" parameterType="Long">
+        delete from merchant_evaluation where merchant_evaluation_id = #{merchantEvaluationId}
+    </delete>
+
+    <delete id="deleteMerchantEvaluationByMerchantEvaluationIds" parameterType="String">
+        delete from merchant_evaluation where merchant_evaluation_id in 
+        <foreach item="merchantEvaluationId" collection="array" open="(" separator="," close=")">
+            #{merchantEvaluationId}
+        </foreach>
+    </delete>
+</mapper>

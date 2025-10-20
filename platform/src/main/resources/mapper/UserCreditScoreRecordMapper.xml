@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.UserCreditScoreRecordMapper">
+    
+    <resultMap type="UserCreditScoreRecord" id="UserCreditScoreRecordResult">
+        <result property="id"    column="id"    />
+        <result property="userBaseId"    column="user_base_id"    />
+        <result property="changeScore"    column="change_score"    />
+        <result property="desc"    column="desc"    />
+        <result property="changeTime"    column="change_time"    />
+    </resultMap>
+
+    <sql id="selectUserCreditScoreRecordVo">
+        select id, user_base_id, change_score, desc, change_time from user_credit_score_record
+    </sql>
+
+    <select id="selectUserCreditScoreRecordList" parameterType="UserCreditScoreRecord" resultMap="UserCreditScoreRecordResult">
+        <include refid="selectUserCreditScoreRecordVo"/>
+        <where>  
+            <if test="userBaseId != null "> and user_base_id = #{userBaseId}</if>
+            <if test="changeScore != null "> and change_score = #{changeScore}</if>
+            <if test="desc != null  and desc != ''"> and desc = #{desc}</if>
+            <if test="changeTime != null "> and change_time = #{changeTime}</if>
+        </where>
+    </select>
+    
+    <select id="selectUserCreditScoreRecordById" parameterType="Long" resultMap="UserCreditScoreRecordResult">
+        <include refid="selectUserCreditScoreRecordVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertUserCreditScoreRecord" parameterType="UserCreditScoreRecord" useGeneratedKeys="true" keyProperty="id">
+        insert into user_credit_score_record
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="userBaseId != null">user_base_id,</if>
+            <if test="changeScore != null">change_score,</if>
+            <if test="desc != null and desc != ''">desc,</if>
+            <if test="changeTime != null">change_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="userBaseId != null">#{userBaseId},</if>
+            <if test="changeScore != null">#{changeScore},</if>
+            <if test="desc != null and desc != ''">#{desc},</if>
+            <if test="changeTime != null">#{changeTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateUserCreditScoreRecord" parameterType="UserCreditScoreRecord">
+        update user_credit_score_record
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="userBaseId != null">user_base_id = #{userBaseId},</if>
+            <if test="changeScore != null">change_score = #{changeScore},</if>
+            <if test="desc != null and desc != ''">desc = #{desc},</if>
+            <if test="changeTime != null">change_time = #{changeTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteUserCreditScoreRecordById" parameterType="Long">
+        delete from user_credit_score_record where id = #{id}
+    </delete>
+
+    <delete id="deleteUserCreditScoreRecordByIds" parameterType="String">
+        delete from user_credit_score_record where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

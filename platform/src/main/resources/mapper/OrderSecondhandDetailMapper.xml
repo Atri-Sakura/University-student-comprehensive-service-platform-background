@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.OrderSecondhandDetailMapper">
+    
+    <resultMap type="OrderSecondhandDetail" id="OrderSecondhandDetailResult">
+        <result property="orderSecondhandDetailId"    column="order_secondhand_detail_id"    />
+        <result property="orderMainId"    column="order_main_id"    />
+        <result property="goodsId"    column="goods_id"    />
+        <result property="goodsName"    column="goods_name"    />
+        <result property="sellerId"    column="seller_id"    />
+        <result property="sellWay"    column="sell_way"    />
+        <result property="sellerNickname"    column="seller_nickname"    />
+        <result property="depositAmount"    column="deposit_amount"    />
+        <result property="confirmTime"    column="confirm_time"    />
+        <result property="evaluateStatus"    column="evaluate_status"    />
+    </resultMap>
+
+    <sql id="selectOrderSecondhandDetailVo">
+        select order_secondhand_detail_id, order_main_id, goods_id, goods_name, seller_id, sell_way, seller_nickname, deposit_amount, confirm_time, evaluate_status from order_secondhand_detail
+    </sql>
+
+    <select id="selectOrderSecondhandDetailList" parameterType="OrderSecondhandDetail" resultMap="OrderSecondhandDetailResult">
+        <include refid="selectOrderSecondhandDetailVo"/>
+        <where>  
+            <if test="orderMainId != null "> and order_main_id = #{orderMainId}</if>
+            <if test="goodsId != null "> and goods_id = #{goodsId}</if>
+            <if test="goodsName != null  and goodsName != ''"> and goods_name like concat('%', #{goodsName}, '%')</if>
+            <if test="sellerId != null "> and seller_id = #{sellerId}</if>
+            <if test="sellWay != null "> and sell_way = #{sellWay}</if>
+            <if test="sellerNickname != null  and sellerNickname != ''"> and seller_nickname like concat('%', #{sellerNickname}, '%')</if>
+            <if test="depositAmount != null "> and deposit_amount = #{depositAmount}</if>
+            <if test="confirmTime != null "> and confirm_time = #{confirmTime}</if>
+            <if test="evaluateStatus != null "> and evaluate_status = #{evaluateStatus}</if>
+        </where>
+    </select>
+    
+    <select id="selectOrderSecondhandDetailByOrderSecondhandDetailId" parameterType="Long" resultMap="OrderSecondhandDetailResult">
+        <include refid="selectOrderSecondhandDetailVo"/>
+        where order_secondhand_detail_id = #{orderSecondhandDetailId}
+    </select>
+
+    <insert id="insertOrderSecondhandDetail" parameterType="OrderSecondhandDetail">
+        insert into order_secondhand_detail
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="orderSecondhandDetailId != null">order_secondhand_detail_id,</if>
+            <if test="orderMainId != null">order_main_id,</if>
+            <if test="goodsId != null">goods_id,</if>
+            <if test="goodsName != null and goodsName != ''">goods_name,</if>
+            <if test="sellerId != null">seller_id,</if>
+            <if test="sellWay != null">sell_way,</if>
+            <if test="sellerNickname != null and sellerNickname != ''">seller_nickname,</if>
+            <if test="depositAmount != null">deposit_amount,</if>
+            <if test="confirmTime != null">confirm_time,</if>
+            <if test="evaluateStatus != null">evaluate_status,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="orderSecondhandDetailId != null">#{orderSecondhandDetailId},</if>
+            <if test="orderMainId != null">#{orderMainId},</if>
+            <if test="goodsId != null">#{goodsId},</if>
+            <if test="goodsName != null and goodsName != ''">#{goodsName},</if>
+            <if test="sellerId != null">#{sellerId},</if>
+            <if test="sellWay != null">#{sellWay},</if>
+            <if test="sellerNickname != null and sellerNickname != ''">#{sellerNickname},</if>
+            <if test="depositAmount != null">#{depositAmount},</if>
+            <if test="confirmTime != null">#{confirmTime},</if>
+            <if test="evaluateStatus != null">#{evaluateStatus},</if>
+         </trim>
+    </insert>
+
+    <update id="updateOrderSecondhandDetail" parameterType="OrderSecondhandDetail">
+        update order_secondhand_detail
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="orderMainId != null">order_main_id = #{orderMainId},</if>
+            <if test="goodsId != null">goods_id = #{goodsId},</if>
+            <if test="goodsName != null and goodsName != ''">goods_name = #{goodsName},</if>
+            <if test="sellerId != null">seller_id = #{sellerId},</if>
+            <if test="sellWay != null">sell_way = #{sellWay},</if>
+            <if test="sellerNickname != null and sellerNickname != ''">seller_nickname = #{sellerNickname},</if>
+            <if test="depositAmount != null">deposit_amount = #{depositAmount},</if>
+            <if test="confirmTime != null">confirm_time = #{confirmTime},</if>
+            <if test="evaluateStatus != null">evaluate_status = #{evaluateStatus},</if>
+        </trim>
+        where order_secondhand_detail_id = #{orderSecondhandDetailId}
+    </update>
+
+    <delete id="deleteOrderSecondhandDetailByOrderSecondhandDetailId" parameterType="Long">
+        delete from order_secondhand_detail where order_secondhand_detail_id = #{orderSecondhandDetailId}
+    </delete>
+
+    <delete id="deleteOrderSecondhandDetailByOrderSecondhandDetailIds" parameterType="String">
+        delete from order_secondhand_detail where order_secondhand_detail_id in 
+        <foreach item="orderSecondhandDetailId" collection="array" open="(" separator="," close=")">
+            #{orderSecondhandDetailId}
+        </foreach>
+    </delete>
+</mapper>

@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.UserWalletRecordMapper">
+    
+    <resultMap type="UserWalletRecord" id="UserWalletRecordResult">
+        <result property="userWalletRecordId"    column="user_wallet_record_id"    />
+        <result property="userWalletId"    column="user_wallet_id"    />
+        <result property="userBaseId"    column="user_base_id"    />
+        <result property="amount"    column="amount"    />
+        <result property="tradeType"    column="trade_type"    />
+        <result property="relatedId"    column="related_id"    />
+        <result property="tradeStatus"    column="trade_status"    />
+        <result property="tradeTime"    column="trade_time"    />
+        <result property="remark"    column="remark"    />
+    </resultMap>
+
+    <sql id="selectUserWalletRecordVo">
+        select user_wallet_record_id, user_wallet_id, user_base_id, amount, trade_type, related_id, trade_status, trade_time, remark from user_wallet_record
+    </sql>
+
+    <select id="selectUserWalletRecordList" parameterType="UserWalletRecord" resultMap="UserWalletRecordResult">
+        <include refid="selectUserWalletRecordVo"/>
+        <where>  
+            <if test="userWalletId != null "> and user_wallet_id = #{userWalletId}</if>
+            <if test="userBaseId != null "> and user_base_id = #{userBaseId}</if>
+            <if test="amount != null "> and amount = #{amount}</if>
+            <if test="tradeType != null "> and trade_type = #{tradeType}</if>
+            <if test="relatedId != null "> and related_id = #{relatedId}</if>
+            <if test="tradeStatus != null "> and trade_status = #{tradeStatus}</if>
+            <if test="tradeTime != null "> and trade_time = #{tradeTime}</if>
+        </where>
+    </select>
+    
+    <select id="selectUserWalletRecordByUserWalletRecordId" parameterType="Long" resultMap="UserWalletRecordResult">
+        <include refid="selectUserWalletRecordVo"/>
+        where user_wallet_record_id = #{userWalletRecordId}
+    </select>
+
+    <insert id="insertUserWalletRecord" parameterType="UserWalletRecord">
+        insert into user_wallet_record
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="userWalletRecordId != null">user_wallet_record_id,</if>
+            <if test="userWalletId != null">user_wallet_id,</if>
+            <if test="userBaseId != null">user_base_id,</if>
+            <if test="amount != null">amount,</if>
+            <if test="tradeType != null">trade_type,</if>
+            <if test="relatedId != null">related_id,</if>
+            <if test="tradeStatus != null">trade_status,</if>
+            <if test="tradeTime != null">trade_time,</if>
+            <if test="remark != null">remark,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="userWalletRecordId != null">#{userWalletRecordId},</if>
+            <if test="userWalletId != null">#{userWalletId},</if>
+            <if test="userBaseId != null">#{userBaseId},</if>
+            <if test="amount != null">#{amount},</if>
+            <if test="tradeType != null">#{tradeType},</if>
+            <if test="relatedId != null">#{relatedId},</if>
+            <if test="tradeStatus != null">#{tradeStatus},</if>
+            <if test="tradeTime != null">#{tradeTime},</if>
+            <if test="remark != null">#{remark},</if>
+         </trim>
+    </insert>
+
+    <update id="updateUserWalletRecord" parameterType="UserWalletRecord">
+        update user_wallet_record
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="userWalletId != null">user_wallet_id = #{userWalletId},</if>
+            <if test="userBaseId != null">user_base_id = #{userBaseId},</if>
+            <if test="amount != null">amount = #{amount},</if>
+            <if test="tradeType != null">trade_type = #{tradeType},</if>
+            <if test="relatedId != null">related_id = #{relatedId},</if>
+            <if test="tradeStatus != null">trade_status = #{tradeStatus},</if>
+            <if test="tradeTime != null">trade_time = #{tradeTime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+        </trim>
+        where user_wallet_record_id = #{userWalletRecordId}
+    </update>
+
+    <delete id="deleteUserWalletRecordByUserWalletRecordId" parameterType="Long">
+        delete from user_wallet_record where user_wallet_record_id = #{userWalletRecordId}
+    </delete>
+
+    <delete id="deleteUserWalletRecordByUserWalletRecordIds" parameterType="String">
+        delete from user_wallet_record where user_wallet_record_id in 
+        <foreach item="userWalletRecordId" collection="array" open="(" separator="," close=")">
+            #{userWalletRecordId}
+        </foreach>
+    </delete>
+</mapper>

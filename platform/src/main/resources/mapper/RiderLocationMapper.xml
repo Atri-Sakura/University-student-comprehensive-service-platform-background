@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.RiderLocationMapper">
+    
+    <resultMap type="RiderLocation" id="RiderLocationResult">
+        <result property="riderLocationId"    column="rider_location_id"    />
+        <result property="riderBaseId"    column="rider_base_id"    />
+        <result property="longitude"    column="longitude"    />
+        <result property="latitude"    column="latitude"    />
+        <result property="updateTime"    column="update_time"    />
+    </resultMap>
+
+    <sql id="selectRiderLocationVo">
+        select rider_location_id, rider_base_id, longitude, latitude, update_time from rider_location
+    </sql>
+
+    <select id="selectRiderLocationList" parameterType="RiderLocation" resultMap="RiderLocationResult">
+        <include refid="selectRiderLocationVo"/>
+        <where>  
+            <if test="riderBaseId != null "> and rider_base_id = #{riderBaseId}</if>
+            <if test="longitude != null "> and longitude = #{longitude}</if>
+            <if test="latitude != null "> and latitude = #{latitude}</if>
+        </where>
+    </select>
+    
+    <select id="selectRiderLocationByRiderLocationId" parameterType="Long" resultMap="RiderLocationResult">
+        <include refid="selectRiderLocationVo"/>
+        where rider_location_id = #{riderLocationId}
+    </select>
+
+    <insert id="insertRiderLocation" parameterType="RiderLocation">
+        insert into rider_location
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="riderLocationId != null">rider_location_id,</if>
+            <if test="riderBaseId != null">rider_base_id,</if>
+            <if test="longitude != null">longitude,</if>
+            <if test="latitude != null">latitude,</if>
+            <if test="updateTime != null">update_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="riderLocationId != null">#{riderLocationId},</if>
+            <if test="riderBaseId != null">#{riderBaseId},</if>
+            <if test="longitude != null">#{longitude},</if>
+            <if test="latitude != null">#{latitude},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateRiderLocation" parameterType="RiderLocation">
+        update rider_location
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="riderBaseId != null">rider_base_id = #{riderBaseId},</if>
+            <if test="longitude != null">longitude = #{longitude},</if>
+            <if test="latitude != null">latitude = #{latitude},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where rider_location_id = #{riderLocationId}
+    </update>
+
+    <delete id="deleteRiderLocationByRiderLocationId" parameterType="Long">
+        delete from rider_location where rider_location_id = #{riderLocationId}
+    </delete>
+
+    <delete id="deleteRiderLocationByRiderLocationIds" parameterType="String">
+        delete from rider_location where rider_location_id in 
+        <foreach item="riderLocationId" collection="array" open="(" separator="," close=")">
+            #{riderLocationId}
+        </foreach>
+    </delete>
+</mapper>

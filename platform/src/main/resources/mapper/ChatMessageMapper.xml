@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.ChatMessageMapper">
+    
+    <resultMap type="ChatMessage" id="ChatMessageResult">
+        <result property="messageId"    column="message_id"    />
+        <result property="sessionId"    column="session_id"    />
+        <result property="fromType"    column="from_type"    />
+        <result property="fromId"    column="from_id"    />
+        <result property="toType"    column="to_type"    />
+        <result property="toId"    column="to_id"    />
+        <result property="msgType"    column="msg_type"    />
+        <result property="msgContent"    column="msg_content"    />
+        <result property="msgStatus"    column="msg_status"    />
+        <result property="sendTime"    column="send_time"    />
+        <result property="deliverTime"    column="deliver_time"    />
+        <result property="readTime"    column="read_time"    />
+        <result property="isDeleted"    column="is_deleted"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateTime"    column="update_time"    />
+    </resultMap>
+
+    <sql id="selectChatMessageVo">
+        select message_id, session_id, from_type, from_id, to_type, to_id, msg_type, msg_content, msg_status, send_time, deliver_time, read_time, is_deleted, create_time, update_time from chat_message
+    </sql>
+
+    <select id="selectChatMessageList" parameterType="ChatMessage" resultMap="ChatMessageResult">
+        <include refid="selectChatMessageVo"/>
+        <where>  
+            <if test="sessionId != null "> and session_id = #{sessionId}</if>
+            <if test="fromType != null "> and from_type = #{fromType}</if>
+            <if test="fromId != null "> and from_id = #{fromId}</if>
+            <if test="toType != null "> and to_type = #{toType}</if>
+            <if test="toId != null "> and to_id = #{toId}</if>
+            <if test="msgType != null "> and msg_type = #{msgType}</if>
+            <if test="msgContent != null  and msgContent != ''"> and msg_content = #{msgContent}</if>
+            <if test="msgStatus != null "> and msg_status = #{msgStatus}</if>
+            <if test="sendTime != null "> and send_time = #{sendTime}</if>
+            <if test="deliverTime != null "> and deliver_time = #{deliverTime}</if>
+            <if test="readTime != null "> and read_time = #{readTime}</if>
+            <if test="isDeleted != null "> and is_deleted = #{isDeleted}</if>
+        </where>
+    </select>
+    
+    <select id="selectChatMessageByMessageId" parameterType="Long" resultMap="ChatMessageResult">
+        <include refid="selectChatMessageVo"/>
+        where message_id = #{messageId}
+    </select>
+
+    <insert id="insertChatMessage" parameterType="ChatMessage">
+        insert into chat_message
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="messageId != null">message_id,</if>
+            <if test="sessionId != null">session_id,</if>
+            <if test="fromType != null">from_type,</if>
+            <if test="fromId != null">from_id,</if>
+            <if test="toType != null">to_type,</if>
+            <if test="toId != null">to_id,</if>
+            <if test="msgType != null">msg_type,</if>
+            <if test="msgContent != null">msg_content,</if>
+            <if test="msgStatus != null">msg_status,</if>
+            <if test="sendTime != null">send_time,</if>
+            <if test="deliverTime != null">deliver_time,</if>
+            <if test="readTime != null">read_time,</if>
+            <if test="isDeleted != null">is_deleted,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="messageId != null">#{messageId},</if>
+            <if test="sessionId != null">#{sessionId},</if>
+            <if test="fromType != null">#{fromType},</if>
+            <if test="fromId != null">#{fromId},</if>
+            <if test="toType != null">#{toType},</if>
+            <if test="toId != null">#{toId},</if>
+            <if test="msgType != null">#{msgType},</if>
+            <if test="msgContent != null">#{msgContent},</if>
+            <if test="msgStatus != null">#{msgStatus},</if>
+            <if test="sendTime != null">#{sendTime},</if>
+            <if test="deliverTime != null">#{deliverTime},</if>
+            <if test="readTime != null">#{readTime},</if>
+            <if test="isDeleted != null">#{isDeleted},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateChatMessage" parameterType="ChatMessage">
+        update chat_message
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="sessionId != null">session_id = #{sessionId},</if>
+            <if test="fromType != null">from_type = #{fromType},</if>
+            <if test="fromId != null">from_id = #{fromId},</if>
+            <if test="toType != null">to_type = #{toType},</if>
+            <if test="toId != null">to_id = #{toId},</if>
+            <if test="msgType != null">msg_type = #{msgType},</if>
+            <if test="msgContent != null">msg_content = #{msgContent},</if>
+            <if test="msgStatus != null">msg_status = #{msgStatus},</if>
+            <if test="sendTime != null">send_time = #{sendTime},</if>
+            <if test="deliverTime != null">deliver_time = #{deliverTime},</if>
+            <if test="readTime != null">read_time = #{readTime},</if>
+            <if test="isDeleted != null">is_deleted = #{isDeleted},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where message_id = #{messageId}
+    </update>
+
+    <delete id="deleteChatMessageByMessageId" parameterType="Long">
+        delete from chat_message where message_id = #{messageId}
+    </delete>
+
+    <delete id="deleteChatMessageByMessageIds" parameterType="String">
+        delete from chat_message where message_id in 
+        <foreach item="messageId" collection="array" open="(" separator="," close=")">
+            #{messageId}
+        </foreach>
+    </delete>
+</mapper>
