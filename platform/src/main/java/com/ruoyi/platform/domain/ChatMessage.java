@@ -11,7 +11,7 @@ import com.ruoyi.common.core.domain.BaseEntity;
  * 聊天消息（存储单条消息的核心信息）对象 chat_message
  * 
  * @author ruoyi
- * @date 2025-10-16
+ * @date 2025-10-20
  */
 public class ChatMessage extends BaseEntity
 {

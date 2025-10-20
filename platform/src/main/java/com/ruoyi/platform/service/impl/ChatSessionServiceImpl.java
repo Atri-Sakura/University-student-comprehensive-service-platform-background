@@ -12,7 +12,7 @@ import com.ruoyi.platform.service.IChatSessionService;
  * 聊天会话（管理双方的聊天窗口关系）Service业务层处理
  * 
  * @author ruoyi
- * @date 2025-10-16
+ * @date 2025-10-20
  */
 @Service
 public class ChatSessionServiceImpl implements IChatSessionService 

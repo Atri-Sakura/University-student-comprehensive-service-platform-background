@@ -7,7 +7,7 @@ import com.ruoyi.platform.domain.SecondhandGoods;
  * 二手商品(简化版)Mapper接口
  * 
  * @author ruoyi
- * @date 2025-10-16
+ * @date 2025-10-20
  */
 public interface SecondhandGoodsMapper 
 {

@@ -7,7 +7,7 @@ import com.ruoyi.platform.domain.MerchantGoods;
  * 商品Service接口
  * 
  * @author ruoyi
- * @date 2025-10-16
+ * @date 2025-10-20
  */
 public interface IMerchantGoodsService 
 {

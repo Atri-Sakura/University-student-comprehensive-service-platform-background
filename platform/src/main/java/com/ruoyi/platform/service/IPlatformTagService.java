@@ -7,7 +7,7 @@ import com.ruoyi.platform.domain.PlatformTag;
  * 平台标签体系（管理用户和商品标签）Service接口
  * 
  * @author ruoyi
- * @date 2025-10-16
+ * @date 2025-10-20
  */
 public interface IPlatformTagService 
 {

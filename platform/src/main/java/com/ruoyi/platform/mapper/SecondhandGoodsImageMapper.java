@@ -7,7 +7,7 @@ import com.ruoyi.platform.domain.SecondhandGoodsImage;
  * 二手商品图片(支持1-9张图片)Mapper接口
  * 
  * @author ruoyi
- * @date 2025-10-16
+ * @date 2025-10-20
  */
 public interface SecondhandGoodsImageMapper 
 {

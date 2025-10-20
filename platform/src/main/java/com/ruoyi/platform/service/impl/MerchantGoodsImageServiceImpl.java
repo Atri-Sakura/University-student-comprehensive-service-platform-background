@@ -12,7 +12,7 @@ import com.ruoyi.platform.service.IMerchantGoodsImageService;
  * 商品图片关联（支持多图展示）Service业务层处理
  * 
  * @author ruoyi
- * @date 2025-10-16
+ * @date 2025-10-20
  */
 @Service
 public class MerchantGoodsImageServiceImpl implements IMerchantGoodsImageService 

@@ -11,7 +11,7 @@ import com.ruoyi.common.core.domain.BaseEntity;
  * 用户基础信息对象 user_base
  * 
  * @author ruoyi
- * @date 2025-10-16
+ * @date 2025-10-20
  */
 public class UserBase extends BaseEntity
 {

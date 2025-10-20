@@ -11,7 +11,7 @@ import com.ruoyi.platform.service.IOrderTakeoutDetailService;
  * 外卖订单明细（不含地址信息）Service业务层处理
  * 
  * @author ruoyi
- * @date 2025-10-16
+ * @date 2025-10-20
  */
 @Service
 public class OrderTakeoutDetailServiceImpl implements IOrderTakeoutDetailService 

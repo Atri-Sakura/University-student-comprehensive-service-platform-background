@@ -7,7 +7,7 @@ import com.ruoyi.platform.domain.UserBankCard;
  * 用户银行卡绑定Service接口
  * 
  * @author ruoyi
- * @date 2025-10-16
+ * @date 2025-10-20
  */
 public interface IUserBankCardService 
 {

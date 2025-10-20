@@ -7,7 +7,7 @@ import com.ruoyi.platform.domain.PlatformRoleMapping;
  * 角色-账号映射（多角色登录路由核心）Mapper接口
  * 
  * @author ruoyi
- * @date 2025-10-16
+ * @date 2025-10-20
  */
 public interface PlatformRoleMappingMapper 
 {

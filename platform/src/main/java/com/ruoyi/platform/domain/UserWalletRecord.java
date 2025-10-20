@@ -12,7 +12,7 @@ import com.ruoyi.common.core.domain.BaseEntity;
  * 用户钱包流水对象 user_wallet_record
  * 
  * @author ruoyi
- * @date 2025-10-16
+ * @date 2025-10-20
  */
 public class UserWalletRecord extends BaseEntity
 {

@@ -12,7 +12,7 @@ import com.ruoyi.platform.service.IGoodsEvaluationService;
  * 商品评价Service业务层处理
  * 
  * @author ruoyi
- * @date 2025-10-16
+ * @date 2025-10-20
  */
 @Service
 public class GoodsEvaluationServiceImpl implements IGoodsEvaluationService 

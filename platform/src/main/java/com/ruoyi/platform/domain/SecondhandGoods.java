@@ -12,7 +12,7 @@ import com.ruoyi.common.core.domain.BaseEntity;
  * 二手商品(简化版)对象 secondhand_goods
  * 
  * @author ruoyi
- * @date 2025-10-16
+ * @date 2025-10-20
  */
 public class SecondhandGoods extends BaseEntity
 {

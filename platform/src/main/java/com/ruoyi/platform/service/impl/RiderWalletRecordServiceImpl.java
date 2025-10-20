@@ -11,7 +11,7 @@ import com.ruoyi.platform.service.IRiderWalletRecordService;
  * 骑手钱包流水Service业务层处理
  * 
  * @author ruoyi
- * @date 2025-10-16
+ * @date 2025-10-20
  */
 @Service
 public class RiderWalletRecordServiceImpl implements IRiderWalletRecordService 

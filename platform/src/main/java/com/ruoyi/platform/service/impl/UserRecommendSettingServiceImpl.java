@@ -12,7 +12,7 @@ import com.ruoyi.platform.service.IUserRecommendSettingService;
  * 用户个性化推荐设置Service业务层处理
  * 
  * @author ruoyi
- * @date 2025-10-16
+ * @date 2025-10-20
  */
 @Service
 public class UserRecommendSettingServiceImpl implements IUserRecommendSettingService 

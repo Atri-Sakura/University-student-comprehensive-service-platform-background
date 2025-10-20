@@ -7,7 +7,7 @@ import com.ruoyi.platform.domain.UserAddress;
  * 用户地址Mapper接口
  * 
  * @author ruoyi
- * @date 2025-10-16
+ * @date 2025-10-20
  */
 public interface UserAddressMapper 
 {

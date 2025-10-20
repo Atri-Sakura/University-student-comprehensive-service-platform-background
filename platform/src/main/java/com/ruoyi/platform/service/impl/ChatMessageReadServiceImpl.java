@@ -12,7 +12,7 @@ import com.ruoyi.platform.service.IChatMessageReadService;
  * 消息已读状态（追踪每条消息的已读情况，支撑群聊扩展）Service业务层处理
  * 
  * @author ruoyi
- * @date 2025-10-16
+ * @date 2025-10-20
  */
 @Service
 public class ChatMessageReadServiceImpl implements IChatMessageReadService 

@@ -9,7 +9,7 @@ import com.ruoyi.common.core.domain.BaseEntity;
  * 骑手评价对象 rider_evaluation
  * 
  * @author ruoyi
- * @date 2025-10-16
+ * @date 2025-10-20
  */
 public class RiderEvaluation extends BaseEntity
 {

@@ -9,7 +9,7 @@ import com.ruoyi.common.core.domain.BaseEntity;
  * 用户银行卡绑定对象 user_bank_card
  * 
  * @author ruoyi
- * @date 2025-10-16
+ * @date 2025-10-20
  */
 public class UserBankCard extends BaseEntity
 {

@@ -11,7 +11,7 @@ import com.ruoyi.common.core.domain.BaseEntity;
  * 系统操作日志对象 platform_operate_log
  * 
  * @author ruoyi
- * @date 2025-10-16
+ * @date 2025-10-20
  */
 public class PlatformOperateLog extends BaseEntity
 {

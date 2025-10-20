@@ -12,7 +12,7 @@ import com.ruoyi.platform.service.IUserPrivacyService;
  * 用户隐私设置Service业务层处理
  * 
  * @author ruoyi
- * @date 2025-10-16
+ * @date 2025-10-20
  */
 @Service
 public class UserPrivacyServiceImpl implements IUserPrivacyService 

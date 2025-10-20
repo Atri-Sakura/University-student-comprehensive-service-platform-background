@@ -9,7 +9,7 @@ import com.ruoyi.common.core.domain.BaseEntity;
  * 商品图片关联（支持多图展示）对象 merchant_goods_image
  * 
  * @author ruoyi
- * @date 2025-10-16
+ * @date 2025-10-20
  */
 public class MerchantGoodsImage extends BaseEntity
 {

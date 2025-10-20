@@ -12,7 +12,7 @@ import com.ruoyi.platform.service.IPlatformRoleMappingService;
  * 角色-账号映射（多角色登录路由核心）Service业务层处理
  * 
  * @author ruoyi
- * @date 2025-10-16
+ * @date 2025-10-20
  */
 @Service
 public class PlatformRoleMappingServiceImpl implements IPlatformRoleMappingService 

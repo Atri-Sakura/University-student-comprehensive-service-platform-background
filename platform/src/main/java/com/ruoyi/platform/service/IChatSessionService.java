@@ -7,7 +7,7 @@ import com.ruoyi.platform.domain.ChatSession;
  * 聊天会话（管理双方的聊天窗口关系）Service接口
  * 
  * @author ruoyi
- * @date 2025-10-16
+ * @date 2025-10-20
  */
 public interface IChatSessionService 
 {

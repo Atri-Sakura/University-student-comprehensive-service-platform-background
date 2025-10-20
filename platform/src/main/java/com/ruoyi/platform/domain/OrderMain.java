@@ -12,7 +12,7 @@ import com.ruoyi.common.core.domain.BaseEntity;
  * 订单主（整合地址与定位信息）对象 order_main
  * 
  * @author ruoyi
- * @date 2025-10-16
+ * @date 2025-10-20
  */
 public class OrderMain extends BaseEntity
 {

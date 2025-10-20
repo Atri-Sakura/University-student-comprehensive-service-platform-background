@@ -10,7 +10,7 @@ import com.ruoyi.common.core.domain.BaseEntity;
  * 骑手位置对象 rider_location
  * 
  * @author ruoyi
- * @date 2025-10-16
+ * @date 2025-10-20
  */
 public class RiderLocation extends BaseEntity
 {

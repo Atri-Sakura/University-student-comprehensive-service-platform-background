@@ -9,7 +9,7 @@ import com.ruoyi.common.core.domain.BaseEntity;
  * 角色权限关联对象 platform_role_perm
  * 
  * @author ruoyi
- * @date 2025-10-16
+ * @date 2025-10-20
  */
 public class PlatformRolePerm extends BaseEntity
 {

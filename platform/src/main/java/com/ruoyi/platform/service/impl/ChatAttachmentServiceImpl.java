@@ -12,7 +12,7 @@ import com.ruoyi.platform.service.IChatAttachmentService;
  * 消息附件（存储图片/语音等附件的元信息）Service业务层处理
  * 
  * @author ruoyi
- * @date 2025-10-16
+ * @date 2025-10-20
  */
 @Service
 public class ChatAttachmentServiceImpl implements IChatAttachmentService 

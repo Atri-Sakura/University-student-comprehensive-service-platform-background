@@ -11,7 +11,7 @@ import com.ruoyi.platform.service.IUserBehaviorLogService;
  * 用户行为记录Service业务层处理
  * 
  * @author ruoyi
- * @date 2025-10-16
+ * @date 2025-10-20
  */
 @Service
 public class UserBehaviorLogServiceImpl implements IUserBehaviorLogService 

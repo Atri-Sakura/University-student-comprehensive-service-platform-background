@@ -12,7 +12,7 @@ import com.ruoyi.platform.service.ISecondhandGoodsService;
  * 二手商品(简化版)Service业务层处理
  * 
  * @author ruoyi
- * @date 2025-10-16
+ * @date 2025-10-20
  */
 @Service
 public class SecondhandGoodsServiceImpl implements ISecondhandGoodsService 
