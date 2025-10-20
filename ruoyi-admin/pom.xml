@@ -54,6 +54,12 @@
             <artifactId>ruoyi-generator</artifactId>
         </dependency>
 
+        <!--  三端合一     -->
+        <dependency>
+            <groupId>com.ruoyi</groupId>
+            <artifactId>platform</artifactId>
+        </dependency>
+
     </dependencies>
 
     <build>
