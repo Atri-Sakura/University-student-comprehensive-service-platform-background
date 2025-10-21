@@ -16,7 +16,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/platform/recommend/setting")
-public class UserRecommendSettingController {
+public class UserRecommendSettingController1 {
 
     @Autowired
     private IUserRecommendSettingService userRecommendSettingService;

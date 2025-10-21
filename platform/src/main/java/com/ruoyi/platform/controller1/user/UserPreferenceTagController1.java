@@ -16,7 +16,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/platform/user/preference/tag")
-public class UserPreferenceTagController {
+public class UserPreferenceTagController1 {
 
     @Autowired
     private IUserPreferenceTagService userPreferenceTagService;

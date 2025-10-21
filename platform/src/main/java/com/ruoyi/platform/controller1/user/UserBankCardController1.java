@@ -16,7 +16,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/platform/user/bankcard")
-public class UserBankCardController {
+public class UserBankCardController1 {
 
     @Autowired
     private IUserBankCardService userBankCardService;

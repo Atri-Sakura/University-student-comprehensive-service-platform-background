@@ -16,7 +16,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/platform/timetable")
-public class UserTimetableController {
+public class UserTimetableController1 {
 
     @Autowired
     private IUserTimetableService userTimetableService;

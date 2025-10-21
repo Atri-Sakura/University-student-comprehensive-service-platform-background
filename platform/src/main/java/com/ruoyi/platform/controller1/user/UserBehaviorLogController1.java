@@ -16,7 +16,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/platform/user/behavior/log")
-public class UserBehaviorLogController {
+public class UserBehaviorLogController1 {
 
     @Autowired
     private IUserBehaviorLogService userBehaviorLogService;

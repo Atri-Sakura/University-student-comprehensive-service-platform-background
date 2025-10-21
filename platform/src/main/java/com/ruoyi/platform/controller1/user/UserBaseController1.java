@@ -5,6 +5,7 @@ import com.ruoyi.platform.domain.UserBase;
 import com.ruoyi.platform.service.IUserBaseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -16,7 +17,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/platform/user/base")
-public class UserBaseController {
+public class UserBaseController1 {
 
     @Autowired
     private IUserBaseService userBaseService;
@@ -64,5 +65,14 @@ public class UserBaseController {
     public R<Integer> remove(@PathVariable Long[] userBaseIds) {
         int result = userBaseService.deleteUserBaseByUserBaseIds(userBaseIds);
         return result > 0 ? R.ok(result, "删除用户基础信息成功") : R.fail("删除用户基础信息失败");
+    }
+
+
+    /**
+     * 用户头像更新
+     */
+    @PostMapping("/avatar/upload")
+    public R<String> uploadAvatar(@RequestParam("file") MultipartFile file, Long userBaseId) {
+        return R.ok(userBaseService.updateAvatar(file,userBaseId));
     }
 }

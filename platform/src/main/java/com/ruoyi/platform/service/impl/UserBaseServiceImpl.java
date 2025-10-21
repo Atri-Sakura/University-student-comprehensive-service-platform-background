@@ -1,12 +1,20 @@
 package com.ruoyi.platform.service.impl;
 
+import java.io.IOException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import com.ruoyi.common.utils.DateUtils;
+import com.ruoyi.common.utils.file.MinioFileUtils;
+import io.minio.MinioClient;
+import io.minio.errors.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.ruoyi.platform.mapper.UserBaseMapper;
 import com.ruoyi.platform.domain.UserBase;
 import com.ruoyi.platform.service.IUserBaseService;
+import org.springframework.web.multipart.MultipartFile;
+
 
 /**
  * 用户基础信息Service业务层处理
@@ -19,6 +27,10 @@ public class UserBaseServiceImpl implements IUserBaseService
 {
     @Autowired
     private UserBaseMapper userBaseMapper;
+
+
+    @Autowired
+    private MinioFileUtils minioFileUtils;
 
     /**
      * 查询用户基础信息
@@ -93,4 +105,27 @@ public class UserBaseServiceImpl implements IUserBaseService
     {
         return userBaseMapper.deleteUserBaseByUserBaseId(userBaseId);
     }
+
+    /**
+     * 头像上传
+     * @param file
+     * @return
+     */
+    @Override
+    public String updateAvatar(MultipartFile file,Long userBaseId) {
+        try {
+            String fileAddress = minioFileUtils.upload(file, "user",userBaseId);
+            UserBase userBase = userBaseMapper.selectUserBaseByUserBaseId(userBaseId);
+            userBase.setAvatar(fileAddress);
+            userBaseMapper.updateUserBase(userBase);
+            return fileAddress;
+        }catch (Exception e) {
+            e.printStackTrace();
+            return "error";
+        }
+
+    }
+
+
+
 }

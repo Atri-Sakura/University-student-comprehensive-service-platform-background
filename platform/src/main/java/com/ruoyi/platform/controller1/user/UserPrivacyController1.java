@@ -16,7 +16,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/platform/user/privacy")
-public class UserPrivacyController {
+public class UserPrivacyController1 {
 
     @Autowired
     private IUserPrivacyService userPrivacyService;

@@ -16,7 +16,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/platform/wallet")
-public class UserWalletController {
+public class UserWalletController1 {
 
     @Autowired
     private IUserWalletService userWalletService;

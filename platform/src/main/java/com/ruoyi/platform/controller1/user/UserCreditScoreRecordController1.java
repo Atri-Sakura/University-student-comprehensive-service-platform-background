@@ -16,7 +16,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/platform/user/credit/record")
-public class UserCreditScoreRecordController {
+public class UserCreditScoreRecordController1 {
 
     @Autowired
     private IUserCreditScoreRecordService userCreditScoreRecordService;

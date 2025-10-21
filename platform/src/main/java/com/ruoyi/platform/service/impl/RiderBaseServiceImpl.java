@@ -2,11 +2,13 @@ package com.ruoyi.platform.service.impl;
 
 import java.util.List;
 import com.ruoyi.common.utils.DateUtils;
+import com.ruoyi.common.utils.file.MinioFileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.ruoyi.platform.mapper.RiderBaseMapper;
 import com.ruoyi.platform.domain.RiderBase;
 import com.ruoyi.platform.service.IRiderBaseService;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * 骑手基础信息Service业务层处理
@@ -19,6 +21,9 @@ public class RiderBaseServiceImpl implements IRiderBaseService
 {
     @Autowired
     private RiderBaseMapper riderBaseMapper;
+
+    @Autowired
+    private MinioFileUtils minioFileUtils;
 
     /**
      * 查询骑手基础信息
@@ -93,4 +98,20 @@ public class RiderBaseServiceImpl implements IRiderBaseService
     {
         return riderBaseMapper.deleteRiderBaseByRiderBaseId(riderBaseId);
     }
+
+    @Override
+    public String avatarUpload(MultipartFile file,Long riderBaseId) {
+        try {
+            RiderBase riderBase = riderBaseMapper.selectRiderBaseByRiderBaseId(riderBaseId);
+            String fileAddress = minioFileUtils.upload(file, "rider", riderBaseId);
+            riderBase.setAvatar(fileAddress);
+            riderBaseMapper.updateRiderBase(riderBase);
+            return fileAddress;
+        }catch (Exception e){
+            e.printStackTrace();
+            return "error";
+        }
+    }
+
+
 }

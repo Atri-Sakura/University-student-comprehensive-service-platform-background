@@ -2,6 +2,7 @@ package com.ruoyi.platform.service;
 
 import java.util.List;
 import com.ruoyi.platform.domain.RiderBase;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * 骑手基础信息Service接口
@@ -58,4 +59,11 @@ public interface IRiderBaseService
      * @return 结果
      */
     public int deleteRiderBaseByRiderBaseId(Long riderBaseId);
+
+    /**
+     * 上传头像
+     * @param file
+     * @return
+     */
+    public String avatarUpload(MultipartFile file,Long riderBaseId);
 }
