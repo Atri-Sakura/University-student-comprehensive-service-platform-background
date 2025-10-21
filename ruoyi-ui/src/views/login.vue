@@ -2,14 +2,16 @@
   <div class="login">
     <el-form ref="loginForm" :model="loginForm" :rules="loginRules" class="login-form">
       <h3 class="title">{{title}}</h3>
-      <el-form-item prop="username">
+      <!-- 修改为手机号输入 -->
+      <el-form-item prop="phonenumber">
         <el-input
-          v-model="loginForm.username"
+          v-model="loginForm.phonenumber"
           type="text"
           auto-complete="off"
-          placeholder="账号"
+          placeholder="手机号"
+          maxlength="11"
         >
-          <svg-icon slot="prefix" icon-class="user" class="el-input__icon input-icon" />
+          <svg-icon slot="prefix" icon-class="phone" class="el-input__icon input-icon" />
         </el-input>
       </el-form-item>
       <el-form-item prop="password">
@@ -73,15 +75,16 @@ export default {
       title: process.env.VUE_APP_TITLE,
       codeUrl: "",
       loginForm: {
-        username: "admin",
-        password: "admin123",
+        phonenumber: "",  // 改为手机号
+        password: "",
         rememberMe: false,
         code: "",
         uuid: ""
       },
       loginRules: {
-        username: [
-          { required: true, trigger: "blur", message: "请输入您的账号" }
+        phonenumber: [
+          { required: true, trigger: "blur", message: "请输入您的手机号" },
+          { pattern: /^1[3-9]\d{9}$/, message: "手机号格式不正确", trigger: "blur" }
         ],
         password: [
           { required: true, trigger: "blur", message: "请输入您的密码" }
@@ -119,11 +122,11 @@ export default {
       })
     },
     getCookie() {
-      const username = Cookies.get("username")
+      const phonenumber = Cookies.get("phonenumber")  // 改为手机号
       const password = Cookies.get("password")
       const rememberMe = Cookies.get('rememberMe')
       this.loginForm = {
-        username: username === undefined ? this.loginForm.username : username,
+        phonenumber: phonenumber === undefined ? this.loginForm.phonenumber : phonenumber,
         password: password === undefined ? this.loginForm.password : decrypt(password),
         rememberMe: rememberMe === undefined ? false : Boolean(rememberMe)
       }
@@ -133,11 +136,11 @@ export default {
         if (valid) {
           this.loading = true
           if (this.loginForm.rememberMe) {
-            Cookies.set("username", this.loginForm.username, { expires: 30 })
+            Cookies.set("phonenumber", this.loginForm.phonenumber, { expires: 30 })  // 改为手机号
             Cookies.set("password", encrypt(this.loginForm.password), { expires: 30 })
             Cookies.set('rememberMe', this.loginForm.rememberMe, { expires: 30 })
           } else {
-            Cookies.remove("username")
+            Cookies.remove("phonenumber")  // 改为手机号
             Cookies.remove("password")
             Cookies.remove('rememberMe')
           }

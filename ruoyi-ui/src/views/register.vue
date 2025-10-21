@@ -2,9 +2,16 @@
   <div class="register">
     <el-form ref="registerForm" :model="registerForm" :rules="registerRules" class="register-form">
       <h3 class="title">{{title}}</h3>
-      <el-form-item prop="username">
-        <el-input v-model="registerForm.username" type="text" auto-complete="off" placeholder="账号">
-          <svg-icon slot="prefix" icon-class="user" class="el-input__icon input-icon" />
+      <!-- 修改为手机号输入 -->
+      <el-form-item prop="phonenumber">
+        <el-input 
+          v-model="registerForm.phonenumber" 
+          type="text" 
+          auto-complete="off" 
+          placeholder="手机号"
+          maxlength="11"
+        >
+          <svg-icon slot="prefix" icon-class="phone" class="el-input__icon input-icon" />
         </el-input>
       </el-form-item>
       <el-form-item prop="password">
@@ -83,21 +90,21 @@ export default {
       title: process.env.VUE_APP_TITLE,
       codeUrl: "",
       registerForm: {
-        username: "",
+        phonenumber: "",  // 改为手机号
         password: "",
         confirmPassword: "",
         code: "",
         uuid: ""
       },
       registerRules: {
-        username: [
-          { required: true, trigger: "blur", message: "请输入您的账号" },
-          { min: 2, max: 20, message: '用户账号长度必须介于 2 和 20 之间', trigger: 'blur' }
+        phonenumber: [
+          { required: true, trigger: "blur", message: "请输入您的手机号" },
+          { pattern: /^1[3-9]\d{9}$/, message: "手机号格式不正确", trigger: "blur" }
         ],
         password: [
           { required: true, trigger: "blur", message: "请输入您的密码" },
           { min: 5, max: 20, message: "用户密码长度必须介于 5 和 20 之间", trigger: "blur" },
-          { pattern: /^[^<>"'|\\]+$/, message: "不能包含非法字符：< > \" ' \\\ |", trigger: "blur" }
+          { pattern: /^[^<>"'|\\]+$/, message: "不能包含非法字符：< > \" ' \\ |", trigger: "blur" }
         ],
         confirmPassword: [
           { required: true, trigger: "blur", message: "请再次输入您的密码" },
@@ -127,8 +134,8 @@ export default {
         if (valid) {
           this.loading = true
           register(this.registerForm).then(res => {
-            const username = this.registerForm.username
-            this.$alert("<font color='red'>恭喜你，您的账号 " + username + " 注册成功！</font>", '系统提示', {
+            const phonenumber = this.registerForm.phonenumber
+            this.$alert("<font color='red'>恭喜你，您的手机号 " + phonenumber + " 注册成功！</font>", '系统提示', {
               dangerouslyUseHTMLString: true,
               type: 'success'
             }).then(() => {
