@@ -1,35 +1,36 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper
-PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.ruoyi.platform.mapper.RiderBaseMapper">
-    
+
     <resultMap type="RiderBase" id="RiderBaseResult">
-        <result property="riderBaseId"    column="rider_base_id"    />
-        <result property="username"    column="username"    />
-        <result property="password"    column="password"    />
-        <result property="nickname"    column="nickname"    />
-        <result property="avatar"    column="avatar"    />
-        <result property="realName"    column="real_name"    />
-        <result property="idCard"    column="id_card"    />
-        <result property="idCardFront"    column="id_card_front"    />
+        <result property="riderBaseId"   column="rider_base_id"   />
+        <result property="userId"        column="user_id"         />
+        <result property="username"      column="username"        />
+        <result property="password"      column="password"        />
+        <result property="nickname"      column="nickname"        />
+        <result property="avatar"        column="avatar"          />
+        <result property="realName"      column="real_name"       />
+        <result property="idCard"        column="id_card"         />
+        <result property="idCardFront"   column="id_card_front"   />
         <result property="idCardBack"    column="id_card_back"    />
-        <result property="phone"    column="phone"    />
-        <result property="auditStatus"    column="audit_status"    />
-        <result property="workStatus"    column="work_status"    />
-        <result property="creditScore"    column="credit_score"    />
-        <result property="accountStatus"    column="account_status"    />
-        <result property="createTime"    column="create_time"    />
-        <result property="updateTime"    column="update_time"    />
+        <result property="phone"         column="phone"           />
+        <result property="auditStatus"   column="audit_status"    />
+        <result property="workStatus"    column="work_status"     />
+        <result property="creditScore"   column="credit_score"    />
+        <result property="accountStatus" column="account_status"  />
+        <result property="createTime"    column="create_time"     />
+        <result property="updateTime"    column="update_time"     />
     </resultMap>
 
     <sql id="selectRiderBaseVo">
-        select rider_base_id, username, password, nickname, avatar, real_name, id_card, id_card_front, id_card_back, phone, audit_status, work_status, credit_score, account_status, create_time, update_time from rider_base
+        select rider_base_id, user_id, username, password, nickname, avatar, real_name, id_card, id_card_front, id_card_back, phone, audit_status, work_status, credit_score, account_status, create_time, update_time from rider_base
     </sql>
 
     <select id="selectRiderBaseList" parameterType="RiderBase" resultMap="RiderBaseResult">
         <include refid="selectRiderBaseVo"/>
-        <where>  
+        <where>
             <if test="username != null  and username != ''"> and username like concat('%', #{username}, '%')</if>
             <if test="password != null  and password != ''"> and password = #{password}</if>
             <if test="nickname != null  and nickname != ''"> and nickname like concat('%', #{nickname}, '%')</if>
@@ -45,16 +46,22 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="accountStatus != null "> and account_status = #{accountStatus}</if>
         </where>
     </select>
-    
+
+    <select id="selectRiderBaseByPhone" parameterType="String" resultMap="RiderBaseResult">
+        <include refid="selectRiderBaseVo"/>
+        where phone = #{phone}
+    </select>
+
     <select id="selectRiderBaseByRiderBaseId" parameterType="Long" resultMap="RiderBaseResult">
         <include refid="selectRiderBaseVo"/>
         where rider_base_id = #{riderBaseId}
     </select>
 
-    <insert id="insertRiderBase" parameterType="RiderBase">
+    <insert id="insertRiderBase" parameterType="RiderBase" useGeneratedKeys="true" keyProperty="riderBaseId">
         insert into rider_base
         <trim prefix="(" suffix=")" suffixOverrides=",">
             <if test="riderBaseId != null">rider_base_id,</if>
+            <if test="userId != null">user_id,</if>
             <if test="username != null and username != ''">username,</if>
             <if test="password != null and password != ''">password,</if>
             <if test="nickname != null and nickname != ''">nickname,</if>
@@ -70,9 +77,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="accountStatus != null">account_status,</if>
             <if test="createTime != null">create_time,</if>
             <if test="updateTime != null">update_time,</if>
-         </trim>
+        </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="riderBaseId != null">#{riderBaseId},</if>
+            <if test="userId != null">#{userId},</if>
             <if test="username != null and username != ''">#{username},</if>
             <if test="password != null and password != ''">#{password},</if>
             <if test="nickname != null and nickname != ''">#{nickname},</if>
@@ -88,7 +96,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="accountStatus != null">#{accountStatus},</if>
             <if test="createTime != null">#{createTime},</if>
             <if test="updateTime != null">#{updateTime},</if>
-         </trim>
+        </trim>
     </insert>
 
     <update id="updateRiderBase" parameterType="RiderBase">
@@ -118,7 +126,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </delete>
 
     <delete id="deleteRiderBaseByRiderBaseIds" parameterType="String">
-        delete from rider_base where rider_base_id in 
+        delete from rider_base where rider_base_id in
         <foreach item="riderBaseId" collection="array" open="(" separator="," close=")">
             #{riderBaseId}
         </foreach>

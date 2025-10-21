@@ -101,6 +101,8 @@ public class SecurityConfig
                     permitAllUrl.getUrls().forEach(url -> requests.requestMatchers(url).permitAll());
                     // 对于登录login 注册register 验证码captchaImage 允许匿名访问
                     requests.requestMatchers("/login", "/register", "/captchaImage").permitAll()
+                            // ===== 新增：放行三端认证接口 =====
+                            .requestMatchers("/platform/auth/**").permitAll()
                             // 商家门户接口需要认证 (移除了 /platform/** 的匿名访问)
                             .requestMatchers("/merchant/**").authenticated()
                             // 静态资源，可匿名访问

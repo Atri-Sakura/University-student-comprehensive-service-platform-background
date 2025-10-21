@@ -77,6 +77,19 @@ public class UserBase extends BaseEntity
     @Excel(name = "最后登录IP")
     private String lastLoginIp;
 
+    /** 对应sys_user表的用户ID */
+    private Long userId;
+
+    public void setUserId(Long userId)
+    {
+        this.userId = userId;
+    }
+
+    public Long getUserId()
+    {
+        return userId;
+    }
+
     public void setUserBaseId(Long userBaseId) 
     {
         this.userBaseId = userBaseId;

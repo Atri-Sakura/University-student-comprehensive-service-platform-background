@@ -58,4 +58,12 @@ public interface MerchantBaseMapper
      * @return 结果
      */
     public int deleteMerchantBaseByMerchantBaseIds(Long[] merchantBaseIds);
+
+    /**
+     * 通过手机号查询商家
+     *
+     * @param phone 手机号
+     * @return 商家基础信息
+     */
+    public MerchantBase selectMerchantBaseByPhone(String phone);
 }

@@ -1,40 +1,43 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper
-PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.ruoyi.platform.mapper.MerchantBaseMapper">
-    
+
     <resultMap type="MerchantBase" id="MerchantBaseResult">
         <result property="merchantBaseId"    column="merchant_base_id"    />
-        <result property="username"    column="username"    />
-        <result property="password"    column="password"    />
-        <result property="merchantName"    column="merchant_name"    />
-        <result property="logo"    column="logo"    />
-        <result property="merchantAddressId"    column="merchant_address_id"    />
-        <result property="businessScope"    column="business_scope"    />
-        <result property="businessHours"    column="business_hours"    />
-        <result property="deliveryRange"    column="delivery_range"    />
+        <result property="userId"            column="user_id"             />
+        <result property="username"          column="username"            />
+        <result property="phone"             column="phone"               />
+        <result property="password"          column="password"            />
+        <result property="merchantName"      column="merchant_name"       />
+        <result property="logo"              column="logo"                />
+        <result property="merchantAddressId" column="merchant_address_id" />
+        <result property="businessScope"     column="business_scope"      />
+        <result property="businessHours"     column="business_hours"      />
+        <result property="deliveryRange"     column="delivery_range"      />
         <result property="minOrderAmount"    column="min_order_amount"    />
-        <result property="deliveryFee"    column="delivery_fee"    />
-        <result property="licenseImg"    column="license_img"    />
-        <result property="rating"    column="rating"    />
-        <result property="monthSales"    column="month_sales"    />
-        <result property="auditStatus"    column="audit_status"    />
-        <result property="businessStatus"    column="business_status"    />
-        <result property="longitude"    column="longitude"    />
-        <result property="latitude"    column="latitude"    />
-        <result property="createTime"    column="create_time"    />
-        <result property="updateTime"    column="update_time"    />
+        <result property="deliveryFee"       column="delivery_fee"        />
+        <result property="licenseImg"        column="license_img"         />
+        <result property="rating"            column="rating"              />
+        <result property="monthSales"        column="month_sales"         />
+        <result property="auditStatus"       column="audit_status"        />
+        <result property="businessStatus"    column="business_status"     />
+        <result property="longitude"         column="longitude"           />
+        <result property="latitude"          column="latitude"            />
+        <result property="createTime"        column="create_time"         />
+        <result property="updateTime"        column="update_time"         />
     </resultMap>
 
     <sql id="selectMerchantBaseVo">
-        select merchant_base_id, username, password, merchant_name, logo, merchant_address_id, business_scope, business_hours, delivery_range, min_order_amount, delivery_fee, license_img, rating, month_sales, audit_status, business_status, longitude, latitude, create_time, update_time from merchant_base
+        select merchant_base_id, user_id, username, phone, password, merchant_name, logo, merchant_address_id, business_scope, business_hours, delivery_range, min_order_amount, delivery_fee, license_img, rating, month_sales, audit_status, business_status, longitude, latitude, create_time, update_time from merchant_base
     </sql>
 
     <select id="selectMerchantBaseList" parameterType="MerchantBase" resultMap="MerchantBaseResult">
         <include refid="selectMerchantBaseVo"/>
-        <where>  
+        <where>
             <if test="username != null  and username != ''"> and username like concat('%', #{username}, '%')</if>
+            <if test="phone != null  and phone != ''"> and phone like concat('%', #{phone}, '%')</if>
             <if test="password != null  and password != ''"> and password = #{password}</if>
             <if test="merchantName != null  and merchantName != ''"> and merchant_name like concat('%', #{merchantName}, '%')</if>
             <if test="logo != null  and logo != ''"> and logo = #{logo}</if>
@@ -53,17 +56,24 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="latitude != null "> and latitude = #{latitude}</if>
         </where>
     </select>
-    
+
+    <select id="selectMerchantBaseByPhone" parameterType="String" resultMap="MerchantBaseResult">
+        <include refid="selectMerchantBaseVo"/>
+        where phone = #{phone}
+    </select>
+
     <select id="selectMerchantBaseByMerchantBaseId" parameterType="Long" resultMap="MerchantBaseResult">
         <include refid="selectMerchantBaseVo"/>
         where merchant_base_id = #{merchantBaseId}
     </select>
 
-    <insert id="insertMerchantBase" parameterType="MerchantBase">
+    <insert id="insertMerchantBase" parameterType="MerchantBase" useGeneratedKeys="true" keyProperty="merchantBaseId">
         insert into merchant_base
         <trim prefix="(" suffix=")" suffixOverrides=",">
             <if test="merchantBaseId != null">merchant_base_id,</if>
+            <if test="userId != null">user_id,</if>
             <if test="username != null and username != ''">username,</if>
+            <if test="phone != null and phone != ''">phone,</if>
             <if test="password != null and password != ''">password,</if>
             <if test="merchantName != null and merchantName != ''">merchant_name,</if>
             <if test="logo != null">logo,</if>
@@ -82,10 +92,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="latitude != null">latitude,</if>
             <if test="createTime != null">create_time,</if>
             <if test="updateTime != null">update_time,</if>
-         </trim>
+        </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="merchantBaseId != null">#{merchantBaseId},</if>
+            <if test="userId != null">#{userId},</if>
             <if test="username != null and username != ''">#{username},</if>
+            <if test="phone != null and phone != ''">#{phone},</if>
             <if test="password != null and password != ''">#{password},</if>
             <if test="merchantName != null and merchantName != ''">#{merchantName},</if>
             <if test="logo != null">#{logo},</if>
@@ -104,13 +116,14 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="latitude != null">#{latitude},</if>
             <if test="createTime != null">#{createTime},</if>
             <if test="updateTime != null">#{updateTime},</if>
-         </trim>
+        </trim>
     </insert>
 
     <update id="updateMerchantBase" parameterType="MerchantBase">
         update merchant_base
         <trim prefix="SET" suffixOverrides=",">
             <if test="username != null and username != ''">username = #{username},</if>
+            <if test="phone != null and phone != ''">phone = #{phone},</if>
             <if test="password != null and password != ''">password = #{password},</if>
             <if test="merchantName != null and merchantName != ''">merchant_name = #{merchantName},</if>
             <if test="logo != null">logo = #{logo},</if>
@@ -138,7 +151,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </delete>
 
     <delete id="deleteMerchantBaseByMerchantBaseIds" parameterType="String">
-        delete from merchant_base where merchant_base_id in 
+        delete from merchant_base where merchant_base_id in
         <foreach item="merchantBaseId" collection="array" open="(" separator="," close=")">
             #{merchantBaseId}
         </foreach>

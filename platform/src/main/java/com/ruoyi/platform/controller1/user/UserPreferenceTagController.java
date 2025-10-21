@@ -1,11 +1,12 @@
 package com.ruoyi.platform.controller1.user;
 
-import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import com.ruoyi.common.core.domain.R;
 import com.ruoyi.platform.domain.UserPreferenceTag;
 import com.ruoyi.platform.service.IUserPreferenceTagService;
-import com.ruoyi.common.core.domain.R;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * 用户偏好标签Controller

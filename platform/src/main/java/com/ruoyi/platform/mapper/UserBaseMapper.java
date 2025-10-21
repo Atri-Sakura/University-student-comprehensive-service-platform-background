@@ -58,4 +58,12 @@ public interface UserBaseMapper
      * @return 结果
      */
     public int deleteUserBaseByUserBaseIds(Long[] userBaseIds);
+
+    /**
+     * 通过手机号查询用户
+     *
+     * @param phone 手机号
+     * @return 用户基础信息
+     */
+    public UserBase selectUserBaseByPhone(String phone);
 }

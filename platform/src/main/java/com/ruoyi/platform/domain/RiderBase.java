@@ -70,6 +70,19 @@ public class RiderBase extends BaseEntity
     @Excel(name = "账号状态：0-禁用 1-正常")
     private Long accountStatus;
 
+    /** 对应sys_user表的用户ID */
+    private Long userId;
+
+    public void setUserId(Long userId)
+    {
+        this.userId = userId;
+    }
+
+    public Long getUserId()
+    {
+        return userId;
+    }
+
     public void setRiderBaseId(Long riderBaseId) 
     {
         this.riderBaseId = riderBaseId;
