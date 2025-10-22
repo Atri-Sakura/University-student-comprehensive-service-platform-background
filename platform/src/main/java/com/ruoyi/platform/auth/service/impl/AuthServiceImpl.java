@@ -65,26 +65,26 @@ public class AuthServiceImpl implements IAuthService
         validateCaptcha(registerBody.getPhone(), registerBody.getCode(), registerBody.getUuid());
 
         // 2. 校验必填字段
-        if (StringUtils.isEmpty(registerBody.getNickname()))
-        {
-            throw new ServiceException("用户昵称不能为空");
-        }
-        if (StringUtils.isEmpty(registerBody.getStudentId()))
-        {
-            throw new ServiceException("学号不能为空");
-        }
-        if (StringUtils.isEmpty(registerBody.getCollege()))
-        {
-            throw new ServiceException("所属学院不能为空");
-        }
-        if (StringUtils.isEmpty(registerBody.getMajor()))
-        {
-            throw new ServiceException("所属专业不能为空");
-        }
-        if (StringUtils.isEmpty(registerBody.getGrade()))
-        {
-            throw new ServiceException("年级不能为空");
-        }
+//        if (StringUtils.isEmpty(registerBody.getNickname()))
+//        {
+//            throw new ServiceException("用户昵称不能为空");
+//        }
+//        if (StringUtils.isEmpty(registerBody.getStudentId()))
+//        {
+//            throw new ServiceException("学号不能为空");
+//        }
+//        if (StringUtils.isEmpty(registerBody.getCollege()))
+//        {
+//            throw new ServiceException("所属学院不能为空");
+//        }
+//        if (StringUtils.isEmpty(registerBody.getMajor()))
+//        {
+//            throw new ServiceException("所属专业不能为空");
+//        }
+//        if (StringUtils.isEmpty(registerBody.getGrade()))
+//        {
+//            throw new ServiceException("年级不能为空");
+//        }
 
         String phone = registerBody.getPhone();
         String password = registerBody.getPassword();
@@ -149,18 +149,18 @@ public class AuthServiceImpl implements IAuthService
         validateCaptcha(registerBody.getPhone(), registerBody.getCode(), registerBody.getUuid());
 
         // 2. 校验必填字段
-        if (StringUtils.isEmpty(registerBody.getRiderNickname()))
-        {
-            throw new ServiceException("骑手昵称不能为空");
-        }
-        if (StringUtils.isEmpty(registerBody.getRealName()))
-        {
-            throw new ServiceException("真实姓名不能为空");
-        }
-        if (StringUtils.isEmpty(registerBody.getIdCard()))
-        {
-            throw new ServiceException("身份证号不能为空");
-        }
+//        if (StringUtils.isEmpty(registerBody.getRiderNickname()))
+//        {
+//            throw new ServiceException("骑手昵称不能为空");
+//        }
+//        if (StringUtils.isEmpty(registerBody.getRealName()))
+//        {
+//            throw new ServiceException("真实姓名不能为空");
+//        }
+//        if (StringUtils.isEmpty(registerBody.getIdCard()))
+//        {
+//            throw new ServiceException("身份证号不能为空");
+//        }
 
         String phone = registerBody.getPhone();
         String password = registerBody.getPassword();
@@ -225,14 +225,14 @@ public class AuthServiceImpl implements IAuthService
         validateCaptcha(registerBody.getPhone(), registerBody.getCode(), registerBody.getUuid());
 
         // 2. 校验必填字段
-        if (StringUtils.isEmpty(registerBody.getMerchantName()))
-        {
-            throw new ServiceException("商家名称不能为空");
-        }
-        if (StringUtils.isEmpty(registerBody.getBusinessScope()))
-        {
-            throw new ServiceException("经营范围不能为空");
-        }
+//        if (StringUtils.isEmpty(registerBody.getMerchantName()))
+//        {
+//            throw new ServiceException("商家名称不能为空");
+//        }
+//        if (StringUtils.isEmpty(registerBody.getBusinessScope()))
+//        {
+//            throw new ServiceException("经营范围不能为空");
+//        }
 
         String phone = registerBody.getPhone();
         String password = registerBody.getPassword();
