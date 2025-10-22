@@ -18,23 +18,35 @@
         <result property="usefulCount"    column="useful_count"    />
     </resultMap>
 
-    <!-- 查询商家门店评价列表，按星级分类 -->
+    <!-- 查询商家门店评价列表，按星级和是否有图分类 -->
     <select id="selectGoodsEvaluationByMerchantAndRating" resultMap="GoodsEvaluationResult">
-        SELECT * FROM goods_evaluation
-        WHERE merchant_base_id = #{merchantBaseId}
-        <if test="rating == null">
-            <!-- 全部评价，不加rating条件 -->
+        SELECT * FROM goods_evaluation ge
+        WHERE ge.merchant_base_id = #{merchantBaseId}
+        <if test="category == null">
+            <!-- 全部评价 -->
         </if>
-        <if test="rating == 5">
-            AND rating = 5
+        <if test="category == 5">
+            AND ge.rating = 5
         </if>
-        <if test="rating == 4">
-            AND rating = 4
+        <if test="category == 4">
+            AND ge.rating = 4
         </if>
-        <if test="rating == 1">
-            AND rating &lt;= 3
+        <if test="category == 3">
+            AND ge.rating &lt;= 3
         </if>
-        ORDER BY create_time DESC
+        <if test="hasImage != null">
+            <if test="hasImage == true">
+                AND EXISTS (
+                SELECT 1 FROM goods_evaluation_image gi WHERE gi.goods_evaluation_id = ge.goods_evaluation_id
+                )
+            </if>
+            <if test="hasImage == false">
+                AND NOT EXISTS (
+                SELECT 1 FROM goods_evaluation_image gi WHERE gi.goods_evaluation_id = ge.goods_evaluation_id
+                )
+            </if>
+        </if>
+        ORDER BY ge.create_time DESC
     </select>
 
     <!-- 商家回复评价 -->

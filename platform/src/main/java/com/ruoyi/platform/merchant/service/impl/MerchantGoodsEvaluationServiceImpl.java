@@ -15,8 +15,8 @@ public class MerchantGoodsEvaluationServiceImpl implements IMerchantGoodsEvaluat
     private MerchantGoodsEvaluationMapper merchantGoodsEvaluationMapper;
 
     @Override
-    public List<GoodsEvaluation> getGoodsEvaluationList(Long merchantBaseId, Integer rating) {
-        return merchantGoodsEvaluationMapper.selectGoodsEvaluationByMerchantAndRating(merchantBaseId, rating);
+    public List<GoodsEvaluation> getGoodsEvaluationList(Long merchantBaseId, Integer category, Boolean hasImage) {
+        return merchantGoodsEvaluationMapper.selectGoodsEvaluationByMerchantAndRating(merchantBaseId, category, hasImage);
     }
 
     @Override

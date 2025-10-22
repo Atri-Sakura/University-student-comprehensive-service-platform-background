@@ -16,15 +16,17 @@ public class MerchantGoodsEvaluationController {
     private IMerchantGoodsEvaluationService merchantGoodsEvaluationService;
 
     /**
-     * 查询门店订单评价列表（按分类）
+     * 查询门店订单评价列表（按分类和是否有图）
      * @param merchantBaseId 商家ID
      * @param category 分类(全部:null, 五星:5, 四星:4, 三星及以下:1)
+     * @param hasImage 是否有图（可为空，true-有图，false-无图，不传则全部）
      */
     @GetMapping("/list")
     public AjaxResult list(@RequestParam Long merchantBaseId,
-                           @RequestParam(required = false) Integer category) {
-        List<GoodsEvaluation> list = merchantGoodsEvaluationService.getGoodsEvaluationList(merchantBaseId, category);
-        return AjaxResult.success(list); // 返回统一对象格式
+                           @RequestParam(required = false) Integer category,
+                           @RequestParam(required = false) Boolean hasImage) {
+        List<GoodsEvaluation> list = merchantGoodsEvaluationService.getGoodsEvaluationList(merchantBaseId, category, hasImage);
+        return AjaxResult.success(list);
     }
 
     /**
