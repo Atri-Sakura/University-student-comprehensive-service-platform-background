@@ -58,4 +58,14 @@ public interface ChatSessionMapper
      * @return 结果
      */
     public int deleteChatSessionBySessionIds(Long[] sessionIds);
+
+    /**
+     * 获取会话Id
+     * @param fromType
+     * @param toType
+     * @param fromId
+     * @param toId
+     * @return
+     */
+    public Long selectChatSessionIdByFromTo(Long fromType, Long fromId,Long toType,Long toId);
 }

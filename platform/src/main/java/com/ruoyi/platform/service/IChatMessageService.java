@@ -58,4 +58,7 @@ public interface IChatMessageService
      * @return 结果
      */
     public int deleteChatMessageByMessageId(Long messageId);
+
+
+    public void updateChatMessageStatus(ChatMessage chatMessage,Long statusId);
 }

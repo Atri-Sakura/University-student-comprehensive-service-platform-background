@@ -50,9 +50,17 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </select>
 
     <insert id="insertChatMessage" parameterType="ChatMessage">
+        <!-- 自动生成雪花算法ID并赋值给messageId，包裹在SELECT语句中 -->
+        <selectKey
+                keyProperty="messageId"
+                resultType="java.lang.Long"
+                order="BEFORE">
+            SELECT ${@com.ruoyi.platform.chat.utils.SnowflakeIdGenerator@getInstance().nextId()}
+        </selectKey>
+
         insert into chat_message
         <trim prefix="(" suffix=")" suffixOverrides=",">
-            <if test="messageId != null">message_id,</if>
+            message_id,
             <if test="sessionId != null">session_id,</if>
             <if test="fromType != null">from_type,</if>
             <if test="fromId != null">from_id,</if>
@@ -67,9 +75,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="isDeleted != null">is_deleted,</if>
             <if test="createTime != null">create_time,</if>
             <if test="updateTime != null">update_time,</if>
-         </trim>
+        </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
-            <if test="messageId != null">#{messageId},</if>
+            #{messageId},
             <if test="sessionId != null">#{sessionId},</if>
             <if test="fromType != null">#{fromType},</if>
             <if test="fromId != null">#{fromId},</if>
@@ -84,7 +92,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="isDeleted != null">#{isDeleted},</if>
             <if test="createTime != null">#{createTime},</if>
             <if test="updateTime != null">#{updateTime},</if>
-         </trim>
+        </trim>
     </insert>
 
     <update id="updateChatMessage" parameterType="ChatMessage">

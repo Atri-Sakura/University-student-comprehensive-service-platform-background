@@ -58,4 +58,15 @@ public interface IChatSessionService
      * @return 结果
      */
     public int deleteChatSessionBySessionId(Long sessionId);
+
+
+    /**
+     * 查询会话Id
+     * @param fromType
+     * @param toType
+     * @param fromId
+     * @param toId
+     * @return
+     */
+    public Long selectChatSessionIdByFromTo(Long fromType, Long fromId, Long toType, Long toId);
 }

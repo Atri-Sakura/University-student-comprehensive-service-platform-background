@@ -45,10 +45,41 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         where session_id = #{sessionId}
     </select>
 
+    <select id="selectChatSessionIdByFromTo" resultType="java.lang.Long">
+        SELECT session_id
+        FROM chat_session
+        WHERE
+           -- 正向条件：from→to（明确双方关系）
+            (
+                from_type = #{fromType}
+                    AND from_id = #{fromId}
+                    AND to_type = #{toType}
+                    AND to_id = #{toId}
+                )
+           OR
+           -- 反向条件：to→from（交换双方，避免重复会话）
+            (
+                from_type = #{toType}
+                    AND from_id = #{toId}
+                    AND to_type = #{fromType}
+                    AND to_id = #{fromId}
+                )
+            LIMIT 1
+    </select>
+
+
     <insert id="insertChatSession" parameterType="ChatSession">
+        <!-- 自动生成雪花算法ID并赋值给sessionId，必须包裹在SELECT语句中 -->
+        <selectKey
+                keyProperty="sessionId"
+                resultType="java.lang.Long"
+                order="BEFORE">
+            SELECT ${@com.ruoyi.platform.chat.utils.SnowflakeIdGenerator@getInstance().nextId()}
+        </selectKey>
+
         insert into chat_session
         <trim prefix="(" suffix=")" suffixOverrides=",">
-            <if test="sessionId != null">session_id,</if>
+            session_id,
             <if test="fromType != null">from_type,</if>
             <if test="fromId != null">from_id,</if>
             <if test="toType != null">to_type,</if>
@@ -61,9 +92,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="sessionStatus != null">session_status,</if>
             <if test="createTime != null">create_time,</if>
             <if test="updateTime != null">update_time,</if>
-         </trim>
+        </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
-            <if test="sessionId != null">#{sessionId},</if>
+            #{sessionId},
             <if test="fromType != null">#{fromType},</if>
             <if test="fromId != null">#{fromId},</if>
             <if test="toType != null">#{toType},</if>
@@ -76,7 +107,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="sessionStatus != null">#{sessionStatus},</if>
             <if test="createTime != null">#{createTime},</if>
             <if test="updateTime != null">#{updateTime},</if>
-         </trim>
+        </trim>
     </insert>
 
     <update id="updateChatSession" parameterType="ChatSession">
