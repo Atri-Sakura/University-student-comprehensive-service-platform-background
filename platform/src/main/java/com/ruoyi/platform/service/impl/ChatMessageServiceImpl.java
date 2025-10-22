@@ -93,4 +93,11 @@ public class ChatMessageServiceImpl implements IChatMessageService
     {
         return chatMessageMapper.deleteChatMessageByMessageId(messageId);
     }
+
+    public void updateChatMessageStatus(ChatMessage chatMessage,Long statusId){
+        chatMessage.setMsgStatus(statusId);
+        chatMessageMapper.updateChatMessage(chatMessage);
+    }
+
+
 }

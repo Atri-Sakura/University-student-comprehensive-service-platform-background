@@ -53,6 +53,7 @@ public class ChatSessionServiceImpl implements IChatSessionService
     @Override
     public int insertChatSession(ChatSession chatSession)
     {
+
         chatSession.setCreateTime(DateUtils.getNowDate());
         return chatSessionMapper.insertChatSession(chatSession);
     }
@@ -93,4 +94,12 @@ public class ChatSessionServiceImpl implements IChatSessionService
     {
         return chatSessionMapper.deleteChatSessionBySessionId(sessionId);
     }
+
+    @Override
+    public Long selectChatSessionIdByFromTo(Long fromType, Long fromId, Long toType, Long toId)
+    {
+        return chatSessionMapper.selectChatSessionIdByFromTo(fromType, fromId, toType, toId);
+    }
+
+
 }
