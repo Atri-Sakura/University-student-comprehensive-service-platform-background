@@ -55,4 +55,12 @@
         SET merchant_reply = #{merchantReply}, reply_time = NOW()
         WHERE goods_evaluation_id = #{goodsEvaluationId}
     </update>
+
+    <!-- 根据评价ID查询评价详情 -->
+    <select id="selectGoodsEvaluationById" resultMap="GoodsEvaluationResult">
+        SELECT *
+        FROM goods_evaluation
+        WHERE goods_evaluation_id = #{goodsEvaluationId}
+            LIMIT 1
+    </select>
 </mapper>

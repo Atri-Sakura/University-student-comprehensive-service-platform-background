@@ -24,4 +24,6 @@ public interface MerchantGoodsEvaluationMapper {
      * @return 影响行数
      */
     int replyGoodsEvaluation(Long goodsEvaluationId, String merchantReply);
+
+    GoodsEvaluation selectGoodsEvaluationById(Long goodsEvaluationId);
 }

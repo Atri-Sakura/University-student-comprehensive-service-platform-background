@@ -7,4 +7,6 @@ public interface IMerchantGoodsEvaluationService {
     List<GoodsEvaluation> getGoodsEvaluationList(Long merchantBaseId, Integer category, Boolean hasImage);
 
     int replyGoodsEvaluation(Long goodsEvaluationId, String merchantReply);
+
+    GoodsEvaluation getGoodsEvaluationById(Long goodsEvaluationId);
 }

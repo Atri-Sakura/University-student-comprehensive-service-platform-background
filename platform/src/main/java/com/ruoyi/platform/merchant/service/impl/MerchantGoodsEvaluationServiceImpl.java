@@ -23,4 +23,9 @@ public class MerchantGoodsEvaluationServiceImpl implements IMerchantGoodsEvaluat
     public int replyGoodsEvaluation(Long goodsEvaluationId, String merchantReply) {
         return merchantGoodsEvaluationMapper.replyGoodsEvaluation(goodsEvaluationId, merchantReply);
     }
+
+    @Override
+    public GoodsEvaluation getGoodsEvaluationById(Long goodsEvaluationId) {
+        return merchantGoodsEvaluationMapper.selectGoodsEvaluationById(goodsEvaluationId);
+    }
 }
