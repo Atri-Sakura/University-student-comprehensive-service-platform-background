@@ -1,6 +1,7 @@
 package com.ruoyi.platform.merchant.controller;
 
 import com.ruoyi.common.core.domain.AjaxResult;
+import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.platform.domain.MerchantBase;
 import com.ruoyi.platform.domain.MerchantAddress;
 import com.ruoyi.platform.merchant.service.IMerchantInfoService;
@@ -24,11 +25,11 @@ public class MerchantInfoController {
 
     /**
      * 查询商家基础信息
-     * @param merchantBaseId 商家ID
      * @return 商家基础信息
      */
-    @GetMapping("/base/{merchantBaseId}")
-    public AjaxResult getMerchantBaseInfo(@PathVariable Long merchantBaseId) {
+    @GetMapping("/base")
+    public AjaxResult getMerchantBaseInfo() {
+        Long merchantBaseId = SecurityUtils.getMerchantBaseId();
         MerchantBase merchantBase = merchantInfoService.selectMerchantBaseByMerchantBaseId(merchantBaseId);
         if (merchantBase == null) {
             return AjaxResult.error("未找到该商家基础信息");
@@ -43,8 +44,9 @@ public class MerchantInfoController {
      */
     @PutMapping("/base")
     public AjaxResult updateMerchantBase(@RequestBody MerchantBase merchantBase) {
-        if (merchantBase == null || merchantBase.getMerchantBaseId() == null) {
-            return AjaxResult.error("参数错误，缺少商家ID");
+        Long merchantBaseId = SecurityUtils.getMerchantBaseId();
+        if (merchantBase == null || merchantBase.getMerchantBaseId() == null || !merchantBase.getMerchantBaseId().equals(merchantBaseId)) {
+            return AjaxResult.error("无权修改该商家信息");
         }
         int result = merchantInfoService.updateMerchantBase(merchantBase);
         if (result > 0) {
@@ -55,11 +57,11 @@ public class MerchantInfoController {
 
     /**
      * 查询商家地址信息
-     * @param merchantBaseId 商家ID
      * @return 商家地址信息
      */
-    @GetMapping("/address/{merchantBaseId}")
-    public AjaxResult getMerchantAddress(@PathVariable Long merchantBaseId) {
+    @GetMapping("/address")
+    public AjaxResult getMerchantAddress() {
+        Long merchantBaseId = SecurityUtils.getMerchantBaseId();
         MerchantAddress address = merchantAddressInfoService.selectMerchantAddressByMerchantBaseId(merchantBaseId);
         if (address == null) {
             return AjaxResult.error("未找到该商家地址信息");
@@ -74,8 +76,10 @@ public class MerchantInfoController {
      */
     @PutMapping("/address")
     public AjaxResult updateMerchantAddress(@RequestBody MerchantAddress merchantAddress) {
-        if (merchantAddress == null || merchantAddress.getMerchantAddressId() == null) {
-            return AjaxResult.error("参数错误，缺少地址ID");
+        Long merchantBaseId = SecurityUtils.getMerchantBaseId();
+        MerchantAddress dbAddress = merchantAddressInfoService.selectMerchantAddressByMerchantBaseId(merchantBaseId);
+        if (merchantAddress == null || dbAddress == null || !dbAddress.getMerchantAddressId().equals(merchantAddress.getMerchantAddressId())) {
+            return AjaxResult.error("无权修改该商家地址信息");
         }
         int result = merchantAddressInfoService.updateMerchantAddress(merchantAddress);
         if (result > 0) {

@@ -18,6 +18,8 @@ public class MerchantGoodsImage extends BaseEntity
     /** 图片ID */
     private Long merchantGoodsImageId;
 
+    private Long merchantBaseId;
+
     /** 关联商品ID */
     @Excel(name = "关联商品ID")
     private Long merchantGoodsId;
@@ -41,6 +43,14 @@ public class MerchantGoodsImage extends BaseEntity
     public void setMerchantGoodsImageId(Long merchantGoodsImageId) 
     {
         this.merchantGoodsImageId = merchantGoodsImageId;
+    }
+
+    public Long getMerchantBaseId() {
+        return merchantBaseId;
+    }
+
+    public void setMerchantBaseId(Long merchantBaseId) {
+        this.merchantBaseId = merchantBaseId;
     }
 
     public Long getMerchantGoodsImageId() 
