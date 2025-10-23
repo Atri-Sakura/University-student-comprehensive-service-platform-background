@@ -20,6 +20,9 @@ public class LoginUser implements UserDetails
      * 用户ID
      */
     private Long userId;
+    private Long userBaseId;
+    private Long riderBaseId;
+    private Long merchantBaseId;
 
     /**
      * 部门ID
@@ -70,6 +73,30 @@ public class LoginUser implements UserDetails
      * 用户信息
      */
     private SysUser user;
+
+    public Long getUserBaseId() {
+        return userBaseId;
+    }
+
+    public void setUserBaseId(Long userBaseId) {
+        this.userBaseId = userBaseId;
+    }
+
+    public Long getRiderBaseId() {
+        return riderBaseId;
+    }
+
+    public void setRiderBaseId(Long riderBaseId) {
+        this.riderBaseId = riderBaseId;
+    }
+
+    public Long getMerchantBaseId() {
+        return merchantBaseId;
+    }
+
+    public void setMerchantBaseId(Long merchantBaseId) {
+        this.merchantBaseId = merchantBaseId;
+    }
 
     public LoginUser()
     {

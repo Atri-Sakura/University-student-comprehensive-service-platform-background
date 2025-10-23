@@ -175,4 +175,28 @@ public class SecurityUtils
                 .anyMatch(x -> Constants.SUPER_ADMIN.equals(x) || PatternMatchUtils.simpleMatch(x, role));
     }
 
+    public static Long getUserBaseId() {
+        try {
+            return getLoginUser().getUserBaseId();
+        } catch (Exception e) {
+            throw new ServiceException("获取用户BaseId异常", HttpStatus.UNAUTHORIZED);
+        }
+    }
+
+    public static Long getRiderBaseId() {
+        try {
+            return getLoginUser().getRiderBaseId();
+        } catch (Exception e) {
+            throw new ServiceException("获取骑手BaseId异常", HttpStatus.UNAUTHORIZED);
+        }
+    }
+
+    public static Long getMerchantBaseId() {
+        try {
+            return getLoginUser().getMerchantBaseId();
+        } catch (Exception e) {
+            throw new ServiceException("获取商家ID异常", HttpStatus.UNAUTHORIZED);
+        }
+    }
+
 }
