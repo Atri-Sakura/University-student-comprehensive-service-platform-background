@@ -43,6 +43,8 @@ public interface IRiderBaseService
      */
     public int updateRiderBase(RiderBase riderBase);
 
+
+    int updateRiderBaseBasicInfo(RiderBase riderBase);
     /**
      * 批量删除骑手基础信息
      * 
@@ -58,4 +60,16 @@ public interface IRiderBaseService
      * @return 结果
      */
     public int deleteRiderBaseByRiderBaseId(Long riderBaseId);
+
+    /**
+     * 切换骑手工作状态
+     *
+     */
+    int updateRiderWorkStatus(RiderBase riderBase);
+
+    /**
+     * 跟新骑手授权信息
+     */
+    int updateRiderAuthInfo(RiderBase rider);
+
 }

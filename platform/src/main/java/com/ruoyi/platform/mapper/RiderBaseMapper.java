@@ -35,6 +35,7 @@ public interface RiderBaseMapper
      */
     public int insertRiderBase(RiderBase riderBase);
 
+    int updateRiderBaseBasicInfo(RiderBase riderBase);
     /**
      * 修改骑手基础信息
      * 
@@ -58,4 +59,16 @@ public interface RiderBaseMapper
      * @return 结果
      */
     public int deleteRiderBaseByRiderBaseIds(Long[] riderBaseIds);
+
+    /**
+     * 修改骑手工作状态
+     *
+     */
+    int updateRiderWorkStatus(RiderBase riderBase);
+
+    /**
+     * 更新骑手授权信息
+     */
+    int updateRiderAuthInfo(RiderBase rider);
+
 }

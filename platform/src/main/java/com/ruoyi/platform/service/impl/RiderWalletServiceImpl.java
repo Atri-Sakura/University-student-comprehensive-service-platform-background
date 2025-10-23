@@ -23,26 +23,25 @@ public class RiderWalletServiceImpl implements IRiderWalletService
     /**
      * 查询骑手钱包
      * 
-     * @param riderWalletId 骑手钱包主键
      * @return 骑手钱包
      */
-    @Override
-    public RiderWallet selectRiderWalletByRiderWalletId(Long riderWalletId)
-    {
-        return riderWalletMapper.selectRiderWalletByRiderWalletId(riderWalletId);
-    }
 
+
+    @Override
+    public RiderWallet selectRiderWalletByRiderBaseId(Long riderBaseId) {
+        return riderWalletMapper.selectRiderWalletByRiderBaseId(riderBaseId);
+    }
     /**
      * 查询骑手钱包列表
      * 
      * @param riderWallet 骑手钱包
      * @return 骑手钱包
      */
-    @Override
-    public List<RiderWallet> selectRiderWalletList(RiderWallet riderWallet)
-    {
-        return riderWalletMapper.selectRiderWalletList(riderWallet);
-    }
+//    @Override
+//    public List<RiderWallet> selectRiderWalletList(RiderWallet riderWallet)
+//    {
+//        return riderWalletMapper.selectRiderWalletList(riderWallet);
+//    }
 
     /**
      * 新增骑手钱包
@@ -50,12 +49,12 @@ public class RiderWalletServiceImpl implements IRiderWalletService
      * @param riderWallet 骑手钱包
      * @return 结果
      */
-    @Override
-    public int insertRiderWallet(RiderWallet riderWallet)
-    {
-        riderWallet.setCreateTime(DateUtils.getNowDate());
-        return riderWalletMapper.insertRiderWallet(riderWallet);
-    }
+//    @Override
+//    public int insertRiderWallet(RiderWallet riderWallet)
+//    {
+//        riderWallet.setCreateTime(DateUtils.getNowDate());
+//        return riderWalletMapper.insertRiderWallet(riderWallet);
+//    }
 
     /**
      * 修改骑手钱包
@@ -63,12 +62,12 @@ public class RiderWalletServiceImpl implements IRiderWalletService
      * @param riderWallet 骑手钱包
      * @return 结果
      */
-    @Override
-    public int updateRiderWallet(RiderWallet riderWallet)
-    {
-        riderWallet.setUpdateTime(DateUtils.getNowDate());
-        return riderWalletMapper.updateRiderWallet(riderWallet);
-    }
+//    @Override
+//    public int updateRiderWallet(RiderWallet riderWallet)
+//    {
+//        riderWallet.setUpdateTime(DateUtils.getNowDate());
+//        return riderWalletMapper.updateRiderWallet(riderWallet);
+//    }
 
     /**
      * 批量删除骑手钱包
@@ -76,11 +75,11 @@ public class RiderWalletServiceImpl implements IRiderWalletService
      * @param riderWalletIds 需要删除的骑手钱包主键
      * @return 结果
      */
-    @Override
-    public int deleteRiderWalletByRiderWalletIds(Long[] riderWalletIds)
-    {
-        return riderWalletMapper.deleteRiderWalletByRiderWalletIds(riderWalletIds);
-    }
+//    @Override
+//    public int deleteRiderWalletByRiderWalletIds(Long[] riderWalletIds)
+//    {
+//        return riderWalletMapper.deleteRiderWalletByRiderWalletIds(riderWalletIds);
+//    }
 
     /**
      * 删除骑手钱包信息
@@ -88,9 +87,9 @@ public class RiderWalletServiceImpl implements IRiderWalletService
      * @param riderWalletId 骑手钱包主键
      * @return 结果
      */
-    @Override
-    public int deleteRiderWalletByRiderWalletId(Long riderWalletId)
-    {
-        return riderWalletMapper.deleteRiderWalletByRiderWalletId(riderWalletId);
-    }
+//    @Override
+//    public int deleteRiderWalletByRiderWalletId(Long riderWalletId)
+//    {
+//        return riderWalletMapper.deleteRiderWalletByRiderWalletId(riderWalletId);
+//    }
 }

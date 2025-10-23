@@ -1,5 +1,6 @@
 package com.ruoyi.framework.config;
 
+import com.ruoyi.framework.security.filter.FakeAuthFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -28,6 +29,11 @@ import com.ruoyi.framework.security.handle.LogoutSuccessHandlerImpl;
 @Configuration
 public class SecurityConfig
 {
+    /*
+        fakeAuthFilter：开发阶段模拟登录用户
+     */
+    @Autowired(required = false)
+    private FakeAuthFilter fakeAuthFilter;
     /**
      * 认证失败处理类
      */
@@ -111,6 +117,8 @@ public class SecurityConfig
             .logout(logout -> logout.logoutUrl("/logout").logoutSuccessHandler(logoutSuccessHandler))
             // 添加JWT filter
             .addFilterBefore(authenticationTokenFilter, UsernamePasswordAuthenticationFilter.class)
+            // 添加FakeAuthFilter（仅dev环境生效）
+            .addFilterAfter(fakeAuthFilter, JwtAuthenticationTokenFilter.class)
             // 添加CORS filter
             .addFilterBefore(corsFilter, JwtAuthenticationTokenFilter.class)
             .addFilterBefore(corsFilter, LogoutFilter.class)
