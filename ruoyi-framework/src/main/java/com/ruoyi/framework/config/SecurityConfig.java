@@ -1,5 +1,6 @@
 package com.ruoyi.framework.config;
 
+import com.ruoyi.framework.security.filter.FakeAuthFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,13 +22,18 @@ import com.ruoyi.framework.security.handle.LogoutSuccessHandlerImpl;
 
 /**
  * spring security配置
- *
+ * 
  * @author ruoyi
  */
 @EnableMethodSecurity(prePostEnabled = true, securedEnabled = true)
 @Configuration
 public class SecurityConfig
 {
+    /*
+        fakeAuthFilter：开发阶段模拟登录用户
+     */
+    @Autowired(required = false)
+    private FakeAuthFilter fakeAuthFilter;
     /**
      * 认证失败处理类
      */
@@ -45,7 +51,7 @@ public class SecurityConfig
      */
     @Autowired
     private JwtAuthenticationTokenFilter authenticationTokenFilter;
-
+    
     /**
      * 跨域过滤器
      */
@@ -58,14 +64,14 @@ public class SecurityConfig
     @Autowired
     private PermitAllUrlProperties permitAllUrl;
 
-    /**
-     * 身份验证实现
-     */
-    @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception
-    {
-        return authenticationConfiguration.getAuthenticationManager();
-    }
+	/**
+	 * 身份验证实现
+	 */
+	@Bean
+	public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception 
+	{
+		return authenticationConfiguration.getAuthenticationManager();
+	}
 
     /**
      * anyRequest          |   匹配所有请求路径
@@ -86,39 +92,37 @@ public class SecurityConfig
     protected SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception
     {
         return httpSecurity
-                // CSRF禁用，因为不使用session
-                .csrf(csrf -> csrf.disable())
-                // 禁用HTTP响应标头
-                .headers((headersCustomizer) -> {
-                    headersCustomizer.cacheControl(cache -> cache.disable()).frameOptions(options -> options.sameOrigin());
-                })
-                // 认证失败处理类
-                .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
-                // 基于token，所以不需要session
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                // 注解标记允许匿名访问的url
-                .authorizeHttpRequests((requests) -> {
-                    permitAllUrl.getUrls().forEach(url -> requests.requestMatchers(url).permitAll());
-                    // 对于登录login 注册register 验证码captchaImage 允许匿名访问
-                    requests.requestMatchers("/login", "/register", "/captchaImage","/platform/**").permitAll()
-                            // ===== 新增：放行三端认证接口 =====
-                            .requestMatchers("/platform/auth/**").permitAll()
-                            // 商家门户接口需要认证 (移除了 /platform/** 的匿名访问)
-                            .requestMatchers("/merchant/**").authenticated()
-                            // 静态资源，可匿名访问
-                            .requestMatchers(HttpMethod.GET, "/", "/*.html", "/**.html", "/**.css", "/**.js", "/profile/**").permitAll()
-                            .requestMatchers("/swagger-ui.html", "/v3/api-docs/**", "/swagger-ui/**", "/druid/**").permitAll()
-                            // 除上面外的所有请求全部需要鉴权认证
-                            .anyRequest().authenticated();
-                })
-                // 添加Logout filter
-                .logout(logout -> logout.logoutUrl("/logout").logoutSuccessHandler(logoutSuccessHandler))
-                // 添加JWT filter
-                .addFilterBefore(authenticationTokenFilter, UsernamePasswordAuthenticationFilter.class)
-                // 添加CORS filter
-                .addFilterBefore(corsFilter, JwtAuthenticationTokenFilter.class)
-                .addFilterBefore(corsFilter, LogoutFilter.class)
-                .build();
+            // CSRF禁用，因为不使用session
+            .csrf(csrf -> csrf.disable())
+            // 禁用HTTP响应标头
+            .headers((headersCustomizer) -> {
+                headersCustomizer.cacheControl(cache -> cache.disable()).frameOptions(options -> options.sameOrigin());
+            })
+            // 认证失败处理类
+            .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
+            // 基于token，所以不需要session
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            // 注解标记允许匿名访问的url
+            .authorizeHttpRequests((requests) -> {
+                permitAllUrl.getUrls().forEach(url -> requests.requestMatchers(url).permitAll());
+                // 对于登录login 注册register 验证码captchaImage 允许匿名访问
+                requests.requestMatchers("/login", "/register", "/captchaImage").permitAll()
+                    // 静态资源，可匿名访问
+                    .requestMatchers(HttpMethod.GET, "/", "/*.html", "/**.html", "/**.css", "/**.js", "/profile/**").permitAll()
+                    .requestMatchers("/swagger-ui.html", "/v3/api-docs/**", "/swagger-ui/**", "/druid/**").permitAll()
+                    // 除上面外的所有请求全部需要鉴权认证
+                    .anyRequest().authenticated();
+            })
+            // 添加Logout filter
+            .logout(logout -> logout.logoutUrl("/logout").logoutSuccessHandler(logoutSuccessHandler))
+            // 添加JWT filter
+            .addFilterBefore(authenticationTokenFilter, UsernamePasswordAuthenticationFilter.class)
+            // 添加FakeAuthFilter（仅dev环境生效）
+            .addFilterAfter(fakeAuthFilter, JwtAuthenticationTokenFilter.class)
+            // 添加CORS filter
+            .addFilterBefore(corsFilter, JwtAuthenticationTokenFilter.class)
+            .addFilterBefore(corsFilter, LogoutFilter.class)
+            .build();
     }
 
     /**

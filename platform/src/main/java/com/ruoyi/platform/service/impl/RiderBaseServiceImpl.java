@@ -70,6 +70,12 @@ public class RiderBaseServiceImpl implements IRiderBaseService
         return riderBaseMapper.updateRiderBase(riderBase);
     }
 
+    @Override
+    public int updateRiderBaseBasicInfo(RiderBase riderBase) {
+        return riderBaseMapper.updateRiderBaseBasicInfo(riderBase);
+    }
+
+
     /**
      * 批量删除骑手基础信息
      * 
@@ -93,4 +99,27 @@ public class RiderBaseServiceImpl implements IRiderBaseService
     {
         return riderBaseMapper.deleteRiderBaseByRiderBaseId(riderBaseId);
     }
+
+    /**
+     * 修改骑手工作状态
+     *
+     */
+    @Override
+    public int updateRiderWorkStatus(RiderBase riderBase) {
+        RiderBase current = riderBaseMapper.selectRiderBaseByRiderBaseId(riderBase.getRiderBaseId());
+        if (current != null && current.getWorkStatus().equals(riderBase.getWorkStatus())) {
+            // 状态一致，不更新
+            return 0;
+        }
+        return riderBaseMapper.updateRiderWorkStatus(riderBase);
+    }
+
+    /**
+     * 更新骑手授权信息
+     */
+    @Override
+    public int updateRiderAuthInfo(RiderBase rider) {
+        return riderBaseMapper.updateRiderAuthInfo(rider);
+    }
+
 }

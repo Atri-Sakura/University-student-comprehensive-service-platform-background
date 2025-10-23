@@ -20,6 +20,12 @@ public interface IRiderWalletService
     public RiderWallet selectRiderWalletByRiderWalletId(Long riderWalletId);
 
     /**
+     * 根据骑手ID查询钱包
+     */
+    RiderWallet selectRiderWalletByRiderBaseId(Long riderBaseId);
+
+
+    /**
      * 查询骑手钱包列表
      * 
      * @param riderWallet 骑手钱包

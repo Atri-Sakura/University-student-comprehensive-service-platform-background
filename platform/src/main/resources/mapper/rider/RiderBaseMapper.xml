@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper
-        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.ruoyi.platform.mapper.RiderBaseMapper">
 
     <resultMap type="RiderBase" id="RiderBaseResult">
@@ -24,39 +24,109 @@
         <result property="updateTime"    column="update_time"     />
     </resultMap>
 
+    <!-- ========== 查询语句 ========== -->
     <sql id="selectRiderBaseVo">
         select rider_base_id, user_id, username, password, nickname, avatar, real_name, id_card, id_card_front, id_card_back, phone, audit_status, work_status, credit_score, account_status, create_time, update_time from rider_base
     </sql>
 
-    <select id="selectRiderBaseList" parameterType="RiderBase" resultMap="RiderBaseResult">
+    <!-- 查询单个骑手信息 -->
+    <select id="selectRiderBaseByRiderBaseId" parameterType="java.lang.Long" resultMap="RiderBaseResult">
+        SELECT
+            rider_base_id,
+            username,
+            password,
+            nickname,
+            avatar,
+            real_name,
+            id_card,
+            id_card_front,
+            id_card_back,
+            phone,
+            audit_status,
+            work_status,
+            credit_score,
+            account_status,
+            create_time,
+            update_time
+        FROM rider_base
+        WHERE rider_base_id = #{riderBaseId}
+    </select>
+
+    <!-- 查询列表 -->
+    <select id="selectRiderBaseList" parameterType="com.ruoyi.platform.domain.RiderBase" resultMap="RiderBaseResult">
         <include refid="selectRiderBaseVo"/>
         <where>
-            <if test="username != null  and username != ''"> and username like concat('%', #{username}, '%')</if>
-            <if test="password != null  and password != ''"> and password = #{password}</if>
-            <if test="nickname != null  and nickname != ''"> and nickname like concat('%', #{nickname}, '%')</if>
-            <if test="avatar != null  and avatar != ''"> and avatar = #{avatar}</if>
-            <if test="realName != null  and realName != ''"> and real_name like concat('%', #{realName}, '%')</if>
-            <if test="idCard != null  and idCard != ''"> and id_card = #{idCard}</if>
-            <if test="idCardFront != null  and idCardFront != ''"> and id_card_front = #{idCardFront}</if>
-            <if test="idCardBack != null  and idCardBack != ''"> and id_card_back = #{idCardBack}</if>
-            <if test="phone != null  and phone != ''"> and phone = #{phone}</if>
-            <if test="auditStatus != null "> and audit_status = #{auditStatus}</if>
-            <if test="workStatus != null "> and work_status = #{workStatus}</if>
-            <if test="creditScore != null "> and credit_score = #{creditScore}</if>
-            <if test="accountStatus != null "> and account_status = #{accountStatus}</if>
+            <if test="username != null and username != ''">
+                and username like concat('%', #{username}, '%')
+            </if>
+            <if test="password != null and password != ''">
+                and password = #{password}
+            </if>
+            <if test="nickname != null and nickname != ''">
+                and nickname like concat('%', #{nickname}, '%')
+            </if>
+            <if test="avatar != null and avatar != ''">
+                and avatar = #{avatar}
+            </if>
+            <if test="realName != null and realName != ''">
+                and real_name like concat('%', #{realName}, '%')
+            </if>
+            <if test="idCard != null and idCard != ''">
+                and id_card = #{idCard}
+            </if>
+            <if test="idCardFront != null and idCardFront != ''">
+                and id_card_front = #{idCardFront}
+            </if>
+            <if test="idCardBack != null and idCardBack != ''">
+                and id_card_back = #{idCardBack}
+            </if>
+            <if test="phone != null and phone != ''">
+                and phone = #{phone}
+            </if>
+            <if test="auditStatus != null">
+                and audit_status = #{auditStatus}
+            </if>
+            <if test="workStatus != null">
+                and work_status = #{workStatus}
+            </if>
+            <if test="creditScore != null">
+                and credit_score = #{creditScore}
+            </if>
+            <if test="accountStatus != null">
+                and account_status = #{accountStatus}
+            </if>
         </where>
     </select>
+
+
 
     <select id="selectRiderBaseByPhone" parameterType="String" resultMap="RiderBaseResult">
         <include refid="selectRiderBaseVo"/>
         where phone = #{phone}
     </select>
 
-    <select id="selectRiderBaseByRiderBaseId" parameterType="Long" resultMap="RiderBaseResult">
-        <include refid="selectRiderBaseVo"/>
-        where rider_base_id = #{riderBaseId}
-    </select>
+<!--    <select id="selectRiderBaseByRiderBaseId" parameterType="Long" resultMap="RiderBaseResult">-->
+<!--        <include refid="selectRiderBaseVo"/>-->
+<!--        where rider_base_id = #{riderBaseId}-->
+<!--    </select>-->
 
+    <!-- 修改骑手基本信息（仅限用户名、昵称、手机号） -->
+    <update id="updateRiderBaseBasicInfo" parameterType="com.ruoyi.platform.domain.RiderBase">
+        UPDATE rider_base
+        <set>
+            <if test="username != null and username != ''">
+                username = #{username},
+            </if>
+            <if test="nickname != null and nickname != ''">
+                nickname = #{nickname},
+            </if>
+            <if test="phone != null and phone != ''">
+                phone = #{phone},
+            </if>
+            update_time = NOW()
+        </set>
+        WHERE rider_base_id = #{riderBaseId}
+    </update>
     <insert id="insertRiderBase" parameterType="RiderBase" useGeneratedKeys="true" keyProperty="riderBaseId">
         insert into rider_base
         <trim prefix="(" suffix=")" suffixOverrides=",">
@@ -99,31 +169,24 @@
         </trim>
     </insert>
 
-    <update id="updateRiderBase" parameterType="RiderBase">
-        update rider_base
-        <trim prefix="SET" suffixOverrides=",">
-            <if test="username != null and username != ''">username = #{username},</if>
-            <if test="password != null and password != ''">password = #{password},</if>
-            <if test="nickname != null and nickname != ''">nickname = #{nickname},</if>
-            <if test="avatar != null">avatar = #{avatar},</if>
-            <if test="realName != null and realName != ''">real_name = #{realName},</if>
-            <if test="idCard != null and idCard != ''">id_card = #{idCard},</if>
-            <if test="idCardFront != null and idCardFront != ''">id_card_front = #{idCardFront},</if>
-            <if test="idCardBack != null and idCardBack != ''">id_card_back = #{idCardBack},</if>
-            <if test="phone != null and phone != ''">phone = #{phone},</if>
-            <if test="auditStatus != null">audit_status = #{auditStatus},</if>
-            <if test="workStatus != null">work_status = #{workStatus},</if>
-            <if test="creditScore != null">credit_score = #{creditScore},</if>
-            <if test="accountStatus != null">account_status = #{accountStatus},</if>
-            <if test="createTime != null">create_time = #{createTime},</if>
-            <if test="updateTime != null">update_time = #{updateTime},</if>
-        </trim>
-        where rider_base_id = #{riderBaseId}
+    <!-- 修改骑手工作状态 -->
+    <update id="updateRiderWorkStatus" parameterType="com.ruoyi.platform.domain.RiderBase">
+        UPDATE rider_base
+        SET work_status = #{workStatus},
+            update_time = NOW()
+        WHERE rider_base_id = #{riderBaseId}
     </update>
 
-    <delete id="deleteRiderBaseByRiderBaseId" parameterType="Long">
-        delete from rider_base where rider_base_id = #{riderBaseId}
-    </delete>
+    <update id="updateRiderAuthInfo" parameterType="com.ruoyi.platform.domain.RiderBase">
+        UPDATE rider_base
+        SET real_name = #{realName},
+            id_card = #{idCard},
+            id_card_front = #{idCardFront},
+            id_card_back = #{idCardBack},
+            audit_status = #{auditStatus},
+            update_time = NOW()
+        WHERE rider_base_id = #{riderBaseId}
+    </update>
 
     <delete id="deleteRiderBaseByRiderBaseIds" parameterType="String">
         delete from rider_base where rider_base_id in

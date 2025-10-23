@@ -7,7 +7,8 @@ ruoyi:
   # 版权年份
   copyrightYear: 2025
   # 文件路径 示例（ Windows配置D:/ruoyi/uploadPath，Linux配置 /home/ruoyi/uploadPath）
-  profile: D:/ruoyi/uploadPath
+#  profile: D:/ruoyi/uploadPath
+  profile: E:/LocalImage
   # 获取ip地址开关
   addressEnabled: false
   # 验证码类型 math 数字计算 char 字符验证
@@ -52,7 +53,7 @@ spring:
     # 国际化资源文件路径
     basename: i18n/messages
   profiles:
-    active: druid
+    active: dev,druid
   # 文件上传
   servlet:
     multipart:
@@ -142,3 +143,15 @@ xss:
   excludes: /system/notice
   # 匹配链接
   urlPatterns: /system/*,/monitor/*,/tool/*
+
+
+# 新增关于文件上传选项
+file:
+  storage: local
+  cloud:
+    enabled: false  # 若 true 且存在 CloudStorageService Bean，则优先使用云端
+    type: oss
+    endpoint: http://oss-cn-hangzhou.aliyuncs.com
+    bucket: my-bucket
+    access-key: xxx
+    secret-key: xxx

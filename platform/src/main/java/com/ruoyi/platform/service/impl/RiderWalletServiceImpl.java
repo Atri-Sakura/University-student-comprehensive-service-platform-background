@@ -20,18 +20,21 @@ public class RiderWalletServiceImpl implements IRiderWalletService
     @Autowired
     private RiderWalletMapper riderWalletMapper;
 
+
     /**
      * 查询骑手钱包
      * 
-     * @param riderWalletId 骑手钱包主键
      * @return 骑手钱包
      */
     @Override
-    public RiderWallet selectRiderWalletByRiderWalletId(Long riderWalletId)
-    {
-        return riderWalletMapper.selectRiderWalletByRiderWalletId(riderWalletId);
+    public RiderWallet selectRiderWalletByRiderWalletId(Long riderWalletId) {
+        return null;
     }
 
+    @Override
+    public RiderWallet selectRiderWalletByRiderBaseId(Long riderBaseId) {
+        return riderWalletMapper.selectRiderWalletByRiderBaseId(riderBaseId);
+    }
     /**
      * 查询骑手钱包列表
      * 
