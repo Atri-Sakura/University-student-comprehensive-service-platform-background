@@ -10,7 +10,7 @@ import com.ruoyi.common.core.domain.BaseEntity;
  * 商家基础信息对象 merchant_base
  * 
  * @author ruoyi
- * @date 2025-10-16
+ * @date 2025-10-20
  */
 public class MerchantBase extends BaseEntity
 {
@@ -86,6 +86,33 @@ public class MerchantBase extends BaseEntity
     /** 店铺纬度 */
     @Excel(name = "店铺纬度")
     private BigDecimal latitude;
+
+    /** 对应sys_user表的用户ID */
+    private Long userId;
+
+    public void setUserId(Long userId)
+    {
+        this.userId = userId;
+    }
+
+    public Long getUserId()
+    {
+        return userId;
+    }
+
+    /** 手机号 */
+    @Excel(name = "手机号")
+    private String phone;
+
+    public void setPhone(String phone)
+    {
+        this.phone = phone;
+    }
+
+    public String getPhone()
+    {
+        return phone;
+    }
 
     public void setMerchantBaseId(Long merchantBaseId) 
     {

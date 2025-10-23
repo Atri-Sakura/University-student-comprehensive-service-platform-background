@@ -2,12 +2,13 @@ package com.ruoyi.platform.service;
 
 import java.util.List;
 import com.ruoyi.platform.domain.UserBase;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * 用户基础信息Service接口
  * 
  * @author ruoyi
- * @date 2025-10-16
+ * @date 2025-10-20
  */
 public interface IUserBaseService 
 {
@@ -58,4 +59,6 @@ public interface IUserBaseService
      * @return 结果
      */
     public int deleteUserBaseByUserBaseId(Long userBaseId);
+
+    public String updateAvatar(MultipartFile file,Long userBaseId);
 }

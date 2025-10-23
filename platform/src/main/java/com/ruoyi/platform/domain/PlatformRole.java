@@ -9,7 +9,7 @@ import com.ruoyi.common.core.domain.BaseEntity;
  * 角色对象 platform_role
  * 
  * @author ruoyi
- * @date 2025-10-16
+ * @date 2025-10-20
  */
 public class PlatformRole extends BaseEntity
 {

@@ -12,7 +12,7 @@ import com.ruoyi.platform.service.IPlatformCouponService;
  * 平台优惠券Service业务层处理
  * 
  * @author ruoyi
- * @date 2025-10-16
+ * @date 2025-10-20
  */
 @Service
 public class PlatformCouponServiceImpl implements IPlatformCouponService 

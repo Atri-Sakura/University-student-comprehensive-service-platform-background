@@ -1,9 +1,9 @@
 import request from '@/utils/request'
 
-// 登录方法
-export function login(username, password, code, uuid) {
+// 登录方法 (修改参数名为 phonenumber)
+export function login(phonenumber, password, code, uuid) {
   const data = {
-    username,
+    phonenumber,  // 改为手机号
     password,
     code,
     uuid

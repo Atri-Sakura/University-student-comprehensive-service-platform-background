@@ -12,7 +12,7 @@ import com.ruoyi.platform.service.ISecondhandGoodsImageService;
  * 二手商品图片(支持1-9张图片)Service业务层处理
  * 
  * @author ruoyi
- * @date 2025-10-16
+ * @date 2025-10-20
  */
 @Service
 public class SecondhandGoodsImageServiceImpl implements ISecondhandGoodsImageService 

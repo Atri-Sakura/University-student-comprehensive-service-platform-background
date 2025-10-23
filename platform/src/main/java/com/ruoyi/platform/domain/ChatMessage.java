@@ -1,6 +1,8 @@
 package com.ruoyi.platform.domain;
 
 import java.util.Date;
+
+
 import com.fasterxml.jackson.annotation.JsonFormat;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -11,17 +13,19 @@ import com.ruoyi.common.core.domain.BaseEntity;
  * 聊天消息（存储单条消息的核心信息）对象 chat_message
  * 
  * @author ruoyi
- * @date 2025-10-16
+ * @date 2025-10-20
  */
 public class ChatMessage extends BaseEntity
 {
     private static final long serialVersionUID = 1L;
 
     /** 消息唯一ID（雪花算法生成，全局唯一） */
+//    @TableId(type = IdType.ASSIGN_ID )
     private Long messageId;
 
     /** 所属会话ID（关联chat_session.session_id，聚合同一会话的消息） */
     @Excel(name = "所属会话ID", readConverterExp = "关=联chat_session.session_id，聚合同一会话的消息")
+
     private Long sessionId;
 
     /** 发送方类型：1-用户 2-骑手 3-商家 4-系统 */
@@ -94,7 +98,7 @@ public class ChatMessage extends BaseEntity
         this.fromType = fromType;
     }
 
-    public Long getFromType() 
+    public Long getFromType()
     {
         return fromType;
     }

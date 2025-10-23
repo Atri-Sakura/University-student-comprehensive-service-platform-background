@@ -35,7 +35,6 @@ public interface RiderBaseMapper
      */
     public int insertRiderBase(RiderBase riderBase);
 
-    int updateRiderBaseBasicInfo(RiderBase riderBase);
     /**
      * 修改骑手基础信息
      * 
@@ -71,4 +70,12 @@ public interface RiderBaseMapper
      */
     int updateRiderAuthInfo(RiderBase rider);
 
+
+    /**
+     * 通过手机号查询骑手
+     *
+     * @param phone 手机号
+     * @return 骑手基础信息
+     */
+    public RiderBase selectRiderBaseByPhone(String phone);
 }

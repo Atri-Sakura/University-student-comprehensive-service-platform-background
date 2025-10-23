@@ -11,7 +11,7 @@ import com.ruoyi.common.core.domain.BaseEntity;
  * 系统公告对象 platform_announcement
  * 
  * @author ruoyi
- * @date 2025-10-16
+ * @date 2025-10-20
  */
 public class PlatformAnnouncement extends BaseEntity
 {

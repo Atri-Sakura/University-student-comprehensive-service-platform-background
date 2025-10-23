@@ -13,7 +13,7 @@ import com.ruoyi.system.service.ISysConfigService;
 
 /**
  * 注册验证
- * 
+ *
  * @author ruoyi
  */
 @RestController
@@ -25,6 +25,9 @@ public class SysRegisterController extends BaseController
     @Autowired
     private ISysConfigService configService;
 
+    /**
+     * 用户注册 (支持手机号注册)
+     */
     @PostMapping("/register")
     public AjaxResult register(@RequestBody RegisterBody user)
     {

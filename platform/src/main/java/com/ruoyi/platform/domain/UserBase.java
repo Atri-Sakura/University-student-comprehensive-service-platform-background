@@ -11,7 +11,7 @@ import com.ruoyi.common.core.domain.BaseEntity;
  * 用户基础信息对象 user_base
  * 
  * @author ruoyi
- * @date 2025-10-16
+ * @date 2025-10-20
  */
 public class UserBase extends BaseEntity
 {
@@ -76,6 +76,19 @@ public class UserBase extends BaseEntity
     /** 最后登录IP */
     @Excel(name = "最后登录IP")
     private String lastLoginIp;
+
+    /** 对应sys_user表的用户ID */
+    private Long userId;
+
+    public void setUserId(Long userId)
+    {
+        this.userId = userId;
+    }
+
+    public Long getUserId()
+    {
+        return userId;
+    }
 
     public void setUserBaseId(Long userBaseId) 
     {

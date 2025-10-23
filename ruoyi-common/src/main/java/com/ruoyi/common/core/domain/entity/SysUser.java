@@ -92,6 +92,19 @@ public class SysUser extends BaseEntity
     /** 角色ID */
     private Long roleId;
 
+    /** 角色：0-平台管理员 1-用户 2-骑手 3-商家 */
+    private Integer role;
+
+    public Integer getRole()
+    {
+        return role;
+    }
+
+    public void setRole(Integer role)
+    {
+        this.role = role;
+    }
+
     public SysUser()
     {
 

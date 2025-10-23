@@ -11,7 +11,7 @@ import com.ruoyi.common.core.domain.BaseEntity;
  * 消息已读状态（追踪每条消息的已读情况，支撑群聊扩展）对象 chat_message_read
  * 
  * @author ruoyi
- * @date 2025-10-16
+ * @date 2025-10-20
  */
 public class ChatMessageRead extends BaseEntity
 {

@@ -12,7 +12,7 @@ import com.ruoyi.platform.service.IPlatformAnnouncementService;
  * 系统公告Service业务层处理
  * 
  * @author ruoyi
- * @date 2025-10-16
+ * @date 2025-10-20
  */
 @Service
 public class PlatformAnnouncementServiceImpl implements IPlatformAnnouncementService 

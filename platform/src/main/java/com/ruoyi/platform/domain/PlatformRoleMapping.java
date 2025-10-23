@@ -9,7 +9,7 @@ import com.ruoyi.common.core.domain.BaseEntity;
  * 角色-账号映射（多角色登录路由核心）对象 platform_role_mapping
  * 
  * @author ruoyi
- * @date 2025-10-16
+ * @date 2025-10-20
  */
 public class PlatformRoleMapping extends BaseEntity
 {

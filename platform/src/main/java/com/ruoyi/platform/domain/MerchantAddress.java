@@ -9,7 +9,7 @@ import com.ruoyi.common.core.domain.BaseEntity;
  * 商家地址对象 merchant_address
  * 
  * @author ruoyi
- * @date 2025-10-16
+ * @date 2025-10-20
  */
 public class MerchantAddress extends BaseEntity
 {

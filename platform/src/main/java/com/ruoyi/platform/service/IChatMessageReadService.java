@@ -7,7 +7,7 @@ import com.ruoyi.platform.domain.ChatMessageRead;
  * 消息已读状态（追踪每条消息的已读情况，支撑群聊扩展）Service接口
  * 
  * @author ruoyi
- * @date 2025-10-16
+ * @date 2025-10-20
  */
 public interface IChatMessageReadService 
 {

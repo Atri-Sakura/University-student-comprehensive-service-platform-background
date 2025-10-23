@@ -12,7 +12,7 @@ import com.ruoyi.platform.service.IPlatformRolePermService;
  * 角色权限关联Service业务层处理
  * 
  * @author ruoyi
- * @date 2025-10-16
+ * @date 2025-10-20
  */
 @Service
 public class PlatformRolePermServiceImpl implements IPlatformRolePermService 

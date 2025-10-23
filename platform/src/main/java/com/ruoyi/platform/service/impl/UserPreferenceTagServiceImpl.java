@@ -12,7 +12,7 @@ import com.ruoyi.platform.service.IUserPreferenceTagService;
  * 用户偏好标签Service业务层处理
  * 
  * @author ruoyi
- * @date 2025-10-16
+ * @date 2025-10-20
  */
 @Service
 public class UserPreferenceTagServiceImpl implements IUserPreferenceTagService 

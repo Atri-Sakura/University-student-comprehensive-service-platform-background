@@ -11,7 +11,7 @@ import com.ruoyi.common.core.domain.BaseEntity;
  * 商家评价对象 merchant_evaluation
  * 
  * @author ruoyi
- * @date 2025-10-16
+ * @date 2025-10-20
  */
 public class MerchantEvaluation extends BaseEntity
 {

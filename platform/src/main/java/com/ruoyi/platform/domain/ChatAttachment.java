@@ -9,9 +9,9 @@ import com.ruoyi.common.core.domain.BaseEntity;
 
 /**
  * 消息附件（存储图片/语音等附件的元信息）对象 chat_attachment
- *
+ * 
  * @author ruoyi
- * @date 2025-10-16
+ * @date 2025-10-20
  */
 public class ChatAttachment extends BaseEntity
 {
@@ -52,92 +52,92 @@ public class ChatAttachment extends BaseEntity
     @Excel(name = "是否有效：0-无效", readConverterExp = "已=删除/过期")
     private Long isValid;
 
-    public void setAttachmentId(Long attachmentId)
+    public void setAttachmentId(Long attachmentId) 
     {
         this.attachmentId = attachmentId;
     }
 
-    public Long getAttachmentId()
+    public Long getAttachmentId() 
     {
         return attachmentId;
     }
 
-    public void setMessageId(Long messageId)
+    public void setMessageId(Long messageId) 
     {
         this.messageId = messageId;
     }
 
-    public Long getMessageId()
+    public Long getMessageId() 
     {
         return messageId;
     }
 
-    public void setAttachmentType(Long attachmentType)
+    public void setAttachmentType(Long attachmentType) 
     {
         this.attachmentType = attachmentType;
     }
 
-    public Long getAttachmentType()
+    public Long getAttachmentType() 
     {
         return attachmentType;
     }
 
-    public void setAttachmentUrl(String attachmentUrl)
+    public void setAttachmentUrl(String attachmentUrl) 
     {
         this.attachmentUrl = attachmentUrl;
     }
 
-    public String getAttachmentUrl()
+    public String getAttachmentUrl() 
     {
         return attachmentUrl;
     }
 
-    public void setFileName(String fileName)
+    public void setFileName(String fileName) 
     {
         this.fileName = fileName;
     }
 
-    public String getFileName()
+    public String getFileName() 
     {
         return fileName;
     }
 
-    public void setFileSize(Long fileSize)
+    public void setFileSize(Long fileSize) 
     {
         this.fileSize = fileSize;
     }
 
-    public Long getFileSize()
+    public Long getFileSize() 
     {
         return fileSize;
     }
 
-    public void setFileExt(String fileExt)
+    public void setFileExt(String fileExt) 
     {
         this.fileExt = fileExt;
     }
 
-    public String getFileExt()
+    public String getFileExt() 
     {
         return fileExt;
     }
 
-    public void setExpireTime(Date expireTime)
+    public void setExpireTime(Date expireTime) 
     {
         this.expireTime = expireTime;
     }
 
-    public Date getExpireTime()
+    public Date getExpireTime() 
     {
         return expireTime;
     }
 
-    public void setIsValid(Long isValid)
+    public void setIsValid(Long isValid) 
     {
         this.isValid = isValid;
     }
 
-    public Long getIsValid()
+    public Long getIsValid() 
     {
         return isValid;
     }

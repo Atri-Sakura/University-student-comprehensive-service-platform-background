@@ -7,7 +7,7 @@ import com.ruoyi.platform.domain.MerchantEvaluation;
  * 商家评价Mapper接口
  * 
  * @author ruoyi
- * @date 2025-10-16
+ * @date 2025-10-20
  */
 public interface MerchantEvaluationMapper 
 {

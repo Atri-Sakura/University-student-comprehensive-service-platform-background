@@ -10,7 +10,7 @@ import com.ruoyi.common.core.domain.BaseEntity;
  * 用户地址对象 user_address
  * 
  * @author ruoyi
- * @date 2025-10-16
+ * @date 2025-10-20
  */
 public class UserAddress extends BaseEntity
 {

@@ -9,7 +9,7 @@ import com.ruoyi.common.core.domain.BaseEntity;
  * 用户隐私设置对象 user_privacy
  * 
  * @author ruoyi
- * @date 2025-10-16
+ * @date 2025-10-20
  */
 public class UserPrivacy extends BaseEntity
 {

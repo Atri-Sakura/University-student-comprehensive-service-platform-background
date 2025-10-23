@@ -12,7 +12,7 @@ import com.ruoyi.common.core.domain.BaseEntity;
  * 跑腿订单明细（不含地址信息）对象 order_errand_detail
  * 
  * @author ruoyi
- * @date 2025-10-16
+ * @date 2025-10-20
  */
 public class OrderErrandDetail extends BaseEntity
 {

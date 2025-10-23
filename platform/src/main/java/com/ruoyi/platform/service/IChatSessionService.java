@@ -7,7 +7,7 @@ import com.ruoyi.platform.domain.ChatSession;
  * 聊天会话（管理双方的聊天窗口关系）Service接口
  * 
  * @author ruoyi
- * @date 2025-10-16
+ * @date 2025-10-20
  */
 public interface IChatSessionService 
 {
@@ -58,4 +58,15 @@ public interface IChatSessionService
      * @return 结果
      */
     public int deleteChatSessionBySessionId(Long sessionId);
+
+
+    /**
+     * 查询会话Id
+     * @param fromType
+     * @param toType
+     * @param fromId
+     * @param toId
+     * @return
+     */
+    public Long selectChatSessionIdByFromTo(Long fromType, Long fromId, Long toType, Long toId);
 }

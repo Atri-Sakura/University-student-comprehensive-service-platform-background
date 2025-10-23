@@ -7,7 +7,7 @@ import com.ruoyi.platform.domain.MerchantActivity;
  * 商家活动Mapper接口
  * 
  * @author ruoyi
- * @date 2025-10-16
+ * @date 2025-10-20
  */
 public interface MerchantActivityMapper 
 {

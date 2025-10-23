@@ -11,7 +11,7 @@ import com.ruoyi.platform.service.IOrderErrandDetailService;
  * 跑腿订单明细（不含地址信息）Service业务层处理
  * 
  * @author ruoyi
- * @date 2025-10-16
+ * @date 2025-10-20
  */
 @Service
 public class OrderErrandDetailServiceImpl implements IOrderErrandDetailService 

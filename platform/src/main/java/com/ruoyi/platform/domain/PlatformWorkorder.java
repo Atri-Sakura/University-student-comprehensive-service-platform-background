@@ -11,7 +11,7 @@ import com.ruoyi.common.core.domain.BaseEntity;
  * 客服工单对象 platform_workorder
  * 
  * @author ruoyi
- * @date 2025-10-16
+ * @date 2025-10-20
  */
 public class PlatformWorkorder extends BaseEntity
 {

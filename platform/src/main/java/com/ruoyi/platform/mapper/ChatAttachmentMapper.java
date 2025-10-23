@@ -7,7 +7,7 @@ import com.ruoyi.platform.domain.ChatAttachment;
  * 消息附件（存储图片/语音等附件的元信息）Mapper接口
  * 
  * @author ruoyi
- * @date 2025-10-16
+ * @date 2025-10-20
  */
 public interface ChatAttachmentMapper 
 {

@@ -12,7 +12,7 @@ import com.ruoyi.platform.service.IRiderEvaluationService;
  * 骑手评价Service业务层处理
  * 
  * @author ruoyi
- * @date 2025-10-16
+ * @date 2025-10-20
  */
 @Service
 public class RiderEvaluationServiceImpl implements IRiderEvaluationService 

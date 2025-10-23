@@ -9,7 +9,7 @@ import com.ruoyi.common.core.domain.BaseEntity;
  * 权限对象 platform_permission
  * 
  * @author ruoyi
- * @date 2025-10-16
+ * @date 2025-10-20
  */
 public class PlatformPermission extends BaseEntity
 {

@@ -7,7 +7,7 @@ import com.ruoyi.platform.domain.UserRecommendSetting;
  * 用户个性化推荐设置Service接口
  * 
  * @author ruoyi
- * @date 2025-10-16
+ * @date 2025-10-20
  */
 public interface IUserRecommendSettingService 
 {

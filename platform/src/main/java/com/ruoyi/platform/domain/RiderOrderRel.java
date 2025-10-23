@@ -11,7 +11,7 @@ import com.ruoyi.common.core.domain.BaseEntity;
  * 骑手接单关联对象 rider_order_rel
  * 
  * @author ruoyi
- * @date 2025-10-16
+ * @date 2025-10-20
  */
 public class RiderOrderRel extends BaseEntity
 {

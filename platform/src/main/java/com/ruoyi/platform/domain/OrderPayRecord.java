@@ -12,7 +12,7 @@ import com.ruoyi.common.core.domain.BaseEntity;
  * 订单支付记录对象 order_pay_record
  * 
  * @author ruoyi
- * @date 2025-10-16
+ * @date 2025-10-20
  */
 public class OrderPayRecord extends BaseEntity
 {

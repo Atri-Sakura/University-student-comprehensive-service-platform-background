@@ -23,16 +23,23 @@
             <artifactId>ruoyi-common</artifactId>
         </dependency>
 
-        <!-- RuoYi 核心框架模块（Security、Config、Filter） -->
+
         <dependency>
             <groupId>com.ruoyi</groupId>
             <artifactId>ruoyi-framework</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-all</artifactId>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <scope>provided</scope>
         </dependency>
+
+
+
     </dependencies>
 
 

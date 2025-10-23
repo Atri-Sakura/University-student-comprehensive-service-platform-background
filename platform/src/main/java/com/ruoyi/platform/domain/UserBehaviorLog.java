@@ -11,7 +11,7 @@ import com.ruoyi.common.core.domain.BaseEntity;
  * 用户行为记录对象 user_behavior_log
  * 
  * @author ruoyi
- * @date 2025-10-16
+ * @date 2025-10-20
  */
 public class UserBehaviorLog extends BaseEntity
 {

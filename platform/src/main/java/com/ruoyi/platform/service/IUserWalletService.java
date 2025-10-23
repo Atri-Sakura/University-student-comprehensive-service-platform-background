@@ -7,7 +7,7 @@ import com.ruoyi.platform.domain.UserWallet;
  * 用户钱包Service接口
  * 
  * @author ruoyi
- * @date 2025-10-16
+ * @date 2025-10-20
  */
 public interface IUserWalletService 
 {

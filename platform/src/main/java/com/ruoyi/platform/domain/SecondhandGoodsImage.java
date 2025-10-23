@@ -9,7 +9,7 @@ import com.ruoyi.common.core.domain.BaseEntity;
  * 二手商品图片(支持1-9张图片)对象 secondhand_goods_image
  * 
  * @author ruoyi
- * @date 2025-10-16
+ * @date 2025-10-20
  */
 public class SecondhandGoodsImage extends BaseEntity
 {

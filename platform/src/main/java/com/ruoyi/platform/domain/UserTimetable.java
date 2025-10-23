@@ -11,7 +11,7 @@ import com.ruoyi.common.core.domain.BaseEntity;
  * 个人课对象 user_timetable
  * 
  * @author ruoyi
- * @date 2025-10-16
+ * @date 2025-10-20
  */
 public class UserTimetable extends BaseEntity
 {
@@ -33,7 +33,7 @@ public class UserTimetable extends BaseEntity
     private String teacherName;
 
     /** 上课教室（如"1号教学楼302"） */
-    @Excel(name = "上课教室", readConverterExp = "如= 1号教学楼302")
+    @Excel(name = "上课教室", readConverterExp = "如=1号教学楼302")
     private String classRoom;
 
     /** 星期(1-周一 7-周日) */

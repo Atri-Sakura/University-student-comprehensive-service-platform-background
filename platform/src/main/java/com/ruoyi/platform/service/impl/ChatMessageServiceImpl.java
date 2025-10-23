@@ -12,7 +12,7 @@ import com.ruoyi.platform.service.IChatMessageService;
  * 聊天消息（存储单条消息的核心信息）Service业务层处理
  * 
  * @author ruoyi
- * @date 2025-10-16
+ * @date 2025-10-20
  */
 @Service
 public class ChatMessageServiceImpl implements IChatMessageService 
@@ -93,4 +93,11 @@ public class ChatMessageServiceImpl implements IChatMessageService
     {
         return chatMessageMapper.deleteChatMessageByMessageId(messageId);
     }
+
+    public void updateChatMessageStatus(ChatMessage chatMessage,Long statusId){
+        chatMessage.setMsgStatus(statusId);
+        chatMessageMapper.updateChatMessage(chatMessage);
+    }
+
+
 }

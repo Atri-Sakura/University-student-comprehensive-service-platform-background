@@ -7,7 +7,7 @@ import com.ruoyi.platform.domain.OrderErrandDetail;
  * 跑腿订单明细（不含地址信息）Mapper接口
  * 
  * @author ruoyi
- * @date 2025-10-16
+ * @date 2025-10-20
  */
 public interface OrderErrandDetailMapper 
 {

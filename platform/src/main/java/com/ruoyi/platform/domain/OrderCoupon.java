@@ -10,7 +10,7 @@ import com.ruoyi.common.core.domain.BaseEntity;
  * 订单优惠券对象 order_coupon
  * 
  * @author ruoyi
- * @date 2025-10-16
+ * @date 2025-10-20
  */
 public class OrderCoupon extends BaseEntity
 {

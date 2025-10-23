@@ -12,7 +12,7 @@ import com.ruoyi.platform.service.IChatSessionService;
  * 聊天会话（管理双方的聊天窗口关系）Service业务层处理
  * 
  * @author ruoyi
- * @date 2025-10-16
+ * @date 2025-10-20
  */
 @Service
 public class ChatSessionServiceImpl implements IChatSessionService 
@@ -53,6 +53,7 @@ public class ChatSessionServiceImpl implements IChatSessionService
     @Override
     public int insertChatSession(ChatSession chatSession)
     {
+
         chatSession.setCreateTime(DateUtils.getNowDate());
         return chatSessionMapper.insertChatSession(chatSession);
     }
@@ -93,4 +94,12 @@ public class ChatSessionServiceImpl implements IChatSessionService
     {
         return chatSessionMapper.deleteChatSessionBySessionId(sessionId);
     }
+
+    @Override
+    public Long selectChatSessionIdByFromTo(Long fromType, Long fromId, Long toType, Long toId)
+    {
+        return chatSessionMapper.selectChatSessionIdByFromTo(fromType, fromId, toType, toId);
+    }
+
+
 }

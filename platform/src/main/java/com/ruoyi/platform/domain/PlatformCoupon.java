@@ -12,7 +12,7 @@ import com.ruoyi.common.core.domain.BaseEntity;
  * 平台优惠券对象 platform_coupon
  * 
  * @author ruoyi
- * @date 2025-10-16
+ * @date 2025-10-20
  */
 public class PlatformCoupon extends BaseEntity
 {

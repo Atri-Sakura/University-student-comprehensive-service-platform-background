@@ -7,7 +7,7 @@ import com.ruoyi.platform.domain.UserCreditScoreRecord;
  * 用户信用分流水Mapper接口
  * 
  * @author ruoyi
- * @date 2025-10-16
+ * @date 2025-10-20
  */
 public interface UserCreditScoreRecordMapper 
 {

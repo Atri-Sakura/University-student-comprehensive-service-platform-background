@@ -7,7 +7,7 @@ import com.ruoyi.platform.domain.PlatformCoupon;
  * 平台优惠券Mapper接口
  * 
  * @author ruoyi
- * @date 2025-10-16
+ * @date 2025-10-20
  */
 public interface PlatformCouponMapper 
 {

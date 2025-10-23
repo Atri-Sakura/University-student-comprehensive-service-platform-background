@@ -7,7 +7,7 @@ import com.ruoyi.platform.domain.OrderSecondhandDetail;
  * 二手交易订单明细（不含地址信息）Mapper接口
  * 
  * @author ruoyi
- * @date 2025-10-16
+ * @date 2025-10-20
  */
 public interface OrderSecondhandDetailMapper 
 {

@@ -12,7 +12,7 @@ import com.ruoyi.common.core.domain.BaseEntity;
  * 骑手钱包流水对象 rider_wallet_record
  * 
  * @author ruoyi
- * @date 2025-10-16
+ * @date 2025-10-20
  */
 public class RiderWalletRecord extends BaseEntity
 {

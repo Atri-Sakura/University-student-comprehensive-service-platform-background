@@ -7,7 +7,7 @@ import com.ruoyi.platform.domain.ChatMessage;
  * 聊天消息（存储单条消息的核心信息）Mapper接口
  * 
  * @author ruoyi
- * @date 2025-10-16
+ * @date 2025-10-20
  */
 public interface ChatMessageMapper 
 {

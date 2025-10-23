@@ -7,7 +7,7 @@ import com.ruoyi.platform.domain.GoodsEvaluationImage;
  * 商品评价图片Service接口
  * 
  * @author ruoyi
- * @date 2025-10-16
+ * @date 2025-10-20
  */
 public interface IGoodsEvaluationImageService 
 {

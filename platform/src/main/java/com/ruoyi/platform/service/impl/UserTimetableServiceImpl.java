@@ -12,7 +12,7 @@ import com.ruoyi.platform.service.IUserTimetableService;
  * 个人课Service业务层处理
  * 
  * @author ruoyi
- * @date 2025-10-16
+ * @date 2025-10-20
  */
 @Service
 public class UserTimetableServiceImpl implements IUserTimetableService 

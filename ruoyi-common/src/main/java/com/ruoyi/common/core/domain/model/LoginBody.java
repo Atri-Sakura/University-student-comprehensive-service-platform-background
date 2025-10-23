@@ -2,15 +2,15 @@ package com.ruoyi.common.core.domain.model;
 
 /**
  * 用户登录对象
- * 
+ *
  * @author ruoyi
  */
 public class LoginBody
 {
     /**
-     * 用户名
+     * 手机号码 (修改为手机号登录)
      */
-    private String username;
+    private String phonenumber;
 
     /**
      * 用户密码
@@ -27,14 +27,14 @@ public class LoginBody
      */
     private String uuid;
 
-    public String getUsername()
+    public String getPhonenumber()
     {
-        return username;
+        return phonenumber;
     }
 
-    public void setUsername(String username)
+    public void setPhonenumber(String phonenumber)
     {
-        this.username = username;
+        this.phonenumber = phonenumber;
     }
 
     public String getPassword()

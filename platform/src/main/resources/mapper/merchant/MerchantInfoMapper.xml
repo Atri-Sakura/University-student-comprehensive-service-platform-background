@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.platform.merchant.mapper.MerchantInfoMapper">
+
+    <!-- 商家基础信息映射 -->
+    <resultMap id="MerchantBaseResult" type="MerchantBase">
+        <result property="merchantBaseId" column="merchant_base_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="username" column="username"/>
+        <result property="phone" column="phone"/>
+        <result property="password" column="password"/>
+        <result property="merchantName" column="merchant_name"/>
+        <result property="logo" column="logo"/>
+        <result property="merchantAddressId" column="merchant_address_id"/>
+        <result property="businessScope" column="business_scope"/>
+        <result property="businessHours" column="business_hours"/>
+        <result property="deliveryRange" column="delivery_range"/>
+        <result property="minOrderAmount" column="min_order_amount"/>
+        <result property="deliveryFee" column="delivery_fee"/>
+        <result property="licenseImg" column="license_img"/>
+        <result property="rating" column="rating"/>
+        <result property="monthSales" column="month_sales"/>
+        <result property="auditStatus" column="audit_status"/>
+        <result property="businessStatus" column="business_status"/>
+        <result property="longitude" column="longitude"/>
+        <result property="latitude" column="latitude"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <!-- 查询商家基础信息 -->
+    <select id="selectMerchantBaseByMerchantBaseId" parameterType="Long" resultMap="MerchantBaseResult">
+        select * from merchant_base where merchant_base_id = #{merchantBaseId}
+    </select>
+
+    <!-- 修改商家基础信息 -->
+    <update id="updateMerchantBase" parameterType="MerchantBase">
+        update merchant_base
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="username != null and username != ''">username = #{username},</if>
+            <if test="phone != null and phone != ''">phone = #{phone},</if>
+            <if test="password != null and password != ''">password = #{password},</if>
+            <if test="merchantName != null and merchantName != ''">merchant_name = #{merchantName},</if>
+            <if test="logo != null">logo = #{logo},</if>
+            <if test="merchantAddressId != null">merchant_address_id = #{merchantAddressId},</if>
+            <if test="businessScope != null and businessScope != ''">business_scope = #{businessScope},</if>
+            <if test="businessHours != null and businessHours != ''">business_hours = #{businessHours},</if>
+            <if test="deliveryRange != null">delivery_range = #{deliveryRange},</if>
+            <if test="minOrderAmount != null">min_order_amount = #{minOrderAmount},</if>
+            <if test="deliveryFee != null">delivery_fee = #{deliveryFee},</if>
+            <if test="licenseImg != null and licenseImg != ''">license_img = #{licenseImg},</if>
+            <if test="rating != null">rating = #{rating},</if>
+            <if test="monthSales != null">month_sales = #{monthSales},</if>
+            <if test="auditStatus != null">audit_status = #{auditStatus},</if>
+            <if test="businessStatus != null">business_status = #{businessStatus},</if>
+            <if test="longitude != null">longitude = #{longitude},</if>
+            <if test="latitude != null">latitude = #{latitude},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where merchant_base_id = #{merchantBaseId}
+    </update>
+</mapper>

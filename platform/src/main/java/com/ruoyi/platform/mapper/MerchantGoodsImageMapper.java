@@ -7,7 +7,7 @@ import com.ruoyi.platform.domain.MerchantGoodsImage;
  * 商品图片关联（支持多图展示）Mapper接口
  * 
  * @author ruoyi
- * @date 2025-10-16
+ * @date 2025-10-20
  */
 public interface MerchantGoodsImageMapper 
 {

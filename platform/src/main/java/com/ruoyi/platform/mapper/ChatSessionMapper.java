@@ -7,7 +7,7 @@ import com.ruoyi.platform.domain.ChatSession;
  * 聊天会话（管理双方的聊天窗口关系）Mapper接口
  * 
  * @author ruoyi
- * @date 2025-10-16
+ * @date 2025-10-20
  */
 public interface ChatSessionMapper 
 {
@@ -58,4 +58,14 @@ public interface ChatSessionMapper
      * @return 结果
      */
     public int deleteChatSessionBySessionIds(Long[] sessionIds);
+
+    /**
+     * 获取会话Id
+     * @param fromType
+     * @param toType
+     * @param fromId
+     * @param toId
+     * @return
+     */
+    public Long selectChatSessionIdByFromTo(Long fromType, Long fromId,Long toType,Long toId);
 }
