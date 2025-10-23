@@ -24,6 +24,10 @@ public class SysUser extends BaseEntity
     /** 用户ID */
     @Excel(name = "用户序号", type = Type.EXPORT, cellType = ColumnType.NUMERIC, prompt = "用户编号")
     private Long userId;
+    private Long userBaseId;
+    private Long riderBaseId;
+    private Long merchantBaseId;
+
 
     /** 部门ID */
     @Excel(name = "部门编号", type = Type.IMPORT)
@@ -124,6 +128,18 @@ public class SysUser extends BaseEntity
     {
         this.userId = userId;
     }
+
+    public Long getUserBaseId() { return userBaseId; }
+
+    public void setUserBaseId(Long userBaseId) { this.userBaseId = userBaseId; }
+
+    public Long getRiderBaseId() { return riderBaseId; }
+
+    public void setRiderBaseId(Long riderBaseId) { this.riderBaseId = riderBaseId; }
+
+    public Long getMerchantBaseId() { return merchantBaseId; }
+
+    public void setMerchantBaseId(Long merchantBaseId) { this.merchantBaseId = merchantBaseId; }
 
     public boolean isAdmin()
     {

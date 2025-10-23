@@ -62,6 +62,11 @@ public class UserDetailsServiceImpl implements UserDetailsService
 
     public UserDetails createLoginUser(SysUser user)
     {
-        return new LoginUser(user.getUserId(), user.getDeptId(), user, permissionService.getMenuPermission(user));
+        LoginUser loginUser = new LoginUser(user.getUserId(), user.getDeptId(), user, permissionService.getMenuPermission(user));
+        // 赋值基础ID
+        loginUser.setUserBaseId(user.getUserBaseId());
+        loginUser.setRiderBaseId(user.getRiderBaseId());
+        loginUser.setMerchantBaseId(user.getMerchantBaseId());
+        return loginUser;
     }
 }
