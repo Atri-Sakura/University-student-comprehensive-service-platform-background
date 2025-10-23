@@ -19,4 +19,68 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         FROM rider_wallet
         WHERE rider_base_id = #{riderBaseId}
     </select>
+
+    <!--
+        查询骑手钱包列表
+        参数：riderWallet（可按条件筛选）
+    -->
+    <select id="selectRiderWalletList" parameterType="com.ruoyi.platform.domain.RiderWallet" resultMap="RiderWalletResult">
+        SELECT rider_wallet_id, rider_base_id, balance, freeze_amount, create_time, update_time
+        FROM rider_wallet
+        <where>
+            <if test="riderBaseId != null">
+                AND rider_base_id = #{riderBaseId}
+            </if>
+            <if test="balance != null">
+                AND balance = #{balance}
+            </if>
+            <if test="freezeAmount != null">
+                AND freeze_amount = #{freezeAmount}
+            </if>
+        </where>
+        ORDER BY create_time DESC
+    </select>
+
+    <!--
+        新增骑手钱包
+        参数：riderWallet
+    -->
+    <insert id="insertRiderWallet" parameterType="com.ruoyi.platform.domain.RiderWallet" useGeneratedKeys="true" keyProperty="riderWalletId">
+        INSERT INTO rider_wallet (rider_base_id, balance, freeze_amount, create_time)
+        VALUES (#{riderBaseId}, #{balance}, #{freezeAmount}, NOW())
+    </insert>
+
+    <!--
+        修改骑手钱包
+        参数：riderWallet
+    -->
+    <update id="updateRiderWallet" parameterType="com.ruoyi.platform.domain.RiderWallet">
+        UPDATE rider_wallet
+        <set>
+            <if test="balance != null">balance = #{balance},</if>
+            <if test="freezeAmount != null">freeze_amount = #{freezeAmount},</if>
+            update_time = NOW()
+        </set>
+        WHERE rider_wallet_id = #{riderWalletId}
+    </update>
+
+    <!--
+        批量删除骑手钱包
+        参数：riderWalletIds (Long[])
+    -->
+    <delete id="deleteRiderWalletByRiderWalletIds" parameterType="long">
+        DELETE FROM rider_wallet
+        WHERE rider_wallet_id IN
+        <foreach collection="riderWalletIds" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <!--
+        删除单个骑手钱包
+        参数：riderWalletId
+    -->
+    <delete id="deleteRiderWalletByRiderWalletId" parameterType="long">
+        DELETE FROM rider_wallet WHERE rider_wallet_id = #{riderWalletId}
+    </delete>
 </mapper>

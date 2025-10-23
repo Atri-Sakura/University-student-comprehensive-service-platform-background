@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("api/rider/wallet")
-public class RiderWalletController {
+public class RiderWalletRiderController {
 
     @Autowired
     private IRiderWalletService riderWalletService;

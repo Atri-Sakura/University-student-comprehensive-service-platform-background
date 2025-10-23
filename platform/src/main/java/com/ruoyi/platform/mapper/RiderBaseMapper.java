@@ -78,4 +78,6 @@ public interface RiderBaseMapper
      * @return 骑手基础信息
      */
     public RiderBase selectRiderBaseByPhone(String phone);
+
+    int updateRiderBaseBasicInfo(RiderBase riderBase);
 }
