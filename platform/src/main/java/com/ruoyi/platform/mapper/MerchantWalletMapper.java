@@ -2,6 +2,7 @@ package com.ruoyi.platform.mapper;
 
 import java.util.List;
 import com.ruoyi.platform.domain.MerchantWallet;
+import io.lettuce.core.dynamic.annotation.Param;
 
 /**
  * 商家钱包Mapper接口
@@ -58,4 +59,12 @@ public interface MerchantWalletMapper
      * @return 结果
      */
     public int deleteMerchantWalletByMerchantWalletIds(Long[] merchantWalletIds);
+
+    /**
+     * 根据商家ID查询钱包信息
+     *
+     * @param merchantBaseId 商家ID
+     * @return 钱包信息
+     */
+    MerchantWallet selectMerchantWalletByMerchantId(@Param("merchantBaseId") Long merchantBaseId);
 }

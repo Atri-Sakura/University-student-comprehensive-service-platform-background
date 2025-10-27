@@ -1,7 +1,12 @@
 package com.ruoyi.platform.mapper;
 
+import java.math.BigDecimal;
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
+
 import com.ruoyi.platform.domain.OrderMain;
+import io.lettuce.core.dynamic.annotation.Param;
 
 /**
  * 订单主（整合地址与定位信息）Mapper接口
@@ -58,4 +63,18 @@ public interface OrderMainMapper
      * @return 结果
      */
     public int deleteOrderMainByOrderMainIds(Long[] orderMainIds);
+
+    /**
+     * 查询商家今日订单收入
+     */
+    Map<String, Object> selectMerchantTodayIncome(@Param("merchantId") Long merchantId,
+                                                  @Param("startTime") Date startTime,
+                                                  @Param("endTime") Date endTime);
+
+    /**
+     * 查询商家今日退款金额
+     */
+    BigDecimal selectMerchantTodayRefund(@Param("merchantId") Long merchantId,
+                                         @Param("startTime") Date startTime,
+                                         @Param("endTime") Date endTime);
 }

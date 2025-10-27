@@ -31,6 +31,8 @@ public class MerchantBase extends BaseEntity
     @Excel(name = "商家名称")
     private String merchantName;
 
+    private String description;
+
     /** 商家Logo URL */
     @Excel(name = "商家Logo URL")
     private String logo;
@@ -152,6 +154,14 @@ public class MerchantBase extends BaseEntity
     public String getMerchantName() 
     {
         return merchantName;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public void setLogo(String logo) 
