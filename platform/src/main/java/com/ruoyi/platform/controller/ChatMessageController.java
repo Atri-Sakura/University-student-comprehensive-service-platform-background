@@ -1,6 +1,8 @@
 package com.ruoyi.platform.controller;
 
 import java.util.List;
+
+import com.ruoyi.common.core.domain.entity.ChatMessage;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +18,6 @@ import com.ruoyi.common.annotation.Log;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.enums.BusinessType;
-import com.ruoyi.platform.domain.ChatMessage;
 import com.ruoyi.platform.service.IChatMessageService;
 import com.ruoyi.common.utils.poi.ExcelUtil;
 import com.ruoyi.common.core.page.TableDataInfo;

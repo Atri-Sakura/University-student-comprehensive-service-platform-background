@@ -12,6 +12,7 @@
         <result property="phone" column="phone"/>
         <result property="password" column="password"/>
         <result property="merchantName" column="merchant_name"/>
+        <result property="description" column="description"/>
         <result property="logo" column="logo"/>
         <result property="merchantAddressId" column="merchant_address_id"/>
         <result property="businessScope" column="business_scope"/>
@@ -43,6 +44,7 @@
             <if test="phone != null and phone != ''">phone = #{phone},</if>
             <if test="password != null and password != ''">password = #{password},</if>
             <if test="merchantName != null and merchantName != ''">merchant_name = #{merchantName},</if>
+            <if test="description != null">description = #{description},</if>
             <if test="logo != null">logo = #{logo},</if>
             <if test="merchantAddressId != null">merchant_address_id = #{merchantAddressId},</if>
             <if test="businessScope != null and businessScope != ''">business_scope = #{businessScope},</if>

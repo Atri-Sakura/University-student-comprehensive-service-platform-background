@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.platform.merchant.mapper.MerchantOrderMapper">
+
+    <!-- 定义用于详情查询的ResultMap，实现一对多关联 -->
+    <resultMap type="OrderMain" id="OrderMainResultWithDetails">
+        <id     property="orderMainId"      column="order_main_id"      />
+        <result property="orderNo"          column="order_no"           />
+        <result property="userId"           column="user_id"            />
+        <result property="userNickname"     column="user_nickname"      />
+        <result property="orderType"        column="order_type"         />
+        <result property="totalAmount"      column="total_amount"       />
+        <result property="payAmount"        column="pay_amount"         />
+        <result property="discountAmount"   column="discount_amount"    />
+        <result property="payStatus"        column="pay_status"         />
+        <result property="payTime"          column="pay_time"           />
+        <result property="payType"          column="pay_type"           />
+        <result property="orderStatus"      column="order_status"       />
+        <result property="pickAddress"      column="pick_address"       />
+        <result property="pickContact"      column="pick_contact"       />
+        <result property="pickPhone"        column="pick_phone"         />
+        <result property="deliverAddress"   column="deliver_address"    />
+        <result property="deliverContact"   column="deliver_contact"    />
+        <result property="deliverPhone"     column="deliver_phone"      />
+        <result property="createTime"       column="create_time"        />
+        <result property="updateTime"       column="update_time"        />
+        <result property="completeTime"     column="complete_time"      />
+        <!-- 一对多关联：订单明细列表 -->
+        <collection property="orderTakeoutDetailList" ofType="OrderTakeoutDetail" javaType="java.util.List">
+            <id     property="orderTakeoutDetailId" column="detail_id"          />
+            <result property="goodsId"              column="goods_id"           />
+            <result property="goodsName"            column="goods_name"         />
+            <result property="goodsPrice"           column="goods_price"        />
+            <result property="quantity"             column="quantity"           />
+            <result property="subtotal"             column="subtotal"           />
+            <result property="goodsSpec"            column="goods_spec"         />
+        </collection>
+    </resultMap>
+
+    <resultMap type="OrderMain" id="OrderMainResult">
+        <id     property="orderMainId"      column="order_main_id"      />
+        <result property="orderNo"          column="order_no"           />
+        <result property="userId"           column="user_id"            />
+        <result property="userNickname"     column="user_nickname"      />
+        <result property="orderType"        column="order_type"         />
+        <result property="totalAmount"      column="total_amount"       />
+        <result property="payAmount"        column="pay_amount"         />
+        <result property="discountAmount"   column="discount_amount"    />
+        <result property="payStatus"        column="pay_status"         />
+        <result property="payTime"          column="pay_time"           />
+        <result property="payType"          column="pay_type"           />
+        <result property="orderStatus"      column="order_status"       />
+        <result property="pickAddress"      column="pick_address"       />
+        <result property="pickContact"      column="pick_contact"       />
+        <result property="pickPhone"        column="pick_phone"         />
+        <result property="deliverAddress"   column="deliver_address"    />
+        <result property="deliverContact"   column="deliver_contact"    />
+        <result property="deliverPhone"     column="deliver_phone"      />
+        <result property="createTime"       column="create_time"        />
+        <result property="updateTime"       column="update_time"        />
+        <result property="completeTime"     column="complete_time"      />
+    </resultMap>
+
+    <!-- 商家订单列表查询 -->
+    <select id="selectMerchantOrderList" parameterType="OrderMain" resultMap="OrderMainResult">
+        SELECT DISTINCT om.* FROM order_main om
+        INNER JOIN order_takeout_detail otd ON om.order_main_id = otd.order_main_id
+        <where>
+            <if test="params.merchantId != null">
+                AND otd.merchant_id = #{params.merchantId}
+            </if>
+            <if test="orderStatus != null">
+                AND om.order_status = #{orderStatus}
+            </if>
+            <if test="orderNo != null and orderNo != ''">
+                AND om.order_no like concat('%', #{orderNo}, '%')
+            </if>
+        </where>
+        ORDER BY om.create_time DESC
+    </select>
+
+    <!-- 商家订单详情查询 -->
+    <select id="selectMerchantOrderByOrderMainId" parameterType="OrderMain" resultMap="OrderMainResultWithDetails">
+        SELECT
+        om.*,
+        otd.order_takeout_detail_id as detail_id,
+        otd.goods_id,
+        otd.goods_name,
+        otd.goods_price,
+        otd.quantity,
+        otd.subtotal,
+        otd.goods_spec
+        FROM order_main om
+        INNER JOIN order_takeout_detail otd ON om.order_main_id = otd.order_main_id
+        WHERE
+        om.order_main_id = #{orderMainId}
+        <!-- 关键权限控制：确保该订单属于当前商家 -->
+        AND otd.merchant_id = #{params.merchantId}
+    </select>
+
+    <select id="selectMerchantOrderById" resultMap="OrderMainResultWithDetails">
+        SELECT
+            om.*,
+            otd.order_takeout_detail_id as detail_id,
+            otd.goods_id,
+            otd.goods_name,
+            otd.goods_price,
+            otd.quantity,
+            otd.subtotal,
+            otd.goods_spec
+        FROM order_main om
+                 INNER JOIN order_takeout_detail otd ON om.order_main_id = otd.order_main_id
+        WHERE om.order_main_id = #{orderMainId}
+          AND otd.merchant_id = #{merchantId}
+    </select>
+
+    <select id="selectOrderMainByOrderMainId" parameterType="Long" resultType="OrderMain">
+        select * from order_main where order_main_id = #{orderMainId}
+    </select>
+
+    <update id="updateOrderMain" parameterType="OrderMain">
+        update order_main
+        <set>
+            <if test="orderStatus != null">order_status = #{orderStatus},</if>
+            <!-- 其他可更新字段 -->
+        </set>
+        where order_main_id = #{orderMainId}
+    </update>
+
+</mapper>

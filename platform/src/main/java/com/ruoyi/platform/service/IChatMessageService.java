@@ -1,7 +1,9 @@
 package com.ruoyi.platform.service;
 
+import com.ruoyi.common.core.domain.entity.ChatMessage;
+
 import java.util.List;
-import com.ruoyi.platform.domain.ChatMessage;
+
 
 /**
  * 聊天消息（存储单条消息的核心信息）Service接口

@@ -51,6 +51,7 @@
             #{expireTime},
             <if test="createTime != null">#{createTime},</if>
             <if test="updateTime != null">#{updateTime},</if>
+            <if test="isImportant != null">#{isImportant}</if>
         </trim>
     </insert>
 
@@ -63,6 +64,7 @@
             <if test="expireTime != null">expire_time = #{expireTime},</if>
             <if test="createTime != null">create_time = #{createTime},</if>
             <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="isImportant!=null">is_important = #{isImportant}</if>
         </set>
         where report_id = #{reportId}
     </update>

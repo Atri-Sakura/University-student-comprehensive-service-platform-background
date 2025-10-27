@@ -1,7 +1,7 @@
 package com.ruoyi.platform.chat.handler;
 
+import com.ruoyi.common.core.domain.entity.ChatMessage;
 import com.ruoyi.platform.chat.manager.ChannelSessionManager;
-import com.ruoyi.platform.domain.ChatMessage;
 import io.netty.channel.ChannelHandlerContext;
 import org.springframework.stereotype.Component;
 

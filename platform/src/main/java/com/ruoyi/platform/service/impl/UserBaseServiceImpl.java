@@ -100,6 +100,12 @@ public class UserBaseServiceImpl implements IUserBaseService
     }
 
     @Override
+    public Long selectUserBaseIdByPhone(String phone)
+    {
+        return userBaseMapper.selectUserIdByPhone(phone);
+    }
+
+    @Override
     public String updateAvatar(MultipartFile file, Long userBaseId){
         try{
             String avatar = minioFileUtils.upload(file, "user", userBaseId);
