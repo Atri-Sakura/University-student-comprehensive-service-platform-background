@@ -5,6 +5,8 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 
+import java.util.List;
+
 @Mapper
 public interface GoodsMapper {
 
@@ -16,4 +18,7 @@ public interface GoodsMapper {
 
     @Select("select * from merchant_goods where merchant_goods_id = #{goodsId}")
     MerchantGoods findGoodById(Long goodsId);
+
+    @Select("select * from merchant_goods where merchant_base_id = #{merchantId}")
+    List<MerchantGoods> getGoodsList(Long merchantId);
 }

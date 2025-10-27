@@ -111,7 +111,7 @@ public class RiderController {
    }
 
    /**
-     * 骑手身份验证
+    * 骑手身份验证
     * 可增强点，
     * 可能需要增强身份证格式验证
     * 照片格式验证
@@ -120,7 +120,7 @@ public class RiderController {
     *
     * 注意：
     * - 审核通过/拒绝接口由【平台端】实现（待开发 RiderAuditController）
-     */
+    */
    @PostMapping("/auth")
    public AjaxResult uploadRiderAuthInfo(
            @RequestParam("realName") String realName,
