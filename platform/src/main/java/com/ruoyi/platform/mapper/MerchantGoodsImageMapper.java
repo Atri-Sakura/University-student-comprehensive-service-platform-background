@@ -1,6 +1,8 @@
 package com.ruoyi.platform.mapper;
 
 import java.util.List;
+
+import com.ruoyi.platform.domain.GoodsEvaluationImage;
 import com.ruoyi.platform.domain.MerchantGoodsImage;
 
 /**
@@ -58,4 +60,6 @@ public interface MerchantGoodsImageMapper
      * @return 结果
      */
     public int deleteMerchantGoodsImageByMerchantGoodsImageIds(Long[] merchantGoodsImageIds);
+
+    List<GoodsEvaluationImage> selectImagesByGoodsEvaluationId(Long goodsEvaluationId);
 }

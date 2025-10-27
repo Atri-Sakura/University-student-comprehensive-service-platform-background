@@ -70,4 +70,12 @@ public class MerchantOrderController extends BaseController
         Long merchantId = SecurityUtils.getMerchantBaseId();
         return toAjax(merchantOrderService.acceptOrder(merchantId, orderMainId));
     }
+
+    @Log(title = "商家拒单", businessType = BusinessType.UPDATE)
+    @PutMapping("/reject/{orderMainId}")
+    public AjaxResult reject(@PathVariable Long orderMainId) {
+        Long merchantId = SecurityUtils.getMerchantBaseId();
+        String operator = "merchant"; // 或获取当前商家名称
+        return toAjax(merchantOrderService.rejectOrder(merchantId, orderMainId, operator));
+    }
 }
