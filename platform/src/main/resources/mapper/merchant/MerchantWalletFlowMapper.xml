@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.platform.merchant.mapper.MerchantWalletFlowMapper">
+    <!-- ========================================================= -->
+    <!-- 商家钱包流水 Mapper XML                                   -->
+    <!-- Author: Jinx                                              -->
+    <!-- Date: 2025-10-24                                          -->
+    <!-- ========================================================= -->
+
+    <!-- 公共结果映射 -->
+    <resultMap id="MerchantWalletFlowResult" type="com.ruoyi.platform.domain.MerchantWalletFlow">
+        <id     property="flowId"          column="flow_id"/>
+        <result property="merchantBaseId"  column="merchant_base_id"/>
+        <result property="orderMainId"     column="order_main_id"/>
+        <result property="withdrawId"      column="withdraw_id"/>
+        <result property="flowType"        column="flow_type"/>
+        <result property="flowAmount"      column="flow_amount"/>
+        <result property="balanceAfter"    column="balance_after"/>
+        <result property="description"     column="description"/>
+        <result property="createTime"      column="create_time"/>
+    </resultMap>
+
+    <!-- ========================================================= -->
+    <!-- 查询单条记录 -->
+    <!-- 支持根据商家ID、流水类型模糊查询                   -->
+    <select id="selectMerchantWalletFlowById" parameterType="Long" resultMap="MerchantWalletFlowResult">
+        SELECT * FROM merchant_wallet_flow WHERE flow_id = #{flowId}
+    </select>
+
+    <!-- ========================================================= -->
+    <!-- 批量查询记录 -->
+    <!-- 支持根据商家ID、流水类型模糊查询                   -->
+    <select id="selectMerchantWalletFlowList" parameterType="com.ruoyi.platform.domain.MerchantWalletFlow" resultMap="MerchantWalletFlowResult">
+        SELECT * FROM merchant_wallet_flow
+        <where>
+            <if test="merchantBaseId != null">AND merchant_base_id = #{merchantBaseId}</if>
+            <if test="flowType != null and flowType != ''">AND flow_type = #{flowType}</if>
+        </where>
+        ORDER BY create_time DESC
+    </select>
+
+    <!-- ========================================================= -->
+    <!-- 新增商家钱包流水 -->
+    <!-- ========================================================= -->
+    <insert id="insertMerchantWalletFlow" parameterType="com.ruoyi.platform.domain.MerchantWalletFlow"
+            useGeneratedKeys="true" keyProperty="flowId">
+        INSERT INTO merchant_wallet_flow (
+            merchant_base_id, order_main_id, withdraw_id,
+            flow_type, flow_amount, balance_after, description, create_time
+        ) VALUES (
+                     #{merchantBaseId}, #{orderMainId}, #{withdrawId},
+                     #{flowType}, #{flowAmount}, #{balanceAfter}, #{description}, NOW()
+                 )
+    </insert>
+
+    <!-- ========================================================= -->
+    <!-- 修改商家钱包流水 -->
+    <!-- ========================================================= -->
+    <update id="updateMerchantWalletFlow" parameterType="com.ruoyi.platform.domain.MerchantWalletFlow">
+        UPDATE merchant_wallet_flow
+        <set>
+            <if test="flowType != null">flow_type = #{flowType},</if>
+            <if test="flowAmount != null">flow_amount = #{flowAmount},</if>
+            <if test="balanceAfter != null">balance_after = #{balanceAfter},</if>
+            <if test="description != null">description = #{description},</if>
+        </set>
+        WHERE flow_id = #{flowId}
+    </update>
+
+    <!-- ========================================================= -->
+    <!-- 删除单条商家钱包流水 -->
+    <!-- ========================================================= -->
+    <delete id="deleteMerchantWalletFlowById" parameterType="Long">
+        DELETE FROM merchant_wallet_flow WHERE flow_id = #{flowId}
+    </delete>
+
+    <!-- ========================================================= -->
+    <!-- 批量删除商家钱包流水 -->
+    <!-- ========================================================= -->
+    <delete id="deleteMerchantWalletFlowByIds" parameterType="Long">
+        DELETE FROM merchant_wallet_flow WHERE flow_id IN
+        <foreach collection="array" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>
