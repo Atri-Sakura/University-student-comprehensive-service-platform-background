@@ -1,6 +1,7 @@
 package com.ruoyi.platform.merchant.service.impl;
 
 import com.ruoyi.platform.domain.OrderMain;
+import com.ruoyi.platform.merchant.vo.MerchantOrderStatusVO;
 import com.ruoyi.platform.merchant.mapper.OrderMapper;
 import com.ruoyi.platform.merchant.service.IOrderService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +44,11 @@ public class OrderService implements IOrderService {
         if (!errorMessages.isEmpty()) {
             throw new RuntimeException(String.join("; ", errorMessages));
         }
+    }
+
+    @Override
+    public MerchantOrderStatusVO getMerchantOrderStatus(Long merchantBaseId) {
+        return orderMapper.getMerchantOrderStatus(merchantBaseId);
     }
 
 }

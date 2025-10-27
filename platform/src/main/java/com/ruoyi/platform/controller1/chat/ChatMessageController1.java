@@ -1,7 +1,7 @@
 package com.ruoyi.platform.controller1.chat;
 
 import com.ruoyi.common.core.domain.R;
-import com.ruoyi.platform.domain.ChatMessage;
+import com.ruoyi.common.core.domain.entity.ChatMessage;
 import com.ruoyi.platform.service.IChatMessageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;

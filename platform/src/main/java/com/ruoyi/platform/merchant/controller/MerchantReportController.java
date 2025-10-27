@@ -64,7 +64,7 @@ public class MerchantReportController extends BaseController
     /**
      * 获取商家报表详细信息
      */
-    @PreAuthorize("@ss.hasPermi('platform:report:query')")
+//    @PreAuthorize("@ss.hasPermi('platform:report:query')")
     @GetMapping(value = "/{reportId}")
     public AjaxResult getInfo(@PathVariable("reportId") Long reportId)
     {
@@ -89,7 +89,7 @@ public class MerchantReportController extends BaseController
     /**
      * 修改商家报表
      */
-    @PreAuthorize("@ss.hasPermi('platform:report:edit')")
+//    @PreAuthorize("@ss.hasPermi('platform:report:edit')")
     @Log(title = "商家报表", businessType = BusinessType.UPDATE)
     @PutMapping
     public AjaxResult edit(@RequestBody MerchantReport merchantReport)
@@ -104,7 +104,7 @@ public class MerchantReportController extends BaseController
     /**
      * 删除商家报表
      */
-    @PreAuthorize("@ss.hasPermi('platform:report:remove')")
+//    @PreAuthorize("@ss.hasPermi('platform:report:remove')")
     @Log(title = "商家报表", businessType = BusinessType.DELETE)
     @DeleteMapping("/{reportIds}")
     public AjaxResult remove(@PathVariable Long[] reportIds)

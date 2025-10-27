@@ -1,6 +1,7 @@
 package com.ruoyi.platform.merchant.mapper;
 
 import com.ruoyi.platform.domain.OrderMain;
+import com.ruoyi.platform.merchant.vo.MerchantOrderStatusVO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
@@ -12,4 +13,6 @@ public interface OrderMapper {
 
     @Select("SELECT * FROM order_main WHERE order_no = #{orderNoId}")
     OrderMain selectOrderMainByNoId(Long orderNoId);
+
+    MerchantOrderStatusVO getMerchantOrderStatus(Long MerchantId);
 }

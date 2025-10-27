@@ -1,11 +1,13 @@
 package com.ruoyi.platform.service.impl;
 
 import java.util.List;
+
+import com.ruoyi.common.core.domain.entity.ChatMessage;
 import com.ruoyi.common.utils.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.ruoyi.platform.mapper.ChatMessageMapper;
-import com.ruoyi.platform.domain.ChatMessage;
+
 import com.ruoyi.platform.service.IChatMessageService;
 
 /**

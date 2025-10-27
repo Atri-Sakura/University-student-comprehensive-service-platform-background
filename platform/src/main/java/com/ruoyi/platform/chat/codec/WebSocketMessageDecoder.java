@@ -1,7 +1,8 @@
 package com.ruoyi.platform.chat.codec;
 
 import com.alibaba.fastjson2.JSON;
-import com.ruoyi.platform.domain.ChatMessage;
+
+import com.ruoyi.common.core.domain.entity.ChatMessage;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToMessageDecoder;

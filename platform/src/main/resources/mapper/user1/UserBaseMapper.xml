@@ -125,6 +125,12 @@
         </trim>
         where user_base_id = #{userBaseId}
     </update>
+    <!-- 根据电话号码查询用户ID -->
+    <select id="selectUserIdByPhone" parameterType="String" resultType="Long">
+        SELECT user_base_id
+        FROM user_base
+        WHERE phone = #{phone}
+    </select>
 
     <delete id="deleteUserBaseByUserBaseId" parameterType="Long">
         delete from user_base where user_base_id = #{userBaseId}

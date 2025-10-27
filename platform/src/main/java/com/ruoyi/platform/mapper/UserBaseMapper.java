@@ -66,4 +66,13 @@ public interface UserBaseMapper
      * @return 用户基础信息
      */
     public UserBase selectUserBaseByPhone(String phone);
+
+
+    /**
+     * 根据电话号码查找用户Id
+     * @param phone
+     * @return
+     */
+    public Long selectUserIdByPhone(String phone);
+
 }

@@ -6,6 +6,8 @@ import com.ruoyi.platform.merchant.service.IGoodsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class GoodsService implements IGoodsService {
     @Autowired
@@ -33,5 +35,10 @@ public class GoodsService implements IGoodsService {
             throw new RuntimeException("商品已下架");
         }
         goodsMapper.downGoods(goodsId);
+    }
+
+    @Override
+    public List<MerchantGoods> getGoodsList(Long merchantId) {
+        return goodsMapper.getGoodsList(merchantId);
     }
 }
