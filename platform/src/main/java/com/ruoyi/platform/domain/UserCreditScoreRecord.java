@@ -30,7 +30,7 @@ public class UserCreditScoreRecord extends BaseEntity
 
     /** 变动说明 */
     @Excel(name = "变动说明")
-    private String desc;
+    private String descriptions;
 
     /** 变动时间 */
     @JsonFormat(pattern = "yyyy-MM-dd")
@@ -67,14 +67,14 @@ public class UserCreditScoreRecord extends BaseEntity
         return changeScore;
     }
 
-    public void setDesc(String desc) 
+    public void setDescriptions(String descriptions)
     {
-        this.desc = desc;
+        this.descriptions = descriptions;
     }
 
-    public String getDesc() 
+    public String getDescriptions()
     {
-        return desc;
+        return descriptions;
     }
 
     public void setChangeTime(Date changeTime) 
@@ -93,7 +93,7 @@ public class UserCreditScoreRecord extends BaseEntity
             .append("id", getId())
             .append("userBaseId", getUserBaseId())
             .append("changeScore", getChangeScore())
-            .append("desc", getDesc())
+            .append("descriptions", getDescriptions())
             .append("changeTime", getChangeTime())
             .toString();
     }

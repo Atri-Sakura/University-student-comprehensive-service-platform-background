@@ -34,6 +34,8 @@ public class MerchantReport extends BaseEntity
     @JsonFormat(pattern = "yyyy-MM-dd")
     private Date createTime;
 
+    private Integer isImportant;
+
     public void setReportId(Long reportId)
     {
         this.reportId = reportId;
@@ -82,6 +84,14 @@ public class MerchantReport extends BaseEntity
     public void setCreatTime(Date creatTime)
     {
         this.createTime = creatTime;
+    }
+
+    public void setIsImportant(Integer isImportant){
+    this.isImportant = isImportant;
+    }
+
+    public Integer getIsImportant(){
+        return isImportant;
     }
 
 

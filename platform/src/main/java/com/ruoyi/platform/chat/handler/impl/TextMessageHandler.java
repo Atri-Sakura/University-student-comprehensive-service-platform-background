@@ -1,9 +1,9 @@
 package com.ruoyi.platform.chat.handler.impl;
 
+import com.ruoyi.common.core.domain.entity.ChatMessage;
 import com.ruoyi.platform.chat.handler.MessageHandler;
 import com.ruoyi.platform.chat.manager.ChannelSessionManager;
 import com.ruoyi.platform.chat.method.ChatOperateMethod;
-import com.ruoyi.platform.domain.ChatMessage;
 import com.ruoyi.platform.domain.ChatSession;
 import com.ruoyi.platform.service.IChatMessageService;
 import com.ruoyi.platform.service.IChatSessionService;

@@ -48,9 +48,16 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </select>
 
     <insert id="insertUserAddress" parameterType="UserAddress">
+        <selectKey
+                keyProperty="userAddressId"
+                resultType="java.lang.Long"
+                order="BEFORE">
+            SELECT ${@com.ruoyi.platform.chat.utils.SnowflakeIdGenerator@getInstance().nextId()}
+        </selectKey>
         insert into user_address
         <trim prefix="(" suffix=")" suffixOverrides=",">
-            <if test="userAddressId != null">user_address_id,</if>
+            <!-- 移除user_address_id的判断，因为ID由雪花算法生成，必然存在 -->
+            user_address_id,
             <if test="userBaseId != null">user_base_id,</if>
             <if test="receiver != null and receiver != ''">receiver,</if>
             <if test="phone != null and phone != ''">phone,</if>
@@ -64,9 +71,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="isDefault != null">is_default,</if>
             <if test="createTime != null">create_time,</if>
             <if test="updateTime != null">update_time,</if>
-         </trim>
+        </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
-            <if test="userAddressId != null">#{userAddressId},</if>
+            #{userAddressId}, <!-- 直接使用雪花算法生成的ID -->
             <if test="userBaseId != null">#{userBaseId},</if>
             <if test="receiver != null and receiver != ''">#{receiver},</if>
             <if test="phone != null and phone != ''">#{phone},</if>
@@ -80,7 +87,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="isDefault != null">#{isDefault},</if>
             <if test="createTime != null">#{createTime},</if>
             <if test="updateTime != null">#{updateTime},</if>
-         </trim>
+        </trim>
     </insert>
 
     <update id="updateUserAddress" parameterType="UserAddress">

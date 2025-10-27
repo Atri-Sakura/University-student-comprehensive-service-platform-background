@@ -60,5 +60,17 @@ public interface IUserBaseService
      */
     public int deleteUserBaseByUserBaseId(Long userBaseId);
 
+    /**
+     * 根据电话号码查询用户Id
+     * @param phone
+     * @return
+     */
+    public Long selectUserBaseIdByPhone(String phone);
+    /**
+     * 头像
+     * @param file
+     * @param userBaseId
+     * @return
+     */
     public String updateAvatar(MultipartFile file,Long userBaseId);
 }
