@@ -3,6 +3,7 @@ package com.ruoyi.platform.merchant.service;
 
 import com.ruoyi.platform.domain.MerchantWalletFlow;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -14,6 +15,14 @@ import java.util.List;
  * @date 2025-10-24
  */
 public interface IMerchantWalletFlowService {
+    /**
+     * 插入提现冻结流水
+     *
+     * @param merchantBaseId 商家ID
+     * @param withdrawId 提现记录ID
+     * @param totalAmount 冻结金额（含手续费）
+     */
+    void insertWithdrawFreezeFlow(Long merchantBaseId, Long withdrawId, BigDecimal totalAmount);
     /**
      * 查询商家钱包流水
      *
