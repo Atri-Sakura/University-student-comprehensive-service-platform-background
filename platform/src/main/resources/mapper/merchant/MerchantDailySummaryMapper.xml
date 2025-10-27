@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.platform.merchant.mapper.MerchantDailySummaryMapper">
+    <!-- ========================================================= -->
+    <!-- 商家每日收入汇总 Mapper XML                                -->
+    <!-- Author: Jinx                                              -->
+    <!-- Date: 2025-10-24                                          -->
+    <!-- ========================================================= -->
+
+    <!-- 公共结果映射 -->
+    <resultMap id="MerchantDailySummaryResult" type="com.ruoyi.platform.domain.MerchantDailySummary">
+        <id     property="id"              column="id"/>
+        <result property="merchantBaseId"  column="merchant_base_id"/>
+        <result property="summaryDate"     column="summary_date"/>
+        <result property="incomeAmount"    column="income_amount"/>
+        <result property="refundAmount"    column="refund_amount"/>
+        <result property="withdrawAmount"  column="withdraw_amount"/>
+        <result property="netIncome"       column="net_income"/>
+        <result property="createTime"      column="create_time"/>
+    </resultMap>
+
+    <!-- ============================================================= -->
+    <!-- 查询单条记录 -->
+    <!-- ============================================================= -->
+    <select id="selectMerchantDailySummaryById" parameterType="long" resultMap="MerchantDailySummaryResult">
+        SELECT * FROM merchant_daily_summary WHERE id = #{id}
+    </select>
+
+    <!-- ============================================================= -->
+    <!-- 列表查询 -->
+    <!-- 支持根据商家ID、汇总日期模糊查询                              -->
+    <!-- ============================================================= -->
+    <select id="selectMerchantDailySummaryList" parameterType="com.ruoyi.platform.domain.MerchantDailySummary" resultMap="MerchantDailySummaryResult">
+        SELECT * FROM merchant_daily_summary
+        <where>
+            <if test="merchantBaseId != null">AND merchant_base_id = #{merchantBaseId}</if>
+            <if test="summaryDate != null">AND summary_date = #{summaryDate}</if>
+        </where>
+        ORDER BY summary_date DESC
+    </select>
+
+    <!-- ============================================================= -->
+    <!-- 新增商家每日收入汇总 -->
+    <!-- ============================================================= -->
+    <insert id="insertMerchantDailySummary" parameterType="com.ruoyi.platform.domain.MerchantDailySummary"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO merchant_daily_summary (
+            merchant_base_id, summary_date,
+            income_amount, refund_amount, withdraw_amount,
+            net_income, create_time
+        ) VALUES (
+                     #{merchantBaseId}, #{summaryDate},
+                     #{incomeAmount}, #{refundAmount}, #{withdrawAmount},
+                     #{netIncome}, NOW()
+                 )
+    </insert>
+
+    <!-- ============================================================= -->
+    <!-- 修改商家每日收入汇总 -->
+    <!-- ============================================================= -->
+    <update id="updateMerchantDailySummary" parameterType="com.ruoyi.platform.domain.MerchantDailySummary">
+        UPDATE merchant_daily_summary
+        <set>
+            <if test="incomeAmount != null">income_amount = #{incomeAmount},</if>
+            <if test="refundAmount != null">refund_amount = #{refundAmount},</if>
+            <if test="withdrawAmount != null">withdraw_amount = #{withdrawAmount},</if>
+            <if test="netIncome != null">net_income = #{netIncome},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <!-- ============================================================= -->
+    <!-- 删除单条商家每日收入汇总 -->
+    <!-- ============================================================= -->
+    <delete id="deleteMerchantDailySummaryById" parameterType="long">
+        DELETE FROM merchant_daily_summary WHERE id = #{id}
+    </delete>
+
+    <!-- ============================================================= -->
+    <!-- 批量删除商家每日收入汇总 -->
+    <!-- ============================================================= -->
+    <delete id="deleteMerchantDailySummaryByIds" parameterType="long">
+        DELETE FROM merchant_daily_summary WHERE id IN
+        <foreach collection="array" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <!-- ============================================================= -->
+    <!-- 查询今日收入 -->
+    <!-- ============================================================= -->
+    <select id="selectTodayIncome" parameterType="map" resultType="java.math.BigDecimal">
+        SELECT COALESCE(income_amount, 0)
+        FROM merchant_daily_summary
+        WHERE merchant_base_id = #{merchantBaseId}
+          AND summary_date = #{summaryDate}
+            LIMIT 1
+    </select>
+</mapper>
