@@ -39,6 +39,7 @@ public class FakeAuthFilter extends OncePerRequestFilter{
             LoginUser fakeUser = new LoginUser();
             fakeUser.setUser(sysUser);
             fakeUser.setUserId(sysUser.getUserId());
+            fakeUser.setMerchantBaseId(sysUser.getUserId());
 //            fakeUser.setUsername("dev_user");
 //            fakeUser.setToken("fake-token");
 //            fakeUser.setDeptName("测试部");
