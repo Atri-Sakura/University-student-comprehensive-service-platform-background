@@ -73,4 +73,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             #{merchantWalletId}
         </foreach>
     </delete>
+
+    <select id="selectMerchantWalletByMerchantId"
+            parameterType="long"
+            resultMap="MerchantWalletResult">
+        SELECT merchant_wallet_id, merchant_base_id, balance, freeze_amount, create_time, update_time
+        FROM merchant_wallet
+        WHERE merchant_base_id = #{merchantBaseId}
+    </select>
 </mapper>

@@ -1,6 +1,10 @@
 package com.ruoyi.platform.service.impl;
 
+import java.math.BigDecimal;
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
+
 import com.ruoyi.common.utils.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -92,5 +96,23 @@ public class OrderMainServiceImpl implements IOrderMainService
     public int deleteOrderMainByOrderMainId(Long orderMainId)
     {
         return orderMainMapper.deleteOrderMainByOrderMainId(orderMainId);
+    }
+
+    /**
+     * 查询商家今日订单收入
+     */
+    @Override
+    public Map<String, Object> selectMerchantTodayIncome(Long merchantId, Date startTime, Date endTime)
+    {
+        return orderMainMapper.selectMerchantTodayIncome(merchantId, startTime, endTime);
+    }
+
+    /**
+     * 查询商家今日退款金额
+     */
+    @Override
+    public BigDecimal selectMerchantTodayRefund(Long merchantId, Date startTime, Date endTime)
+    {
+        return orderMainMapper.selectMerchantTodayRefund(merchantId, startTime, endTime);
     }
 }

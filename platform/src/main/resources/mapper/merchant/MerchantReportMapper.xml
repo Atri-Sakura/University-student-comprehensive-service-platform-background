@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.platform.merchant.mapper.MerchantReportMapper">
+
+    <resultMap type="com.ruoyi.platform.domain.MerchantReport" id="MerchantReportResult">
+        <id     property="reportId"        column="report_id"       />
+        <result property="merchantBaseId"  column="merchant_base_id" />
+        <result property="context"         column="context"         />
+        <result property="expireTime"      column="expire_time"     />
+        <result property="createTime"      column="create_time"     />
+        <result property="updateTime"      column="update_time"     />
+    </resultMap>
+
+    <sql id="selectMerchantReportVo">
+        select report_id, merchant_base_id, context, expire_time, create_time, update_time
+        from merchant_report
+    </sql>
+
+    <!-- 查询单个 -->
+    <select id="selectMerchantReportByReportId" parameterType="Long" resultMap="MerchantReportResult">
+        <include refid="selectMerchantReportVo" />
+        where report_id = #{reportId}
+    </select>
+
+    <!-- 查询列表 -->
+    <select id="selectMerchantReportList" parameterType="com.ruoyi.platform.domain.MerchantReport" resultMap="MerchantReportResult">
+        <include refid="selectMerchantReportVo" />
+        <where>
+            <if test="merchantBaseId != null">and merchant_base_id = #{merchantBaseId}</if>
+            <if test="context != null and context != ''">and context like concat('%', #{context}, '%')</if>
+            <if test="expireTime != null">and expire_time = #{expireTime}</if>
+            <if test="createTime != null">and create_time = #{createTime}</if>
+        </where>
+    </select>
+
+    <!-- 新增 -->
+    <insert id="insertMerchantReport" parameterType="com.ruoyi.platform.domain.MerchantReport">
+        insert into merchant_report
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            report_id,
+            merchant_base_id,
+            context,
+            expire_time,
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            #{reportId},
+            #{merchantBaseId},
+            #{context},
+            #{expireTime},
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+        </trim>
+    </insert>
+
+    <!-- 修改 -->
+    <update id="updateMerchantReport" parameterType="com.ruoyi.platform.domain.MerchantReport">
+        update merchant_report
+        <set>
+            <if test="merchantBaseId != null">merchant_base_id = #{merchantBaseId},</if>
+            <if test="context != null">context = #{context},</if>
+            <if test="expireTime != null">expire_time = #{expireTime},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </set>
+        where report_id = #{reportId}
+    </update>
+
+    <!-- 单个删除 -->
+    <delete id="deleteMerchantReportByReportId" parameterType="Long">
+        delete from merchant_report where report_id = #{reportId}
+    </delete>
+
+    <!-- 批量删除 -->
+    <delete id="deleteMerchantReportByReportIds" parameterType="Long">
+        delete from merchant_report where report_id in
+        <foreach collection="array" item="reportId" open="(" separator="," close=")">
+            #{reportId}
+        </foreach>
+    </delete>
+</mapper>

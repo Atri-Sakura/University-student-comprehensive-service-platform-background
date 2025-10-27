@@ -58,4 +58,12 @@ public interface IMerchantWalletService
      * @return 结果
      */
     public int deleteMerchantWalletByMerchantWalletId(Long merchantWalletId);
+
+    /**
+     * 根据商家ID查询钱包信息
+     *
+     * @param merchantBaseId 商家ID
+     * @return 钱包信息
+     */
+    MerchantWallet getWalletByMerchantId(Long merchantBaseId);
 }

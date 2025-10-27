@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.platform.merchant.mapper.MerchantWithdrawRecordMapper">
+
+    <!-- ========================================================= -->
+    <!-- 商家提现记录 Mapper XML                                   -->
+    <!-- Author: Jinx                                              -->
+    <!-- Date: 2025-10-24                                          -->
+    <!-- ========================================================= -->
+
+    <resultMap id="MerchantWithdrawRecordResult" type="com.ruoyi.platform.domain.MerchantWithdrawRecord">
+        <id     property="withdrawId"      column="withdraw_id"/>
+        <result property="merchantBaseId"  column="merchant_base_id"/>
+        <result property="accountId"       column="account_id"/>
+        <result property="withdrawAmount"  column="withdraw_amount"/>
+        <result property="feeAmount"       column="fee_amount"/>
+        <result property="actualAmount"    column="actual_amount"/>
+        <result property="withdrawStatus"  column="withdraw_status"/>
+        <result property="requestTime"     column="request_time"/>
+        <result property="processTime"     column="process_time"/>
+        <result property="remark"          column="remark"/>
+        <result property="operatorName"    column="operator_name"/>
+    </resultMap>
+
+    <!-- 查询单条记录 -->
+    <select id="selectMerchantWithdrawRecordById" parameterType="long" resultMap="MerchantWithdrawRecordResult">
+        SELECT * FROM merchant_withdraw_record
+        WHERE withdraw_id = #{withdrawId}
+    </select>
+
+    <!-- 查询列表 -->
+    <select id="selectMerchantWithdrawRecordList" parameterType="com.ruoyi.platform.domain.MerchantWithdrawRecord" resultMap="MerchantWithdrawRecordResult">
+        SELECT * FROM merchant_withdraw_record
+        <where>
+            <if test="merchantBaseId != null">AND merchant_base_id = #{merchantBaseId}</if>
+            <if test="withdrawStatus != null and withdrawStatus != ''">AND withdraw_status = #{withdrawStatus}</if>
+            <if test="accountId != null">AND account_id = #{accountId}</if>
+        </where>
+        ORDER BY request_time DESC
+    </select>
+
+    <!-- 新增 -->
+    <insert id="insertMerchantWithdrawRecord" parameterType="com.ruoyi.platform.domain.MerchantWithdrawRecord"
+            useGeneratedKeys="true" keyProperty="withdrawId">
+        INSERT INTO merchant_withdraw_record (
+            merchant_base_id, account_id, withdraw_amount, fee_amount,
+            actual_amount, withdraw_status, request_time, process_time,
+            remark, operator_name
+        ) VALUES (
+                     #{merchantBaseId}, #{accountId}, #{withdrawAmount}, #{feeAmount},
+                     #{actualAmount}, #{withdrawStatus}, NOW(), #{processTime},
+                     #{remark}, #{operatorName}
+                 )
+    </insert>
+
+    <!-- 修改 -->
+    <update id="updateMerchantWithdrawRecord" parameterType="com.ruoyi.platform.domain.MerchantWithdrawRecord">
+        UPDATE merchant_withdraw_record
+        <set>
+            <if test="accountId != null">account_id = #{accountId},</if>
+            <if test="withdrawAmount != null">withdraw_amount = #{withdrawAmount},</if>
+            <if test="feeAmount != null">fee_amount = #{feeAmount},</if>
+            <if test="actualAmount != null">actual_amount = #{actualAmount},</if>
+            <if test="withdrawStatus != null">withdraw_status = #{withdrawStatus},</if>
+            <if test="processTime != null">process_time = #{processTime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="operatorName != null">operator_name = #{operatorName},</if>
+        </set>
+        WHERE withdraw_id = #{withdrawId}
+    </update>
+
+    <!-- 删除单条 -->
+    <delete id="deleteMerchantWithdrawRecordById" parameterType="long">
+        DELETE FROM merchant_withdraw_record WHERE withdraw_id = #{withdrawId}
+    </delete>
+
+    <!-- 批量删除 -->
+    <delete id="deleteMerchantWithdrawRecordByIds" parameterType="long">
+        DELETE FROM merchant_withdraw_record WHERE withdraw_id IN
+        <foreach collection="array" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <select id="selectWithdrawingAmount" parameterType="long" resultType="java.math.BigDecimal">
+        SELECT COALESCE(SUM(withdraw_amount), 0)
+        FROM merchant_withdraw_record
+        WHERE merchant_base_id = #{merchantBaseId}
+          AND withdraw_status IN ('PENDING', 'PROCESSING')
+    </select>
+
+
+</mapper>

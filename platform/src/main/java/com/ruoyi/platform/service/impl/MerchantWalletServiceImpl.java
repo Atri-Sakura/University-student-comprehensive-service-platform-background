@@ -2,6 +2,7 @@ package com.ruoyi.platform.service.impl;
 
 import java.util.List;
 import com.ruoyi.common.utils.DateUtils;
+import com.ruoyi.platform.domain.vo.MerchantWalletVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.ruoyi.platform.mapper.MerchantWalletMapper;
@@ -92,5 +93,16 @@ public class MerchantWalletServiceImpl implements IMerchantWalletService
     public int deleteMerchantWalletByMerchantWalletId(Long merchantWalletId)
     {
         return merchantWalletMapper.deleteMerchantWalletByMerchantWalletId(merchantWalletId);
+    }
+
+    /**
+     * 根据商家ID查询钱包信息
+     *
+     * @param merchantBaseId 商家ID
+     * @return 钱包信息
+     */
+    @Override
+    public MerchantWallet getWalletByMerchantId(Long merchantBaseId) {
+        return merchantWalletMapper.selectMerchantWalletByMerchantId(merchantBaseId);
     }
 }

@@ -188,4 +188,30 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             #{orderMainId}
         </foreach>
     </delete>
+
+    <!-- ============================================================================================================= -->
+    <!-- 获取今日收入 -->
+    <select id="selectMerchantTodayIncome" parameterType="map" resultType="java.util.Map">
+        SELECT
+            COALESCE(SUM(o.pay_amount), 0) AS total_income,
+            COUNT(DISTINCT o.order_main_id) AS order_count
+        FROM order_main o
+                 JOIN order_takeout_detail d ON o.order_main_id = d.order_main_id
+        WHERE d.merchant_id = #{merchantId}
+          AND o.pay_status = 1
+          AND o.order_status = 4
+          AND o.complete_time BETWEEN #{startTime} AND #{endTime}
+    </select>
+
+    <!-- ============================================================================================================== -->
+    <!-- 获取今日退款 -->
+    <select id="selectMerchantTodayRefund" parameterType="map" resultType="java.math.BigDecimal">
+        SELECT COALESCE(SUM(o.pay_amount), 0)
+        FROM order_main o
+                 JOIN order_takeout_detail d ON o.order_main_id = d.order_main_id
+        WHERE d.merchant_id = #{merchantId}
+          AND o.pay_status IN (2, 3)
+          AND o.complete_time BETWEEN #{startTime} AND #{endTime}
+    </select>
+
 </mapper>

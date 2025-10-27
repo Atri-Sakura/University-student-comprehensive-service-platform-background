@@ -1,6 +1,10 @@
 package com.ruoyi.platform.service;
 
+import java.math.BigDecimal;
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
+
 import com.ruoyi.platform.domain.OrderMain;
 
 /**
@@ -58,4 +62,14 @@ public interface IOrderMainService
      * @return 结果
      */
     public int deleteOrderMainByOrderMainId(Long orderMainId);
+
+    /**
+     * 查询商家今日订单收入
+     */
+    Map<String, Object> selectMerchantTodayIncome(Long merchantId, Date startTime, Date endTime);
+
+    /**
+     * 查询商家今日退款金额
+     */
+    BigDecimal selectMerchantTodayRefund(Long merchantId, Date startTime, Date endTime);
 }
