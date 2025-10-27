@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.platform.merchant.mapper.MerchantWithdrawAccountMapper">
+    <!-- ========================================================= -->
+    <!-- 商家提现账户 Mapper XML                                    -->
+    <!-- 对应 Mapper: MerchantWithdrawAccountMapper.java            -->
+    <!-- Date: 2025-10-24                                           -->
+    <!-- ========================================================= -->
+
+    <!-- 公共结果映射 -->
+    <resultMap id="MerchantWithdrawAccountResult" type="com.ruoyi.platform.domain.MerchantWithdrawAccount">
+        <id     property="accountId"       column="account_id"/>
+        <result property="merchantBaseId"  column="merchant_base_id"/>
+        <result property="accountType"     column="account_type"/>
+        <result property="accountName"     column="account_name"/>
+        <result property="accountNumber"   column="account_number"/>
+        <result property="bankName"        column="bank_name"/>
+        <result property="isDefault"       column="is_default"/>
+        <result property="status"          column="status"/>
+        <result property="createTime"      column="create_time"/>
+        <result property="updateTime"      column="update_time"/>
+    </resultMap>
+
+    <!-- ========================================================= -->
+    <!-- 查询单条记录 -->
+    <!-- ========================================================= -->
+    <select id="selectMerchantWithdrawAccountById"
+            parameterType="long"
+            resultMap="MerchantWithdrawAccountResult">
+        SELECT
+            account_id,
+            merchant_base_id,
+            account_type,
+            account_name,
+            account_number,
+            bank_name,
+            is_default,
+            status,
+            create_time,
+            update_time
+        FROM merchant_withdraw_account
+        WHERE account_id = #{accountId}
+    </select>
+
+    <!-- ========================================================= -->
+    <!-- 查询列表 -->
+    <!-- 支持根据商家ID、账户类型、状态模糊查询                   -->
+    <!-- ========================================================= -->
+    <select id="selectMerchantWithdrawAccountList"
+            parameterType="com.ruoyi.platform.domain.MerchantWithdrawAccount"
+            resultMap="MerchantWithdrawAccountResult">
+        SELECT
+        account_id,
+        merchant_base_id,
+        account_type,
+        account_name,
+        account_number,
+        bank_name,
+        is_default,
+        status,
+        create_time,
+        update_time
+        FROM merchant_withdraw_account
+        <where>
+            <if test="merchantBaseId != null">
+                AND merchant_base_id = #{merchantBaseId}
+            </if>
+            <if test="accountType != null and accountType != ''">
+                AND account_type = #{accountType}
+            </if>
+            <if test="status != null">
+                AND status = #{status}
+            </if>
+        </where>
+        ORDER BY create_time DESC
+    </select>
+
+    <!-- ========================================================= -->
+    <!-- 新增商家提现账户 -->
+    <!-- ========================================================= -->
+    <insert id="insertMerchantWithdrawAccount"
+            parameterType="com.ruoyi.platform.domain.MerchantWithdrawAccount"
+            useGeneratedKeys="true" keyProperty="accountId">
+        INSERT INTO merchant_withdraw_account (
+            merchant_base_id,
+            account_type,
+            account_name,
+            account_number,
+            bank_name,
+            is_default,
+            status,
+            create_time,
+            update_time
+        ) VALUES (
+                     #{merchantBaseId},
+                     #{accountType},
+                     #{accountName},
+                     #{accountNumber},
+                     #{bankName},
+                     #{isDefault},
+                     #{status},
+                     NOW(),
+                     NOW()
+                 )
+    </insert>
+
+    <!-- ========================================================= -->
+    <!-- 修改商家提现账户 -->
+    <!-- ========================================================= -->
+    <update id="updateMerchantWithdrawAccount"
+            parameterType="com.ruoyi.platform.domain.MerchantWithdrawAccount">
+        UPDATE merchant_withdraw_account
+        <set>
+            <if test="accountType != null">account_type = #{accountType},</if>
+            <if test="accountName != null">account_name = #{accountName},</if>
+            <if test="accountNumber != null">account_number = #{accountNumber},</if>
+            <if test="bankName != null">bank_name = #{bankName},</if>
+            <if test="isDefault != null">is_default = #{isDefault},</if>
+            <if test="status != null">status = #{status},</if>
+            update_time = NOW()
+        </set>
+        WHERE account_id = #{accountId}
+    </update>
+
+    <!-- ========================================================= -->
+    <!-- 删除单条商家提现账户 -->
+    <!-- ========================================================= -->
+    <delete id="deleteMerchantWithdrawAccountById" parameterType="long">
+        DELETE FROM merchant_withdraw_account WHERE account_id = #{accountId}
+    </delete>
+
+    <!-- ========================================================= -->
+    <!-- 批量删除商家提现账户 -->
+    <!-- ========================================================= -->
+    <delete id="deleteMerchantWithdrawAccountByIds" parameterType="long">
+        DELETE FROM merchant_withdraw_account WHERE account_id IN
+        <foreach collection="array" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <!-- ========================================================= -->
+    <!-- 取消商家提现账户的默认状态 -->
+    <!-- ========================================================= -->
+    <update id="cancelDefaultAccount" parameterType="long">
+        UPDATE merchant_withdraw_account
+        SET is_default = 0, update_time = NOW()
+        WHERE merchant_base_id = #{merchantBaseId}
+          AND is_default = 1
+    </update>
+
+    <!-- ========================================================= -->
+    <!-- 查询商家提现账户列表 -->
+    <!-- ========================================================= -->
+    <select id="selectMerchantAccountsByMerchantId" parameterType="long" resultMap="MerchantWithdrawAccountResult">
+        SELECT account_id, merchant_base_id, account_type, account_name, account_number,
+               bank_name, is_default, status, create_time, update_time
+        FROM merchant_withdraw_account
+        WHERE merchant_base_id = #{merchantBaseId}
+          AND status = 1
+        ORDER BY is_default DESC, create_time DESC
+    </select>
+
+    <!-- ========================================================= -->
+    <!-- 设置某个提现账户为默认账户 -->
+    <!-- ========================================================= -->
+    <update id="setDefaultAccount" parameterType="long">
+        UPDATE merchant_withdraw_account
+        SET is_default = 1, update_time = NOW()
+        WHERE account_id = #{accountId}
+    </update>
+
+</mapper>
