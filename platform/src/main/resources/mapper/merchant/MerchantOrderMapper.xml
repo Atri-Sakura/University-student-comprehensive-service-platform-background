@@ -28,7 +28,7 @@
         <result property="updateTime"       column="update_time"        />
         <result property="completeTime"     column="complete_time"      />
         <!-- 一对多关联：订单明细列表 -->
-        <collection property="orderTakeoutDetailList" ofType="OrderTakeoutDetail">
+        <collection property="orderTakeoutDetailList" ofType="OrderTakeoutDetail" javaType="java.util.List">
             <id     property="orderTakeoutDetailId" column="detail_id"          />
             <result property="goodsId"              column="goods_id"           />
             <result property="goodsName"            column="goods_name"         />
