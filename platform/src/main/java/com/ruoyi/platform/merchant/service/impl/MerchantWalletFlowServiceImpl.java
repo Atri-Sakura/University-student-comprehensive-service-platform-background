@@ -6,6 +6,7 @@ import com.ruoyi.platform.merchant.service.IMerchantWalletFlowService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -21,6 +22,17 @@ public class MerchantWalletFlowServiceImpl implements IMerchantWalletFlowService
     @Autowired
     private MerchantWalletFlowMapper merchantWalletFlowMapper;
 
+    /**
+     * 插入提现冻结流水
+     *
+     * @param merchantBaseId 商家ID
+     * @param withdrawId 提现ID
+     * @param totalAmount 提现金额
+     */
+    @Override
+    public void insertWithdrawFreezeFlow(Long merchantBaseId, Long withdrawId, BigDecimal totalAmount) {
+        merchantWalletFlowMapper.insertWithdrawFreezeFlow(merchantBaseId, withdrawId, totalAmount);
+    }
     /**
      * 查询商家钱包流水
      *

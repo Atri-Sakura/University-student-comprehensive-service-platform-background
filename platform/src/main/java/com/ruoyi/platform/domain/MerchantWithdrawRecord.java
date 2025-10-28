@@ -61,6 +61,10 @@ public class MerchantWithdrawRecord extends BaseEntity{
     @Excel(name = "操作人")
     private String operatorName;
 
+    /** 幂等key */
+    @Excel(name = "幂等key")
+    private String idempotentKey;
+
     // ===== Getter / Setter =====
     public Long getWithdrawId() { return withdrawId; }
     public void setWithdrawId(Long withdrawId) { this.withdrawId = withdrawId; }
@@ -95,6 +99,9 @@ public class MerchantWithdrawRecord extends BaseEntity{
     public String getOperatorName() { return operatorName; }
     public void setOperatorName(String operatorName) { this.operatorName = operatorName; }
 
+    public String getIdempotentKey() { return idempotentKey; }
+    public void setIdempotentKey(String idempotentKey) { this.idempotentKey = idempotentKey; }
+
     @Override
     public String toString()
     {
@@ -114,6 +121,7 @@ public class MerchantWithdrawRecord extends BaseEntity{
                 .append("createTime", getCreateTime())
                 .append("updateBy", getUpdateBy())
                 .append("updateTime", getUpdateTime())
+                .append("idempotentKey", getIdempotentKey())
                 .toString();
     }
 }

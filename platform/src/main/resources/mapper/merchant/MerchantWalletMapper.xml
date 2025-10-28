@@ -81,4 +81,39 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         FROM merchant_wallet
         WHERE merchant_base_id = #{merchantBaseId}
     </select>
+
+    <!-- ========================================================= -->
+    <!-- 更新钱包余额和冻结金额                                     -->
+    <select id="selectWalletForUpdate" resultMap="MerchantWalletResult">
+        SELECT * FROM merchant_wallet WHERE merchant_base_id = #{merchantBaseId} FOR UPDATE
+    </select>
+    <update id="updateBalanceAndFreeze" parameterType="map">
+        UPDATE merchant_wallet
+        SET balance = balance - #{total},
+            freeze_amount = freeze_amount + #{total},
+            update_time = NOW()
+        WHERE merchant_base_id = #{merchantBaseId}
+    </update>
+
+    <!-- ========================================================= -->
+    <!-- 出款成功：减少冻结金额 -->
+    <!-- ========================================================= -->
+    <update id="decreaseFreeze">
+        UPDATE merchant_wallet
+        SET freeze_amount = freeze_amount - #{totalAmount},
+            update_time = NOW()
+        WHERE merchant_base_id = #{merchantBaseId}
+    </update>
+
+    <!-- ========================================================= -->
+    <!-- 出款失败：解冻并退回余额 -->
+    <!-- ========================================================= -->
+    <update id="rollbackFreeze">
+        UPDATE merchant_wallet
+        SET balance = balance + #{totalAmount},
+            freeze_amount = freeze_amount - #{totalAmount},
+            update_time = NOW()
+        WHERE merchant_base_id = #{merchantBaseId}
+    </update>
+
 </mapper>

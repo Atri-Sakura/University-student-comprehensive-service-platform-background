@@ -25,7 +25,7 @@
     <!-- ========================================================= -->
     <!-- 查询单条记录 -->
     <!-- 支持根据商家ID、流水类型模糊查询                   -->
-    <select id="selectMerchantWalletFlowById" parameterType="Long" resultMap="MerchantWalletFlowResult">
+    <select id="selectMerchantWalletFlowById" parameterType="long" resultMap="MerchantWalletFlowResult">
         SELECT * FROM merchant_wallet_flow WHERE flow_id = #{flowId}
     </select>
 
@@ -72,17 +72,88 @@
     <!-- ========================================================= -->
     <!-- 删除单条商家钱包流水 -->
     <!-- ========================================================= -->
-    <delete id="deleteMerchantWalletFlowById" parameterType="Long">
+    <delete id="deleteMerchantWalletFlowById" parameterType="long">
         DELETE FROM merchant_wallet_flow WHERE flow_id = #{flowId}
     </delete>
 
     <!-- ========================================================= -->
     <!-- 批量删除商家钱包流水 -->
     <!-- ========================================================= -->
-    <delete id="deleteMerchantWalletFlowByIds" parameterType="Long">
+    <delete id="deleteMerchantWalletFlowByIds" parameterType="long">
         DELETE FROM merchant_wallet_flow WHERE flow_id IN
         <foreach collection="array" item="id" open="(" separator="," close=")">
             #{id}
         </foreach>
     </delete>
+
+    <!-- ========================================================= -->
+    <!-- 插入提现冻结流水 -->
+    <!-- ========================================================= -->
+    <insert id="insertWithdrawFreezeFlow">
+        INSERT INTO merchant_wallet_flow (
+            merchant_base_id,
+            withdraw_id,
+            flow_type,
+            flow_amount,
+            balance_after,
+            description,
+            create_time
+        )
+        SELECT
+            #{merchantBaseId},
+            #{withdrawId},
+            'WITHDRAW_FREEZE',
+            -#{totalAmount},
+            balance,
+            CONCAT('提现冻结，提现单号#', #{withdrawId}),
+            NOW()
+        FROM merchant_wallet
+        WHERE merchant_base_id = #{merchantBaseId}
+    </insert>
+
+    <!-- ========================================================= -->
+    <!-- 提现成功流水 -->
+    <!-- ========================================================= -->
+    <insert id="insertWithdrawSuccessFlow" parameterType="com.ruoyi.platform.domain.MerchantWithdrawRecord">
+        INSERT INTO merchant_wallet_flow (
+            merchant_base_id,
+            withdraw_id,
+            flow_type,
+            flow_amount,
+            balance_after,
+            description,
+            create_time
+        )
+        SELECT
+            #{record.merchantBaseId},
+            #{record.withdrawId},
+            'WITHDRAW_SUCCESS',
+            -#{record.withdrawAmount},
+            balance,
+            CONCAT('提现成功到账，提现单号#', #{record.withdrawId}),
+            NOW()
+        FROM merchant_wallet
+        WHERE merchant_base_id = #{record.merchantBaseId}
+    </insert>
+
+    <!-- ========================================================= -->
+    <!-- 提现失败流水（解冻返还） -->
+    <!-- ========================================================= -->
+    <insert id="insertWithdrawFailFlow" parameterType="com.ruoyi.platform.domain.MerchantWithdrawRecord">
+        INSERT INTO merchant_wallet_flow (
+            merchant_base_id, withdraw_id, flow_type, flow_amount, balance_after, description, create_time
+        )
+        SELECT
+            #{record.merchantBaseId},
+            #{record.withdrawId},
+            'WITHDRAW_ROLLBACK',
+            (#{record.withdrawAmount} + #{record.feeAmount}),
+            balance,
+            CONCAT('提现失败退款，提现单号#', #{record.withdrawId}),
+            NOW()
+        FROM merchant_wallet
+        WHERE merchant_base_id = #{record.merchantBaseId}
+    </insert>
+
+
 </mapper>
