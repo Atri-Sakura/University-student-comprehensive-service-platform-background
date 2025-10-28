@@ -152,4 +152,25 @@
         WHERE withdraw_id = #{withdrawId}
     </select>
 
+
+    <select id="selectWithdrawRecordVOList"
+            resultType="com.ruoyi.platform.domain.vo.MerchantWithdrawRecordVO">
+        SELECT
+        r.withdraw_id     AS withdrawId,
+        r.withdraw_amount AS amount,
+        r.withdraw_status AS status,
+        a.bank_name       AS bankName,
+        r.process_time    AS arriveTime,
+        r.remark          AS remark
+        FROM merchant_withdraw_record r
+        LEFT JOIN merchant_withdraw_account a
+        ON r.account_id = a.account_id
+        WHERE r.merchant_base_id = #{merchantBaseId}
+        <if test="status != null and status != ''">
+            AND r.withdraw_status = #{status}
+        </if>
+        ORDER BY r.request_time DESC
+    </select>
+
+
 </mapper>

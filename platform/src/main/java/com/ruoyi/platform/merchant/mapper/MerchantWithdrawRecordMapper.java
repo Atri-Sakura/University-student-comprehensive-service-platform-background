@@ -1,6 +1,7 @@
 package com.ruoyi.platform.merchant.mapper;
 
 import com.ruoyi.platform.domain.MerchantWithdrawRecord;
+import com.ruoyi.platform.domain.vo.MerchantWithdrawRecordVO;
 import io.lettuce.core.dynamic.annotation.Param;
 
 import java.math.BigDecimal;
@@ -87,5 +88,16 @@ public interface MerchantWithdrawRecordMapper {
      * @return 提现记录
      */
     MerchantWithdrawRecord selectWithdrawRecordById(Long withdrawId);
+
+    /**
+     * 查询商家提现列表
+     *
+     * @param merchantBaseId 提现记录列表
+     * @param status   提现状态
+     * @return 插入条数
+     */
+    List<MerchantWithdrawRecordVO> selectWithdrawRecordVOList(@Param("merchantBaseId") Long merchantBaseId,
+                                                          @Param("status") String status);
+
 
 }
