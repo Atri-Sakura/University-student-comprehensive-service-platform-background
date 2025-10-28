@@ -17,5 +17,13 @@ public interface IGoodsService {
 
     Integer deleteGoods(Long goodsId, Long merchantId);
 
-    Integer updateGoods(Long goodsId, Long merchantId);
+    Integer updateGoods(Long goodsId, Long merchantId,MerchantGoodsDTO goods);
+
+    Integer addGoods(MerchantGoodsDTO goods, Long merchantId);
+
+    MerchantGoodsDTO getGoodsDetail(Long goodsId, Long merchantId);
+
+    Integer addImage(Long goodsId, Long merchantId, String url);
+
+    Integer deleteImage(Long goodsId, Long merchantId, String url);
 }

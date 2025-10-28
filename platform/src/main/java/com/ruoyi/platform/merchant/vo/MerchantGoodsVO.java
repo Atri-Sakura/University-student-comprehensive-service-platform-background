@@ -1,10 +1,12 @@
 package com.ruoyi.platform.merchant.vo;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.ruoyi.platform.merchant.dto.GoodsImageDTO;
 import lombok.Data;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 
 /**
  * 商品数据传输对象
@@ -79,6 +81,9 @@ public class MerchantGoodsVO {
 
     /** 商品图片 */
     private String mainImageUrl;
+
+    /** 商品图片列表 */
+    private List<GoodsImageDTO> imageList;
 
     // 构造方法
     public MerchantGoodsVO() {

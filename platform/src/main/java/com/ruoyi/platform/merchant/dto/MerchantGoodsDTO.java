@@ -5,6 +5,7 @@ import lombok.Data;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 
 /**
  * 商品数据传输对象
@@ -77,8 +78,11 @@ public class MerchantGoodsDTO {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date updateTime;
 
-    /** 商品图片 */
+    /** 商品主图图片 */
     private String mainImageUrl;
+
+    /** 商品图片列表 */
+    private List<GoodsImageDTO> imageList;
 
     // 构造方法
     public MerchantGoodsDTO() {

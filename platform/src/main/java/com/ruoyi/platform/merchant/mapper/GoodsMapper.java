@@ -1,6 +1,7 @@
 package com.ruoyi.platform.merchant.mapper;
 
 import com.ruoyi.platform.domain.MerchantGoods;
+import com.ruoyi.platform.merchant.dto.GoodsImageDTO;
 import com.ruoyi.platform.merchant.dto.MerchantGoodsDTO;
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Mapper;
@@ -20,7 +21,7 @@ public interface GoodsMapper {
     @Update("update merchant_goods set status = 0 where merchant_goods_id = #{goodsId}")
     Integer downGoods(Long goodsId);
 
-    MerchantGoods findGoodById(Long goodsId);
+    MerchantGoodsDTO findGoodById(Long goodsId);
 
     List<MerchantGoodsDTO> getGoodsList(Long merchantId);
 
@@ -29,7 +30,7 @@ public interface GoodsMapper {
     @Delete("delete from merchant_goods where merchant_goods_id = #{goodsId} and merchant_base_id = #{merchantId}")
     Integer deleteGoods(Long goodsId, Long merchantId);
 
-    Integer updateGoods(Long goodsId, Long merchantId);
+    Integer updateGoods(Long goodsId, Long merchantId,MerchantGoodsDTO goods);
 
     /**
      * 更新商品状态
@@ -71,5 +72,29 @@ public interface GoodsMapper {
      */
     List<Map<String, Object>> getMainImageUrlsByGoodsIds(List<Long> goodsIds);
 
+
+    /**
+     * 添加商品
+     * @param goods
+     * @param merchantId
+     * @return
+     */
+    Integer addGoods(MerchantGoodsDTO goods, Long merchantId);
+
+    /**
+     * 查询商品的所有图片（包括主图和其他图片）
+     */
+    List<GoodsImageDTO> getGoodsImagesByGoodsId(Long goodsId);
+
+    /**
+     * 查询商品详情（包含所有图片信息）
+     */
+    MerchantGoodsDTO getGoodsDetailWithImages(Long goodsId);
+
+    /**
+     * 检查商品是否存在且属于指定商家
+     */
+    @Select("SELECT COUNT(1) FROM merchant_goods WHERE merchant_goods_id = #{goodsId} AND merchant_base_id = #{merchantId}")
+    Integer checkGoodsBelongsToMerchant(Long goodsId, Long merchantId);
 
 }

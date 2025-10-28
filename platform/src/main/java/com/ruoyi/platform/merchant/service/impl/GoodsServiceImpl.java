@@ -1,6 +1,5 @@
 package com.ruoyi.platform.merchant.service.impl;
 
-import com.ruoyi.platform.domain.MerchantGoods;
 import com.ruoyi.platform.merchant.dto.MerchantGoodsDTO;
 import com.ruoyi.platform.merchant.mapper.GoodsMapper;
 import com.ruoyi.platform.merchant.service.IGoodsService;
@@ -12,13 +11,13 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
-public class GoodsService implements IGoodsService {
+public class GoodsServiceImpl implements IGoodsService {
     @Autowired
     private GoodsMapper goodsMapper;
 
     @Override
     public Integer upGoods(Long goodsId) {
-        MerchantGoods merchantGoods = goodsMapper.findGoodById(goodsId);
+        MerchantGoodsDTO merchantGoods = goodsMapper.findGoodById(goodsId);
         if (merchantGoods == null){
             throw new RuntimeException("商品不存在");
         }
@@ -30,7 +29,7 @@ public class GoodsService implements IGoodsService {
 
     @Override
     public Integer downGoods(Long goodsId) {
-        MerchantGoods merchantGoods = goodsMapper.findGoodById(goodsId);
+        MerchantGoodsDTO merchantGoods = goodsMapper.findGoodById(goodsId);
         if (merchantGoods == null){
             throw new RuntimeException("商品不存在");
         }
@@ -84,7 +83,7 @@ public class GoodsService implements IGoodsService {
 
     @Override
     public Integer deleteGoods(Long goodsId, Long merchantId) {
-        MerchantGoods merchantGoods = goodsMapper.findGoodById(goodsId);
+        MerchantGoodsDTO merchantGoods = goodsMapper.findGoodById(goodsId);
         if (merchantGoods == null){
             throw new RuntimeException("商品不存在");
         }
@@ -95,14 +94,48 @@ public class GoodsService implements IGoodsService {
     }
 
     @Override
-    public Integer updateGoods(Long goodsId, Long merchantId) {
-        MerchantGoods merchantGoods = goodsMapper.findGoodById(goodsId);
+    public Integer updateGoods(Long goodsId, Long merchantId,MerchantGoodsDTO goods) {
+        MerchantGoodsDTO merchantGoods = goodsMapper.findGoodById(goodsId);
         if (merchantGoods == null){
             throw new RuntimeException("商品不存在");
         }
         if (merchantGoods.getMerchantBaseId() != merchantId) {
             throw new RuntimeException("商品不属于该商家");
         }
-        return goodsMapper.updateGoods(goodsId,merchantId);
+        return goodsMapper.updateGoods(goodsId,merchantId,goods);
+    }
+
+    @Override
+    public Integer addGoods(MerchantGoodsDTO goods, Long merchantId) {
+        goods.setMerchantBaseId(merchantId);
+        return goodsMapper.addGoods(goods,merchantId);
+    }
+
+    @Override
+    public MerchantGoodsDTO getGoodsDetail(Long goodsId, Long merchantId) {
+        // 验证商品权限
+        Integer count = goodsMapper.checkGoodsBelongsToMerchant(goodsId, merchantId);
+        if (count == null || count == 0) {
+            throw new RuntimeException("商品不存在或不属于该商家");
+        }
+
+        // 查询商品详情（包含图片列表）
+        MerchantGoodsDTO goodsDetail = goodsMapper.getGoodsDetailWithImages(goodsId);
+
+        if (goodsDetail == null) {
+            throw new RuntimeException("商品不存在");
+        }
+
+        return goodsDetail;
+    }
+
+    @Override
+    public Integer addImage(Long goodsId, Long merchantId, String url) {
+        return null;
+    }
+
+    @Override
+    public Integer deleteImage(Long goodsId, Long merchantId, String url) {
+        return null;
     }
 }

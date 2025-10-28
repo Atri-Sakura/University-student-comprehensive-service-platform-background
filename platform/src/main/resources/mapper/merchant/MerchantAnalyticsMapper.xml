@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.platform.merchant.mapper.MerchantAnalyticsMapper">
+
+    <!-- 结果映射定义 -->
+    <resultMap id="OrderStatsVOMap" type="com.ruoyi.platform.merchant.vo.OrderStatsVO">
+        <result column="订单量" property="orderCount"/>
+        <result column="营业额" property="totalRevenue"/>
+        <result column="实收金额" property="actualIncome"/>
+        <result column="单均价" property="avgOrderAmount"/>
+    </resultMap>
+
+    <resultMap id="EvaluationAnalysisVOMap" type="com.ruoyi.platform.merchant.vo.EvaluationAnalysisVO">
+        <result column="综合评分" property="avgRating"/>
+        <result column="评价总数" property="totalReviews"/>
+    </resultMap>
+
+    <resultMap id="RatingDistributionVOMap" type="com.ruoyi.platform.merchant.vo.RatingDistributionVO">
+        <result column="评分等级" property="ratingLevel"/>
+        <result column="评价数量" property="reviewCount"/>
+        <result column="占比百分比" property="percentage"/>
+    </resultMap>
+
+    <resultMap id="ProductSalesVOMap" type="com.ruoyi.platform.merchant.vo.ProductSalesVO">
+        <result column="商品ID" property="goodsId"/>
+        <result column="商品名称" property="goodsName"/>
+        <result column="商品价格" property="price"/>
+        <result column="销售数量" property="salesCount"/>
+        <result column="销售总额" property="totalRevenue"/>
+        <result column="排名" property="rank"/>
+    </resultMap>
+
+    <!-- 获取今日销售数据 -->
+    <select id="selectTodaySalesData" resultMap="OrderStatsVOMap">
+        SELECT
+            COALESCE(COUNT(*), 0) as 订单量,
+            COALESCE(SUM(total_amount), 0) as 营业额,
+            COALESCE(SUM(pay_amount), 0) as 实收金额,
+            COALESCE(AVG(total_amount), 0) as 单均价
+        FROM order_main
+        WHERE DATE(create_time) = DATE(NOW())
+          AND pay_status = 1
+          AND order_main_id IN (
+            SELECT order_main_id
+            FROM order_takeout_detail
+            WHERE merchant_id = #{merchantBaseId}
+        )
+    </select>
+
+    <!-- 获取昨日销售数据 -->
+    <select id="selectYesterdaySalesData" resultMap="OrderStatsVOMap">
+        SELECT
+            COALESCE(COUNT(*), 0) as 订单量,
+            COALESCE(SUM(total_amount), 0) as 营业额,
+            COALESCE(SUM(pay_amount), 0) as 实收金额,
+            COALESCE(AVG(total_amount), 0) as 单均价
+        FROM order_main
+        WHERE DATE(create_time) = DATE(DATE_SUB(NOW(), INTERVAL 1 DAY))
+          AND pay_status = 1
+          AND order_main_id IN (
+            SELECT order_main_id
+            FROM order_takeout_detail
+            WHERE merchant_id = #{merchantBaseId}
+        )
+    </select>
+
+    <!-- 获取评价统计数据 -->
+    <select id="selectEvaluationStats" resultMap="EvaluationAnalysisVOMap">
+        SELECT
+            COALESCE(AVG(rating), 0) as 综合评分,
+            COALESCE(COUNT(*), 0) as 评价总数
+        FROM merchant_evaluation
+        WHERE create_time >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
+          AND merchant_base_id = #{merchantBaseId}
+    </select>
+
+    <!-- 获取评分分布数据 -->
+    <select id="selectRatingDistribution" resultMap="RatingDistributionVOMap">
+        SELECT
+            rating as 评分等级,
+            COUNT(*) as 评价数量,
+            ROUND(COUNT(*) * 100.0 / (
+                SELECT COALESCE(COUNT(*), 1)
+                FROM merchant_evaluation
+                WHERE create_time >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
+                  AND merchant_base_id = #{merchantBaseId}
+            ), 2) as 占比百分比
+        FROM merchant_evaluation
+        WHERE create_time >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
+          AND merchant_base_id = #{merchantBaseId}
+        GROUP BY rating
+        ORDER BY rating DESC
+    </select>
+
+    <!-- 获取热销商品数据 -->
+    <select id="selectHotSellingProducts" resultMap="ProductSalesVOMap">
+        SELECT
+            mg.merchant_goods_id as 商品ID,
+            mg.goods_name as 商品名称,
+            COALESCE(mg.price, 0) as 商品价格,
+            COALESCE(SUM(otd.quantity), 0) as 销售数量,
+            COALESCE(SUM(otd.subtotal), 0) as 销售总额,
+            @rank := @rank + 1 as 排名
+        FROM order_takeout_detail otd
+                 JOIN order_main om ON otd.order_main_id = om.order_main_id
+                 JOIN merchant_goods mg ON otd.goods_id = mg.merchant_goods_id
+                 CROSS JOIN (SELECT @rank := 0) r
+        WHERE om.create_time >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
+          AND om.pay_status = 1
+          AND otd.merchant_id = #{merchantBaseId}
+        GROUP BY mg.merchant_goods_id, mg.goods_name, mg.price
+        ORDER BY 销售数量 DESC
+        LIMIT 10
+    </select>
+
+    <!-- 获取滞销商品数据 -->
+    <select id="selectSlowMovingProducts" resultMap="ProductSalesVOMap">
+        SELECT
+            mg.merchant_goods_id as 商品ID,
+            mg.goods_name as 商品名称,
+            COALESCE(mg.price, 0) as 商品价格,
+            COALESCE(SUM(otd.quantity), 0) as 销售数量,
+            @rank := @rank + 1 as 排名
+        FROM merchant_goods mg
+                 LEFT JOIN order_takeout_detail otd ON mg.merchant_goods_id = otd.goods_id
+                 LEFT JOIN order_main om ON otd.order_main_id = om.order_main_id
+            AND om.create_time >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
+            AND om.pay_status = 1
+                 CROSS JOIN (SELECT @rank := 0) r
+        WHERE mg.merchant_base_id = #{merchantBaseId}
+          AND mg.status = 1
+        GROUP BY mg.merchant_goods_id, mg.goods_name, mg.price
+        HAVING 销售数量 &lt;= 5
+        ORDER BY 销售数量 ASC
+        LIMIT 10
+    </select>
+
+
+
+</mapper>

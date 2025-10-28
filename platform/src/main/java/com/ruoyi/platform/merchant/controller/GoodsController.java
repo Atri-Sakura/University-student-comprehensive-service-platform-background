@@ -61,12 +61,58 @@ public class GoodsController extends BaseController {
 
     //某个商家修改某个商品
     @PutMapping("/update/{goodsId}")
-    public AjaxResult updateGoods(@PathVariable Long goodsId,@RequestBody MerchantGoods goods){
+    public AjaxResult updateGoods(@PathVariable Long goodsId,@RequestBody MerchantGoodsDTO goods){
         Long merchantId = SecurityUtils.getMerchantBaseId();
         if (merchantId == null){
             return null;
         }
-        Integer result = goodsService.updateGoods(goodsId,merchantId);
+        Integer result = goodsService.updateGoods(goodsId,merchantId,goods);
         return result > 0 ? AjaxResult.success("更新成功") : AjaxResult.error("更新失败");
     }
+
+    //某个商家添加某个商品
+    @PostMapping("/add")
+    public AjaxResult addGoods(@RequestBody MerchantGoodsDTO goods){
+        Long merchantId = SecurityUtils.getMerchantBaseId();
+        if (merchantId == null) {
+            return null;
+        }
+        Integer result = goodsService.addGoods(goods,merchantId);
+        return result > 0 ? AjaxResult.success("添加成功") : AjaxResult.error("添加失败");
+    }
+
+
+    //某个商家查询某个商品详情
+    @GetMapping("/detail/{goodsId}")
+    public AjaxResult getGoodsDetail(@PathVariable Long goodsId){
+        Long merchantId = SecurityUtils.getMerchantBaseId();
+        if (merchantId == null){
+            return null;
+        }
+        MerchantGoodsDTO merchantGoodsDTO = goodsService.getGoodsDetail(goodsId,merchantId);
+        return AjaxResult.success(merchantGoodsDTO);
+    }
+
+    //商家给某个商品添加图片
+    @PostMapping("/addImage/{goodsId}")
+    public AjaxResult addImage(@PathVariable Long goodsId,@RequestBody String url){
+        Long merchantId = SecurityUtils.getMerchantBaseId();
+        if (merchantId == null){
+            return null;
+        }
+        Integer result = goodsService.addImage(goodsId,merchantId,url);
+        return result > 0 ? AjaxResult.success("添加成功") : AjaxResult.error("添加失败");
+    }
+
+    //商家给某个商品删除图片
+    @DeleteMapping("/deleteImage/{goodsId}")
+    public AjaxResult deleteImage(@PathVariable Long goodsId,@RequestBody String url){
+        Long merchantId = SecurityUtils.getMerchantBaseId();
+        if (merchantId == null){
+            return null;
+        }
+        Integer result = goodsService.deleteImage(goodsId,merchantId,url);
+        return result > 0 ? AjaxResult.success("删除成功") : AjaxResult.error("删除失败");
+    }
+
 }
