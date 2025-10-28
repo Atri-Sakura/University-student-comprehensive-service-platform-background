@@ -1,5 +1,8 @@
 package com.ruoyi.platform.merchant.controller;
 
+import com.github.pagehelper.PageInfo;
+import com.ruoyi.common.core.controller.BaseController;
+import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.common.core.domain.AjaxResult;
@@ -26,13 +29,15 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import static com.ruoyi.common.utils.PageUtils.startPage;
+
 /**
  * 商家财务信息控制器
  */
 
 @RestController
 @RequestMapping("/api/merchant/finance")
-public class MerchantFinanceController {
+public class MerchantFinanceController extends BaseController {
 
     @Autowired
     private IOrderMainService orderMainService;
@@ -258,4 +263,19 @@ public class MerchantFinanceController {
         vo.setProcessTime(record.getProcessTime());
         return AjaxResult.success(vo);
     }
+
+    /**
+     * 获取商家提现记录列表
+     */
+    @GetMapping("/withdraw/records")
+    public TableDataInfo getwithdrawRecordList(@RequestParam (required = false) String status) {
+        Long merchantId = SecurityUtils.getMerchantBaseId();
+        if (merchantId == null) {
+            throw new ServiceException("商家身份信息缺失，请重新登录");
+        }
+        startPage();
+        List<MerchantWithdrawRecordVO> list = merchantWithdrawRecordService.selectWithdrawRecordVOList(merchantId, status);
+        return getDataTable(list);
+    }
 }
+

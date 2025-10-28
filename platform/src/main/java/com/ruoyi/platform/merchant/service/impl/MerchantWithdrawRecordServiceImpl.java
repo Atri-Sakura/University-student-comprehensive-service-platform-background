@@ -1,11 +1,15 @@
 package com.ruoyi.platform.merchant.service.impl;
 
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
+import com.ruoyi.common.core.page.PageDomain;
 import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.platform.domain.MerchantWallet;
 import com.ruoyi.platform.domain.MerchantWalletFlow;
 import com.ruoyi.platform.domain.MerchantWithdrawRecord;
 import com.ruoyi.platform.domain.dto.WithdrawApplyDTO;
 import com.ruoyi.platform.domain.vo.MerchantWithdrawOverviewVO;
+import com.ruoyi.platform.domain.vo.MerchantWithdrawRecordVO;
 import com.ruoyi.platform.domain.vo.WithdrawApplyResultVO;
 import com.ruoyi.platform.mapper.MerchantWalletMapper;
 import com.ruoyi.platform.merchant.mapper.MerchantDailySummaryMapper;
@@ -13,6 +17,7 @@ import com.ruoyi.platform.merchant.mapper.MerchantWalletFlowMapper;
 import com.ruoyi.platform.merchant.mapper.MerchantWithdrawRecordMapper;
 import com.ruoyi.platform.merchant.payment.PaymentGatewayClient;
 import com.ruoyi.platform.merchant.service.IMerchantWithdrawRecordService;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -20,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -131,6 +137,18 @@ public class MerchantWithdrawRecordServiceImpl implements IMerchantWithdrawRecor
         }
     }
 
+    /**
+     * 提现页概览信息
+     */
+    @Override
+    public List<MerchantWithdrawRecordVO> selectWithdrawRecordVOList(Long merchantId,String status){
+//
+        List<MerchantWithdrawRecordVO> list = merchantWithdrawRecordMapper.selectWithdrawRecordVOList(merchantId,status);
+        if (CollectionUtils.isEmpty(list)) {
+            list = Collections.emptyList();
+        }
+        return list;
+    }
     /**
      * 获取提现页概览信息
      *

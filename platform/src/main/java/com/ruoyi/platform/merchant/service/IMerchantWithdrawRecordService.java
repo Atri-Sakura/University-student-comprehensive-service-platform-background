@@ -1,9 +1,11 @@
 package com.ruoyi.platform.merchant.service;
 
 
+import com.github.pagehelper.PageInfo;
 import com.ruoyi.platform.domain.MerchantWithdrawRecord;
 import com.ruoyi.platform.domain.dto.WithdrawApplyDTO;
 import com.ruoyi.platform.domain.vo.MerchantWithdrawOverviewVO;
+import com.ruoyi.platform.domain.vo.MerchantWithdrawRecordVO;
 import com.ruoyi.platform.domain.vo.WithdrawApplyResultVO;
 
 import java.util.List;
@@ -88,5 +90,14 @@ public interface IMerchantWithdrawRecordService {
      * @return 提现记录
      */
     MerchantWithdrawRecord selectWithdrawRecordById(Long withdrawId);
+
+    /**
+     * 获取商家提现记录列表
+     *
+     * @param merchantBaseId 商家ID
+     * @param status 提现状态
+     * @return 提现中总金额
+     */
+    List<MerchantWithdrawRecordVO> selectWithdrawRecordVOList(Long merchantBaseId, String status);
 
 }
