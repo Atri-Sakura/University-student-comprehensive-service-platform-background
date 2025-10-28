@@ -1,7 +1,7 @@
 package com.ruoyi.platform.merchant.controller;
 
 import com.ruoyi.platform.domain.GoodsEvaluation;
-import com.ruoyi.platform.domain.GoodsEvaluationDetailVO;
+import com.ruoyi.platform.domain.vo.GoodsEvaluationDetailVO;
 import com.ruoyi.platform.domain.GoodsEvaluationImage;
 import com.ruoyi.platform.mapper.GoodsEvaluationImageMapper;
 import com.ruoyi.platform.mapper.MerchantGoodsImageMapper;

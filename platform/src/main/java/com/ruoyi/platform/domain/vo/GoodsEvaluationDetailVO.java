@@ -1,4 +1,7 @@
-package com.ruoyi.platform.domain;
+package com.ruoyi.platform.domain.vo;
+
+import com.ruoyi.platform.domain.GoodsEvaluation;
+import com.ruoyi.platform.domain.GoodsEvaluationImage;
 
 import java.util.List;
 
