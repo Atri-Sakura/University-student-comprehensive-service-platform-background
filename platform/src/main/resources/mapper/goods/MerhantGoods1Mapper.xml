@@ -117,8 +117,8 @@
         UPDATE merchant_goods
         <set>
             <if test="merchantBaseId != null">merchant_base_id = #{merchantId},</if>
-            <if test="goods.goodsName != null and goodsName != ''">goods_name = #{goods.goodsName},</if>
-            <if test="goods.category != null and category != ''">category = #{goods.category},</if>
+            <if test="goods.goodsName != null and goods.goodsName != ''">goods_name = #{goods.goodsName},</if>
+            <if test="goods.category != null and goods.category != ''">category = #{goods.category},</if>
             <if test="goods.subCategory != null">sub_category = #{goods.subCategory},</if>
             <if test="goods.price != null">price = #{goods.price},</if>
             <if test="goods.originalPrice != null">original_price = #{goods.originalPrice},</if>
@@ -136,7 +136,7 @@
             <if test="goods.oneStarRate != null">one_star_rate = #{goods.oneStarRate},</if>
             update_time = NOW()
         </set>
-        WHERE merchant_goods_id = #{merchantGoodsId}
+        WHERE merchant_goods_id = #{goodsId}
     </update>
 
     <!-- 更新商品状态 -->
