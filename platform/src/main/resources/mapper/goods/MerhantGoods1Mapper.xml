@@ -117,23 +117,23 @@
         UPDATE merchant_goods
         <set>
             <if test="merchantBaseId != null">merchant_base_id = #{merchantBaseId},</if>
-            <if test="goodsName != null and goodsName != ''">goods_name = #{goodsName},</if>
-            <if test="category != null and category != ''">category = #{category},</if>
-            <if test="subCategory != null">sub_category = #{subCategory},</if>
-            <if test="price != null">price = #{price},</if>
-            <if test="originalPrice != null">original_price = #{originalPrice},</if>
-            <if test="stock != null">stock = #{stock},</if>
-            <if test="salesCount != null">sales_count = #{salesCount},</if>
-            <if test="description != null">description = #{description},</if>
-            <if test="tagCodes != null">tag_codes = #{tagCodes},</if>
-            <if test="status != null">status = #{status},</if>
-            <if test="avgRating != null">avg_rating = #{avgRating},</if>
-            <if test="ratingCount != null">rating_count = #{ratingCount},</if>
-            <if test="fiveStarRate != null">five_star_rate = #{fiveStarRate},</if>
-            <if test="fourStarRate != null">four_star_rate = #{fourStarRate},</if>
-            <if test="threeStarRate != null">three_star_rate = #{threeStarRate},</if>
-            <if test="twoStarRate != null">two_star_rate = #{twoStarRate},</if>
-            <if test="oneStarRate != null">one_star_rate = #{oneStarRate},</if>
+            <if test="goodsName != null and goodsName != ''">goods_name = #{goods.goodsName},</if>
+            <if test="category != null and category != ''">category = #{goods.category},</if>
+            <if test="subCategory != null">sub_category = #{goods.subCategory},</if>
+            <if test="price != null">price = #{goods.price},</if>
+            <if test="originalPrice != null">original_price = #{goods.originalPrice},</if>
+            <if test="stock != null">stock = #{goods.stock},</if>
+            <if test="salesCount != null">sales_count = #{goods.salesCount},</if>
+            <if test="description != null">description = #{goods.description},</if>
+            <if test="tagCodes != null">tag_codes = #{goods.tagCodes},</if>
+            <if test="status != null">status = #{goods.status},</if>
+            <if test="avgRating != null">avg_rating = #{goods.avgRating},</if>
+            <if test="ratingCount != null">rating_count = #{goods.ratingCount},</if>
+            <if test="fiveStarRate != null">five_star_rate = #{goods.fiveStarRate},</if>
+            <if test="fourStarRate != null">four_star_rate = #{goods.fourStarRate},</if>
+            <if test="threeStarRate != null">three_star_rate = #{goods.threeStarRate},</if>
+            <if test="twoStarRate != null">two_star_rate = #{goods.twoStarRate},</if>
+            <if test="oneStarRate != null">one_star_rate = #{goods.oneStarRate},</if>
             update_time = NOW()
         </set>
         WHERE merchant_goods_id = #{merchantGoodsId}
