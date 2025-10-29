@@ -217,8 +217,35 @@
 
     <!--   添加商品  -->
     <insert id="addGoods" parameterType="com.ruoyi.platform.merchant.dto.MerchantGoodsDTO">
-        INSERT INTO merchant_goods(merchant_base_id, goods_name, category, sub_category, price, original_price, stock, sales_count, description, tag_codes, status, avg_rating, rating_count, five_star_rate, four_star_rate, three_star_rate, two_star_rate, one_star_rate, create_time, update_time)
-        VALUES(#{merchantId}, #{goodsName}, #{category}, #{subCategory}, #{price}, #{originalPrice}, #{stock}, #{salesCount}, #{description}, #{tagCodes}, #{status}, #{avgRating}, #{ratingCount}, #{fiveStarRate}, #{fourStarRate}, #{threeStarRate}, #{twoStarRate}, #{oneStarRate}, NOW(), NOW())
+        INSERT INTO merchant_goods(
+            merchant_base_id, goods_name, category, sub_category,
+            price, original_price, stock, sales_count, description,
+            tag_codes, status, avg_rating, rating_count,
+            five_star_rate, four_star_rate, three_star_rate, two_star_rate, one_star_rate,
+            create_time, update_time
+        )
+        VALUES(
+                  #{merchantId},
+                  #{goods.goodsName},
+                  #{goods.category},
+                  #{goods.subCategory},
+                  #{goods.price},
+                  #{goods.originalPrice},
+                  #{goods.stock},
+                  #{goods.salesCount},
+                  #{goods.description},
+                  #{goods.tagCodes},
+                  #{goods.status},
+                  #{goods.avgRating},
+                  #{goods.ratingCount},
+                  #{goods.fiveStarRate},
+                  #{goods.fourStarRate},
+                  #{goods.threeStarRate},
+                  #{goods.twoStarRate},
+                  #{goods.oneStarRate},
+                  NOW(),
+                  NOW()
+              )
     </insert>
 
     <!--  查找主图外的图片URL  -->
