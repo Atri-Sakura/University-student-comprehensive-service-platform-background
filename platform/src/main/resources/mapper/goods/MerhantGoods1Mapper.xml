@@ -116,7 +116,7 @@
     <update id="updateGoods" parameterType="com.ruoyi.platform.merchant.dto.MerchantGoodsDTO">
         UPDATE merchant_goods
         <set>
-            <if test="merchantBaseId != null">merchant_base_id = #{merchantBaseId},</if>
+            <if test="merchantBaseId != null">merchant_base_id = #{merchantId},</if>
             <if test="goodsName != null and goodsName != ''">goods_name = #{goods.goodsName},</if>
             <if test="category != null and category != ''">category = #{goods.category},</if>
             <if test="subCategory != null">sub_category = #{goods.subCategory},</if>
