@@ -29,4 +29,6 @@ public interface IMerchantOrderService {
     public OrderMain selectMerchantOrderById(Long merchantId, Long orderMainId);
 
     int acceptOrder(Long merchantId, Long orderMainId);
+
+    public int rejectOrder(Long merchantId, Long orderMainId, String cancelOperator);
 }

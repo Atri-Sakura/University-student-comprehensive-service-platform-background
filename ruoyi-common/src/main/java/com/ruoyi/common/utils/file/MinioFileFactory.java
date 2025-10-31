@@ -13,13 +13,13 @@ import java.util.UUID;
 public class MinioFileFactory {
 
     //    @Value("${minio.access-key}")
-    private static final String accessKey = "minioadmin";
+    private static final String accessKey = "ATRI";
 
     //    @Value("${minio.secret-key}")
-    private static final String secretKey = "minioadmin";
+    private static final String secretKey = "AAATTTRRRIII";
 
     //    @Value("${minio.endpoint}")
-    private static final String endpoint = "http://localhost:9000";
+    private static final String endpoint = "http://182.254.228.15:9000";
 
     public static MinioClient minioClient = MinioClient.builder()
             .endpoint(endpoint)

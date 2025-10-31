@@ -35,6 +35,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         where merchant_goods_image_id = #{merchantGoodsImageId}
     </select>
 
+    <select id="selectImagesByGoodsEvaluationId" resultType="GoodsEvaluationImage">
+        SELECT * FROM goods_evaluation_image WHERE goods_evaluation_id = #{goodsEvaluationId} ORDER BY sort_order ASC
+    </select>
+
     <insert id="insertMerchantGoodsImage" parameterType="MerchantGoodsImage">
         insert into merchant_goods_image
         <trim prefix="(" suffix=")" suffixOverrides=",">

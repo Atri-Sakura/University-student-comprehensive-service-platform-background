@@ -1,0 +1,288 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.platform.merchant.mapper.GoodsMapper">
+
+    <!-- 商品表结果映射 -->
+    <resultMap id="MerchantGoodsResult" type="com.ruoyi.platform.merchant.dto.MerchantGoodsDTO">
+        <id column="merchant_goods_id" property="merchantGoodsId" />
+        <result column="merchant_base_id" property="merchantBaseId" />
+        <result column="goods_name" property="goodsName" />
+        <result column="category" property="category" />
+        <result column="sub_category" property="subCategory" />
+        <result column="price" property="price" />
+        <result column="original_price" property="originalPrice" />
+        <result column="stock" property="stock" />
+        <result column="sales_count" property="salesCount" />
+        <result column="description" property="description" />
+        <result column="tag_codes" property="tagCodes" />
+        <result column="status" property="status" />
+        <result column="avg_rating" property="avgRating" />
+        <result column="rating_count" property="ratingCount" />
+        <result column="five_star_rate" property="fiveStarRate" />
+        <result column="four_star_rate" property="fourStarRate" />
+        <result column="three_star_rate" property="threeStarRate" />
+        <result column="two_star_rate" property="twoStarRate" />
+        <result column="one_star_rate" property="oneStarRate" />
+        <result column="create_time" property="createTime" />
+        <result column="update_time" property="updateTime" />
+        <!-- 主图URL映射 -->
+        <result column="main_image_url" property="mainImageUrl" />
+
+    </resultMap>
+
+
+    <!-- 商品图片结果映射 -->
+    <resultMap id="GoodsImageResult" type="com.ruoyi.platform.merchant.dto.GoodsImageDTO">
+        <id column="merchant_goods_image_id" property="merchantGoodsImageId" />
+        <result column="image_url" property="imageUrl" />
+        <result column="image_desc" property="imageDesc" />
+        <result column="sort_order" property="sortOrder" />
+        <result column="is_main" property="isMain" />
+    </resultMap>
+
+    <!-- 商品详情结果映射（包含图片列表） -->
+    <resultMap id="MerchantGoodsDetailResult" type="com.ruoyi.platform.merchant.dto.MerchantGoodsDTO">
+        <id column="merchant_goods_id" property="merchantGoodsId" />
+        <result column="merchant_base_id" property="merchantBaseId" />
+        <result column="goods_name" property="goodsName" />
+        <result column="category" property="category" />
+        <result column="sub_category" property="subCategory" />
+        <result column="price" property="price" />
+        <result column="original_price" property="originalPrice" />
+        <result column="stock" property="stock" />
+        <result column="sales_count" property="salesCount" />
+        <result column="description" property="description" />
+        <result column="tag_codes" property="tagCodes" />
+        <result column="status" property="status" />
+        <result column="avg_rating" property="avgRating" />
+        <result column="rating_count" property="ratingCount" />
+        <result column="five_star_rate" property="fiveStarRate" />
+        <result column="four_star_rate" property="fourStarRate" />
+        <result column="three_star_rate" property="threeStarRate" />
+        <result column="two_star_rate" property="twoStarRate" />
+        <result column="one_star_rate" property="oneStarRate" />
+        <result column="create_time" property="createTime" />
+        <result column="update_time" property="updateTime" />
+        <!-- 主图URL映射 -->
+        <result column="main_image_url" property="mainImageUrl" />
+        <!-- 商品图片列表 -->
+        <collection property="imageList" ofType="com.ruoyi.platform.merchant.dto.GoodsImageDTO"
+                    select="getGoodsImagesByGoodsId" column="merchant_goods_id" />
+    </resultMap>
+
+
+    <!-- 查询商品列表 -->
+    <select id="getGoodsList" resultMap="MerchantGoodsResult">
+        SELECT * FROM merchant_goods
+        WHERE merchant_base_id = #{merchantId}
+    </select>
+
+    <!-- 查询商品列表（包含主图URL） -->
+    <select id="getGoodsListWithMainImage" parameterType="Long" resultMap="MerchantGoodsResult">
+        SELECT
+            mg.*,
+            (
+                SELECT mgi.image_url
+                FROM merchant_goods_image mgi
+                WHERE mgi.merchant_goods_id = mg.merchant_goods_id
+                  AND mgi.is_main = 1
+                ORDER BY mgi.sort_order ASC
+                LIMIT 1
+            ) as main_image_url
+        FROM merchant_goods mg
+        WHERE mg.merchant_base_id = #{merchantId}
+        ORDER BY mg.create_time DESC
+    </select>
+
+
+
+    <!-- 修改findGoodById，添加主图URL -->
+    <select id="findGoodById" parameterType="Long" resultMap="MerchantGoodsResult">
+        SELECT
+            mg.*,
+            (
+                SELECT mgi.image_url
+                FROM merchant_goods_image mgi
+                WHERE mgi.merchant_goods_id = mg.merchant_goods_id
+                  AND mgi.is_main = 1
+                ORDER BY mgi.sort_order ASC
+                LIMIT 1
+            ) as main_image_url
+        FROM merchant_goods mg
+        WHERE mg.merchant_goods_id = #{merchantGoodsId}
+    </select>
+
+    <!-- 更新商品信息 - 完整更新 -->
+    <update id="updateGoods" parameterType="com.ruoyi.platform.merchant.dto.MerchantGoodsDTO">
+        UPDATE merchant_goods
+        <set>
+            <if test="merchantId != null">merchant_base_id = #{merchantId},</if>
+            <if test="goods.goodsName != null and goods.goodsName != ''">goods_name = #{goods.goodsName},</if>
+            <if test="goods.category != null and goods.category != ''">category = #{goods.category},</if>
+            <if test="goods.subCategory != null">sub_category = #{goods.subCategory},</if>
+            <if test="goods.price != null">price = #{goods.price},</if>
+            <if test="goods.originalPrice != null">original_price = #{goods.originalPrice},</if>
+            <if test="goods.stock != null">stock = #{goods.stock},</if>
+            <if test="goods.salesCount != null">sales_count = #{goods.salesCount},</if>
+            <if test="goods.description != null">description = #{goods.description},</if>
+            <if test="goods.tagCodes != null">tag_codes = #{goods.tagCodes},</if>
+            <if test="goods.status != null">status = #{goods.status},</if>
+            <if test="goods.avgRating != null">avg_rating = #{goods.avgRating},</if>
+            <if test="goods.ratingCount != null">rating_count = #{goods.ratingCount},</if>
+            <if test="goods.fiveStarRate != null">five_star_rate = #{goods.fiveStarRate},</if>
+            <if test="goods.fourStarRate != null">four_star_rate = #{goods.fourStarRate},</if>
+            <if test="goods.threeStarRate != null">three_star_rate = #{goods.threeStarRate},</if>
+            <if test="goods.twoStarRate != null">two_star_rate = #{goods.twoStarRate},</if>
+            <if test="goods.oneStarRate != null">one_star_rate = #{goods.oneStarRate},</if>
+            update_time = NOW()
+        </set>
+        WHERE merchant_goods_id = #{goodsId}
+    </update>
+
+    <!-- 更新商品状态 -->
+    <update id="updateGoodsStatus">
+        UPDATE merchant_goods
+        SET status = #{status}, update_time = NOW()
+        WHERE merchant_goods_id = #{merchantGoodsId}
+    </update>
+
+    <!-- 更新商品库存 -->
+    <update id="updateGoodsStock">
+        UPDATE merchant_goods
+        SET stock = #{stock}, update_time = NOW()
+        WHERE merchant_goods_id = #{merchantGoodsId}
+    </update>
+
+    <!-- 增加商品销量 -->
+    <update id="increaseSalesCount">
+        UPDATE merchant_goods
+        SET sales_count = sales_count + #{count}, update_time = NOW()
+        WHERE merchant_goods_id = #{merchantGoodsId}
+    </update>
+
+    <!-- 减少商品库存 -->
+    <update id="decreaseStock">
+        UPDATE merchant_goods
+        SET stock = stock - #{count}, update_time = NOW()
+        WHERE merchant_goods_id = #{merchantGoodsId} AND stock >= #{count}
+    </update>
+
+    <!-- 更新商品评分信息 -->
+    <update id="updateGoodsRating">
+        UPDATE merchant_goods
+        SET
+            avg_rating = #{avgRating},
+            rating_count = #{ratingCount},
+            five_star_rate = #{fiveStarRate},
+            four_star_rate = #{fourStarRate},
+            three_star_rate = #{threeStarRate},
+            two_star_rate = #{twoStarRate},
+            one_star_rate = #{oneStarRate},
+            update_time = NOW()
+        WHERE merchant_goods_id = #{merchantGoodsId}
+    </update>
+
+    <!-- 批量更新商品状态 -->
+    <update id="batchUpdateStatus">
+        UPDATE merchant_goods
+        SET status = #{status}, update_time = NOW()
+        WHERE merchant_goods_id IN
+        <foreach collection="goodsIds" item="goodsId" open="(" separator="," close=")">
+            #{goodsId}
+        </foreach>
+    </update>
+
+    <!-- 根据商品ID查询主图URL -->
+    <select id="getMainImageUrlByGoodsId" parameterType="Long" resultType="String">
+        SELECT image_url
+        FROM merchant_goods_image
+        WHERE merchant_goods_id = #{merchantGoodsId}
+          AND is_main = 1
+        ORDER BY sort_order ASC
+        LIMIT 1
+    </select>
+
+    <!-- 批量查询商品主图URL -->
+    <select id="getMainImageUrlsByGoodsIds" parameterType="java.util.List" resultType="java.util.Map">
+        SELECT
+        merchant_goods_id as goodsId,
+        image_url as imageUrl
+        FROM merchant_goods_image
+        WHERE merchant_goods_id IN
+        <foreach collection="list" item="goodsId" open="(" separator="," close=")">
+            #{goodsId}
+        </foreach>
+        AND is_main = 1
+    </select>
+
+    <!--   添加商品  -->
+    <insert id="addGoods" parameterType="com.ruoyi.platform.merchant.dto.MerchantGoodsDTO">
+        INSERT INTO merchant_goods(
+            merchant_base_id, goods_name, category, sub_category,
+            price, original_price, stock, sales_count, description,
+            tag_codes, status, avg_rating, rating_count,
+            five_star_rate, four_star_rate, three_star_rate, two_star_rate, one_star_rate,
+            create_time, update_time
+        )
+        VALUES(
+                  #{merchantId},
+                  #{goods.goodsName},
+                  #{goods.category},
+                  #{goods.subCategory},
+                  #{goods.price},
+                  #{goods.originalPrice},
+                  #{goods.stock},
+                  #{goods.salesCount},
+                  #{goods.description},
+                  #{goods.tagCodes},
+                  #{goods.status},
+                  #{goods.avgRating},
+                  #{goods.ratingCount},
+                  #{goods.fiveStarRate},
+                  #{goods.fourStarRate},
+                  #{goods.threeStarRate},
+                  #{goods.twoStarRate},
+                  #{goods.oneStarRate},
+                  NOW(),
+                  NOW()
+              )
+    </insert>
+
+    <!--  查找主图外的图片URL  -->
+    <select id="getOtherImageUrlsByGoodsId" parameterType="Long" resultType="String">
+            SELECT image_url
+            FROM merchant_goods_image
+            WHERE merchant_goods_id = #{merchantGoodsId}
+              AND is_main = 0
+            ORDER BY sort_order ASC
+    </select>
+
+    <!-- 查询商品的所有图片 -->
+    <select id="getGoodsImagesByGoodsId" parameterType="Long" resultMap="GoodsImageResult">
+        SELECT
+            merchant_goods_image_id,
+            image_url,
+            image_desc,
+            sort_order,
+            is_main
+        FROM merchant_goods_image
+        WHERE merchant_goods_id = #{goodsId}
+        ORDER BY is_main DESC, sort_order ASC, merchant_goods_image_id ASC
+    </select>
+
+    <!-- 查询商品详情（包含所有图片信息） -->
+    <select id="getGoodsDetailWithImages" parameterType="Long" resultMap="MerchantGoodsDetailResult">
+        SELECT
+            mg.*,
+            (
+                SELECT mgi.image_url
+                FROM merchant_goods_image mgi
+                WHERE mgi.merchant_goods_id = mg.merchant_goods_id
+                  AND mgi.is_main = 1
+                ORDER BY mgi.sort_order ASC
+                LIMIT 1
+            ) as main_image_url
+        FROM merchant_goods mg
+        WHERE mg.merchant_goods_id = #{goodsId}
+    </select>
+</mapper>

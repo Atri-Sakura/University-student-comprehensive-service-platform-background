@@ -1,6 +1,10 @@
 package com.ruoyi.platform.merchant.controller;
 
 import com.ruoyi.platform.domain.GoodsEvaluation;
+import com.ruoyi.platform.domain.vo.GoodsEvaluationDetailVO;
+import com.ruoyi.platform.domain.GoodsEvaluationImage;
+import com.ruoyi.platform.mapper.GoodsEvaluationImageMapper;
+import com.ruoyi.platform.mapper.MerchantGoodsImageMapper;
 import com.ruoyi.platform.merchant.service.IMerchantGoodsEvaluationService;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.utils.SecurityUtils;
@@ -16,6 +20,9 @@ public class MerchantGoodsEvaluationController {
     @Autowired
     private IMerchantGoodsEvaluationService merchantGoodsEvaluationService;
 
+    @Autowired
+    private MerchantGoodsImageMapper merchantGoodsImageMapper;
+
     /**
      * 查询门店订单评价列表（按分类和是否有图）
      * 仅限当前登录商家
@@ -28,6 +35,19 @@ public class MerchantGoodsEvaluationController {
         Long merchantBaseId = SecurityUtils.getMerchantBaseId();
         List<GoodsEvaluation> list = merchantGoodsEvaluationService.getGoodsEvaluationList(merchantBaseId, category, hasImage);
         return AjaxResult.success(list);
+    }
+
+    @GetMapping("/detail/{goodsEvaluationId}")
+    public AjaxResult detail(@PathVariable Long goodsEvaluationId) {
+        Long merchantBaseId = SecurityUtils.getMerchantBaseId();
+        GoodsEvaluation evaluation = merchantGoodsEvaluationService.getGoodsEvaluationById(goodsEvaluationId);
+        if (evaluation == null || !evaluation.getMerchantBaseId().equals(merchantBaseId)) {
+            return AjaxResult.error("无权查看该评价");
+        }
+        // 查询图片列表
+        List<GoodsEvaluationImage> images = merchantGoodsImageMapper.selectImagesByGoodsEvaluationId(goodsEvaluationId);
+        // 组合返回结果
+        return AjaxResult.success(new GoodsEvaluationDetailVO(evaluation, images));
     }
 
     /**

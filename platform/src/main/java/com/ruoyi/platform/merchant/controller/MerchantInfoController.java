@@ -64,7 +64,7 @@ public class MerchantInfoController {
         Long merchantBaseId = SecurityUtils.getMerchantBaseId();
         MerchantAddress address = merchantAddressInfoService.selectMerchantAddressByMerchantBaseId(merchantBaseId);
         if (address == null) {
-            return AjaxResult.error("未找到该商家地址信息");
+            return AjaxResult.error("未找到地址信息");
         }
         return AjaxResult.success(address);
     }

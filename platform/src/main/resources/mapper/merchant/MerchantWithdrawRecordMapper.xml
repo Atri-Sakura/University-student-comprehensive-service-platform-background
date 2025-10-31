@@ -22,6 +22,7 @@
         <result property="processTime"     column="process_time"/>
         <result property="remark"          column="remark"/>
         <result property="operatorName"    column="operator_name"/>
+        <result property="idempotentKey"   column="idempotent_key"/>
     </resultMap>
 
     <!-- 查询单条记录 -->
@@ -42,18 +43,34 @@
     </select>
 
     <!-- 新增 -->
-    <insert id="insertMerchantWithdrawRecord" parameterType="com.ruoyi.platform.domain.MerchantWithdrawRecord"
+    <insert id="insertMerchantWithdrawRecord"
+            parameterType="com.ruoyi.platform.domain.MerchantWithdrawRecord"
             useGeneratedKeys="true" keyProperty="withdrawId">
         INSERT INTO merchant_withdraw_record (
-            merchant_base_id, account_id, withdraw_amount, fee_amount,
-            actual_amount, withdraw_status, request_time, process_time,
-            remark, operator_name
+            merchant_base_id,
+            account_id,
+            withdraw_amount,
+            fee_amount,
+            actual_amount,
+            withdraw_status,
+            request_time,
+            idempotent_key,
+            remark,
+            operator_name
         ) VALUES (
-                     #{merchantBaseId}, #{accountId}, #{withdrawAmount}, #{feeAmount},
-                     #{actualAmount}, #{withdrawStatus}, NOW(), #{processTime},
-                     #{remark}, #{operatorName}
+                     #{merchantBaseId},
+                     #{accountId},
+                     #{withdrawAmount},
+                     #{feeAmount},
+                     #{actualAmount},
+                     #{withdrawStatus},
+                     NOW(),
+                     #{idempotentKey},
+                     #{remark},
+                     #{operatorName}
                  )
     </insert>
+
 
     <!-- 修改 -->
     <update id="updateMerchantWithdrawRecord" parameterType="com.ruoyi.platform.domain.MerchantWithdrawRecord">
@@ -89,6 +106,70 @@
         FROM merchant_withdraw_record
         WHERE merchant_base_id = #{merchantBaseId}
           AND withdraw_status IN ('PENDING', 'PROCESSING')
+    </select>
+
+    <!-- ========================================================= -->
+    <!-- 查询提现记录 -->
+    <select id="selectByMerchantAndKey"
+            resultMap="MerchantWithdrawRecordResult">
+        SELECT * FROM merchant_withdraw_record
+        WHERE merchant_base_id = #{merchantBaseId}
+          AND idempotent_key = #{idempotentKey}
+            LIMIT 1
+    </select>
+
+    <!-- ========================================================= -->
+    <!-- 更新提现状态 -->
+    <!-- ========================================================= -->
+    <update id="updateStatus">
+        UPDATE merchant_withdraw_record
+        SET withdraw_status = #{status},
+            remark = #{remark},
+            process_time = NOW()
+        WHERE withdraw_id = #{withdrawId}
+    </update>
+
+    <!-- ========================================================= -->
+    <!-- 查询提现记录详情 -->
+    <!-- ========================================================= -->
+    <select id="selectWithdrawRecordById"
+            parameterType="long"
+            resultMap="MerchantWithdrawRecordResult">
+        SELECT
+            withdraw_id,
+            merchant_base_id,
+            account_id,
+            withdraw_amount,
+            fee_amount,
+            actual_amount,
+            withdraw_status,
+            request_time,
+            process_time,
+            remark,
+            operator_name,
+            idempotent_key
+        FROM merchant_withdraw_record
+        WHERE withdraw_id = #{withdrawId}
+    </select>
+
+
+    <select id="selectWithdrawRecordVOList"
+            resultType="com.ruoyi.platform.domain.vo.MerchantWithdrawRecordVO">
+        SELECT
+        r.withdraw_id     AS withdrawId,
+        r.withdraw_amount AS amount,
+        r.withdraw_status AS status,
+        a.bank_name       AS bankName,
+        r.process_time    AS arriveTime,
+        r.remark          AS remark
+        FROM merchant_withdraw_record r
+        LEFT JOIN merchant_withdraw_account a
+        ON r.account_id = a.account_id
+        WHERE r.merchant_base_id = #{merchantBaseId}
+        <if test="status != null and status != ''">
+            AND r.withdraw_status = #{status}
+        </if>
+        ORDER BY r.request_time DESC
     </select>
 
 

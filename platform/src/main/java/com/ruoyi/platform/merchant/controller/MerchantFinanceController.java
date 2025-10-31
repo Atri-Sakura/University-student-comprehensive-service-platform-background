@@ -1,12 +1,19 @@
 package com.ruoyi.platform.merchant.controller;
 
+import com.github.pagehelper.PageInfo;
+import com.ruoyi.common.core.controller.BaseController;
+import com.ruoyi.common.core.page.TableDataInfo;
+import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.platform.domain.MerchantDailySummary;
 import com.ruoyi.platform.domain.MerchantWallet;
 import com.ruoyi.platform.domain.MerchantWithdrawAccount;
+import com.ruoyi.platform.domain.MerchantWithdrawRecord;
 import com.ruoyi.platform.domain.dto.MerchantWithdrawAccountAddDTO;
+import com.ruoyi.platform.domain.dto.WithdrawApplyDTO;
 import com.ruoyi.platform.domain.vo.*;
+import com.ruoyi.platform.merchant.payment.PaymentGatewayClient;
 import com.ruoyi.platform.merchant.service.IMerchantWithdrawAccountService;
 import com.ruoyi.platform.merchant.service.IMerchantWithdrawRecordService;
 import com.ruoyi.platform.service.IMerchantWalletService;
@@ -22,13 +29,15 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import static com.ruoyi.common.utils.PageUtils.startPage;
+
 /**
  * 商家财务信息控制器
  */
 
 @RestController
 @RequestMapping("/api/merchant/finance")
-public class MerchantFinanceController {
+public class MerchantFinanceController extends BaseController {
 
     @Autowired
     private IOrderMainService orderMainService;
@@ -145,7 +154,7 @@ public class MerchantFinanceController {
     }
 
     /**
-     * 添加商家提现账户
+     * 添加商家提现账户需要增强逻辑避免重复添加相同的
      */
     @PostMapping("/withdraw/account/add")
     public AjaxResult addWithdrawAccount(@RequestBody MerchantWithdrawAccountAddDTO dto) {
@@ -217,4 +226,56 @@ public class MerchantFinanceController {
             return AjaxResult.error(e.getMessage());
         }
     }
+
+    /**
+     * 提现申请
+     */
+    @PostMapping("/withdraw/apply")
+    public AjaxResult applyWithdraw(@RequestBody WithdrawApplyDTO withdrawApplyDTO) {
+        Long merchantId = SecurityUtils.getMerchantBaseId();
+        if (merchantId == null) {
+            return AjaxResult.error("商家身份信息缺失，请重新登录");
+        }
+        try {
+            WithdrawApplyResultVO vo = merchantWithdrawRecordService.applyWithdraw(merchantId, withdrawApplyDTO);
+            return AjaxResult.success(vo);
+        } catch (ServiceException e) {
+            return AjaxResult.error(e.getMessage());
+        } catch (Exception e) {
+            return AjaxResult.error("提现申请失败，请稍后重试");
+        }
+    }
+
+    /**
+     * 查询提现状态
+     */
+    @GetMapping("/withdraw/status/{withdrawId}")
+    public AjaxResult getWithdrawStatus(@PathVariable Long withdrawId) {
+        MerchantWithdrawRecord record = merchantWithdrawRecordService.selectWithdrawRecordById(withdrawId);
+        if (record == null) {
+            return AjaxResult.error("未找到提现记录");
+        }
+
+        WithdrawStatusVO vo = new WithdrawStatusVO();
+        vo.setWithdrawId(record.getWithdrawId());
+        vo.setWithdrawStatus(record.getWithdrawStatus());
+        vo.setRemark(record.getRemark());
+        vo.setProcessTime(record.getProcessTime());
+        return AjaxResult.success(vo);
+    }
+
+    /**
+     * 获取商家提现记录列表
+     */
+    @GetMapping("/withdraw/records")
+    public TableDataInfo getwithdrawRecordList(@RequestParam (required = false) String status) {
+        Long merchantId = SecurityUtils.getMerchantBaseId();
+        if (merchantId == null) {
+            throw new ServiceException("商家身份信息缺失，请重新登录");
+        }
+        startPage();
+        List<MerchantWithdrawRecordVO> list = merchantWithdrawRecordService.selectWithdrawRecordVOList(merchantId, status);
+        return getDataTable(list);
+    }
 }
+

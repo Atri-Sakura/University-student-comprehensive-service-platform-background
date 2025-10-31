@@ -61,4 +61,22 @@ public class MerchantOrderServiceImpl implements IMerchantOrderService {
 
         return merchantOrderMapper.updateOrderMain(updateOrder);
     }
+
+    @Override
+    public int rejectOrder(Long merchantId, Long orderMainId, String cancelOperator) {
+        // 查询订单详情
+        OrderMain order = merchantOrderMapper.selectMerchantOrderById(merchantId, orderMainId);
+        if (order == null) {
+            throw new ServiceException("订单不存在");
+        }
+        if (order.getOrderStatus() != 1L) {
+            throw new ServiceException("订单状态已更新，无法拒单");
+        }
+        // 构造更新对象
+        OrderMain updateOrder = new OrderMain();
+        updateOrder.setOrderMainId(orderMainId);
+        updateOrder.setOrderStatus(5L); // 已取消
+        updateOrder.setCancelOperator(cancelOperator);
+        return merchantOrderMapper.updateOrderMain(updateOrder);
+    }
 }

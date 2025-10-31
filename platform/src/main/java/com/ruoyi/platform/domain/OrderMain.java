@@ -2,6 +2,8 @@ package com.ruoyi.platform.domain;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonFormat;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -126,6 +128,16 @@ public class OrderMain extends BaseEntity
     @JsonFormat(pattern = "yyyy-MM-dd")
     @Excel(name = "完成时间", width = 30, dateFormat = "yyyy-MM-dd")
     private Date completeTime;
+
+    private List<OrderTakeoutDetail> orderTakeoutDetailList;
+
+    public List<OrderTakeoutDetail> getOrderTakeoutDetailList() {
+        return orderTakeoutDetailList;
+    }
+
+    public void setOrderTakeoutDetailList(List<OrderTakeoutDetail> orderTakeoutDetailList) {
+        this.orderTakeoutDetailList = orderTakeoutDetailList;
+    }
 
     public void setOrderMainId(Long orderMainId) 
     {
