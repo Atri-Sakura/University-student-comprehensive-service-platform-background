@@ -12,7 +12,6 @@ public class MessageHandlerFactory {
 
     private final Map<Long, MessageHandler> handlerMap;
 
-
     public MessageHandlerFactory(List<MessageHandler> handlers) {
         handlerMap = new HashMap<>();
         for (MessageHandler handler : handlers) {

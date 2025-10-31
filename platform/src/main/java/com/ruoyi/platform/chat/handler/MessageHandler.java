@@ -1,15 +1,13 @@
 package com.ruoyi.platform.chat.handler;
 
-import com.ruoyi.common.core.domain.entity.ChatMessage;
 import com.ruoyi.platform.chat.manager.ChannelSessionManager;
-import io.netty.channel.ChannelHandlerContext;
-import org.springframework.stereotype.Component;
 
-@Component
+import com.ruoyi.platform.chat.protobuf.ChatMessageProto;
+import io.netty.channel.ChannelHandlerContext;
+
 public interface MessageHandler {
 
-    Long supportType();
+    long supportType();
 
-    void handler(ChannelSessionManager channelSessionManager, ChannelHandlerContext channelHandlerContext , ChatMessage chatMessage);
-
+    void handler(ChannelSessionManager channelSessionManager, ChannelHandlerContext ctx, ChatMessageProto.ChatMessage chatMessage);
 }

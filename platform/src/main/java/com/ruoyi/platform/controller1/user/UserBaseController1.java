@@ -1,6 +1,8 @@
 package com.ruoyi.platform.controller1.user;
 
+import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.R;
+import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.platform.domain.UserBase;
 import com.ruoyi.platform.service.IUserBaseService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +19,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/platform/user/base")
-public class UserBaseController1 {
+public class UserBaseController1 extends BaseController {
 
     @Autowired
     private IUserBaseService userBaseService;
@@ -35,9 +37,10 @@ public class UserBaseController1 {
      * 查询用户基础信息列表
      */
     @GetMapping("/list")
-    public R<List<UserBase>> list(UserBase userBase) {
+    public TableDataInfo list(UserBase userBase) {
+        startPage();
         List<UserBase> list = userBaseService.selectUserBaseList(userBase);
-        return R.ok(list);
+        return getDataTable(list);
     }
 
     /**

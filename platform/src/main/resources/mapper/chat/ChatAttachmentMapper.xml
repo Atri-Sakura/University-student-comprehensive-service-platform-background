@@ -42,6 +42,13 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </select>
 
     <insert id="insertChatAttachment" parameterType="ChatAttachment">
+        <!-- 自动生成雪花算法ID并赋值给messageId，包裹在SELECT语句中 -->
+        <selectKey
+                keyProperty="attachmentId"
+                resultType="java.lang.Long"
+                order="BEFORE">
+            SELECT ${@com.ruoyi.platform.chat.utils.SnowflakeIdGenerator@getInstance().nextId()}
+        </selectKey>
         insert into chat_attachment
         <trim prefix="(" suffix=")" suffixOverrides=",">
             <if test="attachmentId != null">attachment_id,</if>

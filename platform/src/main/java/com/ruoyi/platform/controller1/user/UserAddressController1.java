@@ -1,6 +1,8 @@
 package com.ruoyi.platform.controller1.user;
 
+import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.R;
+import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.platform.domain.UserAddress;
 import com.ruoyi.platform.service.IUserAddressService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +18,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/platform/user/address")
-public class UserAddressController1 {
+public class UserAddressController1 extends BaseController {
 
     @Autowired
     private IUserAddressService userAddressService;
@@ -34,9 +36,10 @@ public class UserAddressController1 {
      * 查询用户地址列表
      */
     @GetMapping("/list")
-    public R<List<UserAddress>> list(UserAddress userAddress) {
+    public TableDataInfo list(UserAddress userAddress) {
+        startPage();
         List<UserAddress> list = userAddressService.selectUserAddressList(userAddress);
-        return R.ok(list);
+        return getDataTable(list);
     }
 
     /**

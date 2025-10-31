@@ -1,30 +1,42 @@
 package com.ruoyi.platform.chat.utils;
 
-import com.ruoyi.platform.chat.codec.WebSocketMessageDecoder;
-import com.ruoyi.platform.chat.codec.WebSocketMessageEncoder;
-import com.ruoyi.platform.chat.handler.MessageHandler;
-import com.ruoyi.platform.chat.handler.NettyServerHandler;
+import com.ruoyi.platform.chat.codec.*;
+import com.ruoyi.platform.chat.handler.ChatHandler;
+
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
-import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketServerCompressionHandler;
 import io.netty.handler.stream.ChunkedWriteHandler;
-import org.springframework.beans.factory.annotation.Autowired;
+import io.netty.handler.timeout.IdleStateHandler;
 import org.springframework.stereotype.Component;
 
 @Component
 public class NettyServerChannelInitializer extends ChannelInitializer<SocketChannel> {
+    private final ChatHandler chatHandler;
 
-    @Autowired
-    private WebSocketMessageEncoder webSocketMessageEncoder;
+    public NettyServerChannelInitializer(ChatHandler chatHandler) {
+        this.chatHandler = chatHandler;
+    }
 
-    @Autowired
-    private WebSocketMessageDecoder webSocketMessageDecoder;
+//    @Autowired
+//    private WebSocketMessageEncoder webSocketMessageEncoder;
+//
+//    @Autowired
+//    private WebSocketMessageDecoder webSocketMessageDecoder;
+//
+//    @Autowired
+//    private NettyServerHandler nettyServerHandler;
 
-    @Autowired
-    private NettyServerHandler nettyServerHandler;
+//    @Autowired
+//    private BinaryMessageEncoder binaryMessageEncoder;
+//
+//    @Autowired
+//    private BinaryMessagedDecoder binaryMessageDecoder;
+
+//    @Autowired
+//    private BinaryChatHandler binaryChatHandler;
 
 
     @Override
@@ -33,11 +45,19 @@ public class NettyServerChannelInitializer extends ChannelInitializer<SocketChan
                 .addLast(new HttpServerCodec())
                 .addLast(new ChunkedWriteHandler())
                 .addLast(new HttpObjectAggregator(64*1024))
-                .addLast(new WebSocketServerCompressionHandler())
+//                .addLast(new WebSocketServerCompressionHandler())
                 .addLast(new WebSocketServerProtocolHandler("/ws", "", true, 64*1024))
-                .addLast(webSocketMessageDecoder)
-                .addLast(webSocketMessageEncoder)
-                .addLast(nettyServerHandler);
+                .addLast(new IdleStateHandler(30, 0, 0))
+//                .addLast(new BinaryMessagedDecoder())
+//                .addLast(new WebSocketFrameToBinaryMessageDecoder())
+//                .addLast(new BinaryMessageEncoder())
+                .addLast(new WebSocketToProtobufDecoder())
+                .addLast(new ProtobufToWebSocketEncoder())
+                .addLast(chatHandler);
+//                .addLast(binaryChatHandler);
+//                .addLast(webSocketMessageDecoder)
+//                .addLast(webSocketMessageEncoder)
+//                .addLast(nettyServerHandler);
 
     }
 }

@@ -24,9 +24,10 @@ public class ChannelSessionManager {
         String key = userType + ":" + Id;
 
         Channel oldChannel = channelMap.get(key);
-        if (oldChannel != null) {
+        if (oldChannel != null && oldChannel != channel) {
             oldChannel.close();
             channelKeyMap.remove(key);
+            log.info("关闭连接，key:{}",key);
         }
 
         channelMap.put(key, channel);
@@ -48,5 +49,10 @@ public class ChannelSessionManager {
 
     public Channel getChannel(String key) {
         return channelMap.get(key);
+    }
+
+
+    public void unregisterChannel(Channel channel) {
+        String key = channelKeyMap.get(channel);
     }
 }

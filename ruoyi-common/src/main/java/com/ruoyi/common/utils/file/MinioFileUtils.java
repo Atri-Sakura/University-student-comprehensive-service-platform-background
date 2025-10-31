@@ -10,10 +10,15 @@ public class MinioFileUtils {
 
 
 
-
-    public  String upload(MultipartFile file, String bucketName, Long id) throws Exception {
+    public String upload(MultipartFile file, String bucketName, Long id) throws Exception {
 
         return minioFileFactory.upload(file,bucketName,id);
 
     }
+
+    public String upload(byte[] data, String bucketName,Long id) throws Exception {
+        return minioFileFactory.upload(data, bucketName, id);
+    }
+
+
 }
