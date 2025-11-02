@@ -58,4 +58,12 @@ public interface IChatMessageReadService
      * @return 结果
      */
     public int deleteChatMessageReadByReadId(Long readId);
+
+//    /**
+//     * 读取消息
+//     * @param readId
+//     */
+//    public void readMessage(Long readId);
+
+
 }

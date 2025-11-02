@@ -1,5 +1,6 @@
 package com.ruoyi.platform.controller1.chat;
 
+import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.domain.R;
 import com.ruoyi.platform.domain.ChatMessageRead;
 import com.ruoyi.platform.service.IChatMessageReadService;
@@ -65,4 +66,6 @@ public class ChatMessageReadController1 {
         int result = chatMessageReadService.deleteChatMessageReadByReadIds(readIds);
         return result > 0 ? R.ok(result, "删除消息已读状态成功") : R.fail("删除消息已读状态失败");
     }
+
+
 }

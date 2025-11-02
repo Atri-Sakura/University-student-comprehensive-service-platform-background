@@ -96,10 +96,16 @@ public class ChatMessageServiceImpl implements IChatMessageService
         return chatMessageMapper.deleteChatMessageByMessageId(messageId);
     }
 
+    /**
+     * 更新消息状态
+     * @param chatMessage
+     * @param statusId
+     */
     public void updateChatMessageStatus(ChatMessage chatMessage,Long statusId){
         chatMessage.setMsgStatus(statusId);
         chatMessageMapper.updateChatMessage(chatMessage);
     }
+
 
 
 }

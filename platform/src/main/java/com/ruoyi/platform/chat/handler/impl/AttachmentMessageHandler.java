@@ -74,10 +74,12 @@ public class AttachmentMessageHandler implements MessageHandler {
                 Long sessionId = chatSessionService.selectChatSessionIdByFromTo((long) chatMessage.getFromType(), chatMessage.getFromId(), (long) chatMessage.getToType(), chatMessage.getToId());
                 ChatMessage dbMsg = chatOperateMethod.saveTextMessage(chatMessage);
                 ChatSession session;
-                if (sessionId == null) {
-                    session = chatOperateMethod.ensureSessionExists(dbMsg);
-                    dbMsg.setSessionId(sessionId);
+                if (sessionId == null)
+                {
+                    session = chatOperateMethod.ensureSessionExists(dbMsg) ;
+                    dbMsg.setSessionId(session.getSessionId());
                 }
+                session = chatSessionService.selectChatSessionBySessionId(sessionId);
                 dbMsg.setSessionId(sessionId);
                 chatMessageService.insertChatMessage(dbMsg);
                 Long messageId = dbMsg.getMessageId();
@@ -98,6 +100,7 @@ public class AttachmentMessageHandler implements MessageHandler {
                         return;
                     }
                     chatAttachmentService.insertChatAttachment(chatOperateMethod.saveImageMessage(attachment, url, messageId));
+                    chatOperateMethod.updateSession(dbMsg,session);
                     forwardMessageToRecipient(channelSessionManager,chatMessage);
                 }
             } catch (Exception ex) {

@@ -2,6 +2,7 @@ package com.ruoyi.platform.mapper;
 
 import java.util.List;
 import com.ruoyi.platform.domain.ChatSession;
+import jakarta.websocket.Session;
 
 /**
  * 聊天会话（管理双方的聊天窗口关系）Mapper接口
@@ -68,4 +69,21 @@ public interface ChatSessionMapper
      * @return
      */
     public Long selectChatSessionIdByFromTo(Long fromType, Long fromId,Long toType,Long toId);
+
+    /**
+     * 查询未读消息
+     * @param fromType
+     * @param fromId
+     * @return
+     */
+    public List<ChatSession> selectUnreadChatSessionList(Long fromType,Long fromId);
+
+
+//    /**
+//     * 查询用户所有的会话
+//     * @param fromType
+//     * @param fromId
+//     * @return
+//     */
+//    public List<ChatSession> getSessionList(Long fromType,Long fromId);
 }

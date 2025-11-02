@@ -39,6 +39,13 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="sessionStatus != null "> and session_status = #{sessionStatus}</if>
         </where>
     </select>
+
+    <select id="selectUnreadChatSessionList" parameterType="java.util.Map" resultMap="ChatSessionResult">
+        <include refid="selectChatSessionVo"/>
+        <where>
+            (from_type = #{fromType} AND from_id = #{fromId} AND unread_count > 0)
+        </where>
+    </select>
     
     <select id="selectChatSessionBySessionId" parameterType="Long" resultMap="ChatSessionResult">
         <include refid="selectChatSessionVo"/>
@@ -56,16 +63,13 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
                     AND to_type = #{toType}
                     AND to_id = #{toId}
                 )
-           OR
-           -- 反向条件：to→from（交换双方，避免重复会话）
-            (
-                from_type = #{toType}
-                    AND from_id = #{toId}
-                    AND to_type = #{fromType}
-                    AND to_id = #{fromId}
-                )
             LIMIT 1
     </select>
+
+<!--    <select id = "getSessionList"  parameterType = "Long" resultMap="ChatSessionResult"></select>-->
+
+
+    
 
 
     <insert id="insertChatSession" parameterType="ChatSession">

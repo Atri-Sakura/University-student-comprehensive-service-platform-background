@@ -69,4 +69,26 @@ public interface IChatSessionService
      * @return
      */
     public Long selectChatSessionIdByFromTo(Long fromType, Long fromId, Long toType, Long toId);
+
+    /**
+     * 获取未读会话
+     * @param fromType
+     * @param fromId
+     * @return
+     */
+    public List<ChatSession> selectUnreadChatSessionList(Long fromType,Long fromId);
+
+    /**
+     * 增加未读数量
+     * @param sessionId
+     * @return
+     */
+    public Integer increaseUnreadCount(Long sessionId);
+
+    /**
+     * 已读所有消息
+     * @param sessionId
+     * @return
+     */
+    public String readUnreadCount(Long sessionId);
 }

@@ -1,5 +1,6 @@
 package com.ruoyi.platform.controller1.chat;
 
+import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.domain.R;
 import com.ruoyi.platform.domain.ChatSession;
 import com.ruoyi.platform.service.IChatSessionService;
@@ -64,5 +65,25 @@ public class ChatSessionController1 {
     public R<Integer> remove(@PathVariable Long[] sessionIds) {
         int result = chatSessionService.deleteChatSessionBySessionIds(sessionIds);
         return result > 0 ? R.ok(result, "删除聊天会话成功") : R.fail("删除聊天会话失败");
+    }
+
+    @GetMapping("/unread")
+    public AjaxResult unread(Long fromType, Long fromId) {
+        return AjaxResult.success(chatSessionService.selectUnreadChatSessionList(fromType, fromId));
+    }
+
+//    @GetMapping("/session")
+//    public AjaxResult getChatSessionList(Long fromType, Long fromId) {
+//        return AjaxResult.success(chatSessionService.getSessionList(fromType,fromId));
+//    }
+
+    @PostMapping("/increaseUnreadCount")
+    public AjaxResult increaseUnreadCount(Long sessionId) {
+        return AjaxResult.success(chatSessionService.increaseUnreadCount(sessionId));
+    }
+
+    @PostMapping("/readUnreadCount")
+    public AjaxResult readUnreadCount(Long sessionId) {
+        return AjaxResult.success(chatSessionService.readUnreadCount(sessionId));
     }
 }

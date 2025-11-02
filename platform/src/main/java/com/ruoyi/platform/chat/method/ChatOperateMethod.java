@@ -9,6 +9,7 @@ import com.ruoyi.platform.service.IChatMessageService;
 import com.ruoyi.platform.service.IChatSessionService;
 import com.ruoyi.platform.service.impl.ChatAttachmentServiceImpl;
 import lombok.extern.slf4j.Slf4j;
+import org.redisson.client.RedisClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -25,6 +26,8 @@ public class ChatOperateMethod {
     @Autowired
     private IChatSessionService chatSessionService;
 
+//    @Autowired
+//    private RedisClient redisClient;
 
 
     /**
@@ -46,6 +49,7 @@ public class ChatOperateMethod {
         dbMsg.setSessionId(protoMsg.getSessionId() != 0 ? protoMsg.getSessionId() : null);
         dbMsg.setCreateTime(new Date());
         dbMsg.setUpdateTime(new Date());
+        dbMsg.setCreateBy(String.valueOf(protoMsg.getFromId()));
         return dbMsg;
     }
 
@@ -108,6 +112,7 @@ public class ChatOperateMethod {
         chatSession.setLastMsgId(chatMessage.getMessageId());
         chatSession.setLastMsgType(chatMessage.getMsgType());
         chatSession.setUpdateTime(new Date());
+        chatSession.setLastMsgTime(new Date());
         // 更新消息状态为“已送达”
         chatMessage.setMsgStatus(1L); // 1-已送达
         chatMessage.setDeliverTime(new Date());
@@ -158,14 +163,20 @@ public class ChatOperateMethod {
                 chatMessage.getFromId(), chatMessage.getToId(),
                 chatMessage.getFromType(), chatMessage.getToType()
         );
-        if (sessionId == null) {
 
+        if (sessionId == null) {
+            // 初始化并插入新会话
             session = initSession(chatMessage);
             chatSessionService.insertChatSession(session);
-            chatMessage.setSessionId(session.getSessionId());
+            // 关键修复：将新生成的会话ID赋值给sessionId
+            sessionId = session.getSessionId();
+            // 更新消息关联的会话ID
+            chatMessage.setSessionId(sessionId);
             chatMessageService.updateChatMessage(chatMessage);
-            log.info("初始化新会话，会话ID: {}", session.getSessionId());
+            log.info("初始化新会话，会话ID: {}", sessionId);
         }
+
+        // 此时sessionId已确保不为null（要么原本存在，要么新生成）
         session = chatSessionService.selectChatSessionBySessionId(sessionId);
         return session;
     }

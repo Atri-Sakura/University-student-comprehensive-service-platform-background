@@ -93,4 +93,10 @@ public class ChatMessageReadServiceImpl implements IChatMessageReadService
     {
         return chatMessageReadMapper.deleteChatMessageReadByReadId(readId);
     }
+
+//    @Override
+//    public void readMessage(Long readId)
+//    {
+//        chatMessageReadMapper.readMessage(readId);
+//    }
 }

@@ -1,6 +1,7 @@
 package com.ruoyi.platform.chat.handler.impl;
 
 import com.ruoyi.common.core.domain.entity.ChatMessage;
+import com.ruoyi.common.core.redis.RedisCache;
 import com.ruoyi.platform.chat.handler.MessageHandler;
 import com.ruoyi.platform.chat.manager.ChannelSessionManager;
 import com.ruoyi.platform.chat.method.ChatOperateMethod;
@@ -14,10 +15,11 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 import lombok.extern.slf4j.Slf4j;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 
 @Component
@@ -36,6 +38,12 @@ public class TextMessageHandler implements MessageHandler {
     @Autowired
     private IChatMessageService chatMessageService;
 
+    @Autowired
+    private RedissonClient redissonClient;
+
+    @Autowired
+    private RedisCache redisCache;
+
     @Override
     public long supportType() {
         return 1L; // 支持文本消息类型（对应msg_type=1）
@@ -51,20 +59,32 @@ public class TextMessageHandler implements MessageHandler {
                 Long sessionId = chatSessionService.selectChatSessionIdByFromTo((long)chatMessage.getFromType(),chatMessage.getFromId(),(long)chatMessage.getToType(),chatMessage.getToId());
                 ChatMessage dbMsg = chatOperateMethod.saveTextMessage(chatMessage);
                 ChatSession session;
-                session = chatSessionService.selectChatSessionBySessionId(sessionId);
+
                 if(sessionId == null){
-                     session = chatOperateMethod.ensureSessionExists(dbMsg);
-                    dbMsg.setSessionId(session.getSessionId());
+                    session = chatOperateMethod.ensureSessionExists(dbMsg);
+                    sessionId = session.getSessionId();
                 }
 
+                session = chatSessionService.selectChatSessionBySessionId(sessionId);
+                dbMsg.setSessionId(session.getSessionId());
+
                 dbMsg.setSessionId(sessionId);
+
                 int saveSuccess = chatMessageService.insertChatMessage(dbMsg);
                 if (saveSuccess < 1) {
                     log.error("文本消息存储失败，消息ID: {}", chatMessage.getMessageId());
                     pushStatusToSender(channelSessionManager, chatMessage, 4);
                     return;
                 }
+                String cacheKey = "chat:sessionId:" + sessionId + ":messages";
 
+                // 修正：以List结构存储消息
+                List<ChatMessage> existMessages = redisCache.getCacheList(cacheKey);
+                if (existMessages == null) {
+                    existMessages = new ArrayList<>();
+                }
+                existMessages.add(dbMsg);
+                redisCache.setCacheList(cacheKey, existMessages);
 
                 boolean pushSuccess = pushToReceiver(channelSessionManager, chatMessage);
                 if (!pushSuccess) {

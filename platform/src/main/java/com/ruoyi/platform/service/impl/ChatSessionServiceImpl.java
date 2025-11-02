@@ -1,12 +1,20 @@
 package com.ruoyi.platform.service.impl;
 
+import java.util.Date;
 import java.util.List;
+
+import com.ruoyi.common.core.domain.entity.ChatMessage;
+import com.ruoyi.common.core.redis.RedisCache;
 import com.ruoyi.common.utils.DateUtils;
+import com.ruoyi.platform.chat.protobuf.ChatMessageProto;
+import com.ruoyi.platform.mapper.ChatMessageMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.ruoyi.platform.mapper.ChatSessionMapper;
 import com.ruoyi.platform.domain.ChatSession;
 import com.ruoyi.platform.service.IChatSessionService;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * 聊天会话（管理双方的聊天窗口关系）Service业务层处理
@@ -15,10 +23,15 @@ import com.ruoyi.platform.service.IChatSessionService;
  * @date 2025-10-20
  */
 @Service
+@Slf4j
 public class ChatSessionServiceImpl implements IChatSessionService 
 {
     @Autowired
     private ChatSessionMapper chatSessionMapper;
+    @Autowired
+    private ChatMessageMapper chatMessageMapper;
+    @Autowired
+    private RedisCache redisCache;
 
     /**
      * 查询聊天会话（管理双方的聊天窗口关系）
@@ -100,6 +113,63 @@ public class ChatSessionServiceImpl implements IChatSessionService
     {
         return chatSessionMapper.selectChatSessionIdByFromTo(fromType, fromId, toType, toId);
     }
+
+    @Override
+    public List<ChatSession> selectUnreadChatSessionList(Long fromType,Long fromId)
+    {
+        return chatSessionMapper.selectUnreadChatSessionList(fromType,fromId);
+    }
+
+    @Override
+    public Integer increaseUnreadCount(Long sessionId)
+    {
+        ChatSession chatSession = selectChatSessionBySessionId(sessionId);
+        chatSession.setUnreadCount(chatSession.getUnreadCount()+1);
+        return chatSessionMapper.updateChatSession(chatSession);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public String readUnreadCount(Long sessionId) {
+        // 1. 校验会话是否存在
+        ChatSession chatSession = selectChatSessionBySessionId(sessionId);
+        if (chatSession == null) {
+            throw new RuntimeException("会话不存在，sessionId: " + sessionId);
+        }
+
+        // 2. 更新会话未读数量为0
+        chatSession.setUnreadCount(0L);
+        chatSessionMapper.updateChatSession(chatSession);
+
+        // 3. 批量更新该会话下的所有未读消息（一次性SQL）
+        Date now = DateUtils.getNowDate();
+        int updatedCount = chatMessageMapper.batchUpdateUnreadToRead(sessionId, now);
+        if( updatedCount > 0 ) {
+            String key = "chat:sessionId:" + sessionId + ":messages";
+            List<ChatMessage> chatMessages = redisCache.getCacheList(key);
+            if( chatMessages != null && !chatMessages.isEmpty()) {
+                int redisUpdateCount = 0;
+                for (ChatMessage chatMessage : chatMessages) {
+                    if(chatMessage.getMsgStatus() != 2){
+                        chatMessage.setMsgStatus(2L);
+                        chatMessage.setReadTime(now);
+                        redisUpdateCount++;
+                    }
+                }
+                redisCache.setCacheObject(key, chatMessages);
+                log.info("redis[{}]条未读消息批量已读",redisUpdateCount);
+            }
+        }
+        log.info("会话[{}]的未读消息已批量标记为已读，更新数量: {}", sessionId, updatedCount);
+
+
+        return updatedCount == 0 ? "没有需要读取的消息哦":"已读" + updatedCount +"条消息";
+    }
+
+//    @Override
+//    public List<ChatSession> getSessionList(Long fromType, Long fromId) {
+//        return chatSessionMapper.getSessionList(fromType,fromId);
+//    }
 
 
 }

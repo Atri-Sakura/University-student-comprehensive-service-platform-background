@@ -95,6 +95,13 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         </trim>
     </insert>
 
+    <update id="batchUpdateUnreadToRead">
+        UPDATE chat_message
+        SET msg_status = 2, read_time = #{readTime}
+        WHERE session_id = #{sessionId}
+          AND msg_status != 2  -- 只更新未读消息，减少操作量
+    </update>
+
     <update id="updateChatMessage" parameterType="ChatMessage">
         update chat_message
         <trim prefix="SET" suffixOverrides=",">

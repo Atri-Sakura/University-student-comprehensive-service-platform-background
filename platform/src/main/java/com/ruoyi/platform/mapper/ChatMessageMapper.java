@@ -2,6 +2,7 @@ package com.ruoyi.platform.mapper;
 
 import com.ruoyi.common.core.domain.entity.ChatMessage;
 
+import java.util.Date;
 import java.util.List;
 
 
@@ -60,4 +61,12 @@ public interface ChatMessageMapper
      * @return 结果
      */
     public int deleteChatMessageByMessageIds(Long[] messageIds);
+
+    /**
+     * 批量阅读未读消息
+     * @param sessionId
+     * @param readTime
+     * @return
+     */
+    int batchUpdateUnreadToRead( Long sessionId,  Date readTime);
 }

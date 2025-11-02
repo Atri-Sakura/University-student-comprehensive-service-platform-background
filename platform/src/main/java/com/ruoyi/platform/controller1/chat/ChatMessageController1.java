@@ -2,6 +2,7 @@ package com.ruoyi.platform.controller1.chat;
 
 import com.ruoyi.common.core.domain.R;
 import com.ruoyi.common.core.domain.entity.ChatMessage;
+import com.ruoyi.common.core.redis.RedisCache;
 import com.ruoyi.platform.service.IChatMessageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -20,6 +21,9 @@ public class ChatMessageController1 {
 
     @Autowired
     private IChatMessageService chatMessageService;
+
+    @Autowired
+    private RedisCache redisCache;
 
     /**
      * 查询聊天消息详情

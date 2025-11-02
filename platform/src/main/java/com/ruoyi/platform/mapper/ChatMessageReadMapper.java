@@ -58,4 +58,12 @@ public interface ChatMessageReadMapper
      * @return 结果
      */
     public int deleteChatMessageReadByReadIds(Long[] readIds);
+
+//    /**
+//     * 读取消息
+//     * @param readId
+//     */
+//    public void readMessage(Long readId);
+
+
 }
