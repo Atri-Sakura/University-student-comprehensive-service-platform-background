@@ -1,27 +1,25 @@
 package com.ruoyi.platform.merchant.vo;
 
 import lombok.Data;
-
 import java.math.BigDecimal;
 
-@Data
 /**
- * 商家订单统计DTO
+ * 商家订单状态VO
  */
+@Data
 public class MerchantOrderStatusVO {
-
     /**
      * 商家名称
      */
     private String merchantName;
 
     /**
-     * 订单量
+     * 总订单量
      */
     private Integer orderCount;
 
     /**
-     * 营业额
+     * 总营业额
      */
     private BigDecimal revenue;
 
@@ -40,19 +38,23 @@ public class MerchantOrderStatusVO {
      */
     private Integer deliveringCount;
 
-    // 默认构造方法
-    public MerchantOrderStatusVO() {
-    }
+    /**
+     * 今日订单量
+     */
+    private Integer todayOrderCount;
 
-    @Override
-    public String toString() {
-        return "MerchantOrderStatsDTO{" +
-                "merchantName='" + merchantName + '\'' +
-                ", orderCount=" + orderCount +
-                ", revenue=" + revenue +
-                ", pendingCount=" + pendingCount +
-                ", waitingDeliveryCount=" + waitingDeliveryCount +
-                ", deliveringCount=" + deliveringCount +
-                '}';
-    }
+    /**
+     * 今日营业额
+     */
+    private BigDecimal todayRevenue;
+
+    /**
+     * 较昨日订单量变化百分比
+     */
+    private BigDecimal orderCountChangePercent;
+
+    /**
+     * 较昨日营业额变化百分比
+     */
+    private BigDecimal revenueChangePercent;
 }

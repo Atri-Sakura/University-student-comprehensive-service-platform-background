@@ -5,29 +5,92 @@
 <mapper namespace="com.ruoyi.platform.merchant.mapper.OrderMapper">
 
     <resultMap id="MerchantOrderStatsResultMap" type="com.ruoyi.platform.merchant.vo.MerchantOrderStatusVO">
-        <result column="商家名称" property="merchantName" jdbcType="VARCHAR"/>
-        <result column="订单量" property="orderCount" jdbcType="INTEGER"/>
-        <result column="营业额" property="revenue" jdbcType="DECIMAL"/>
-        <result column="待处理数量" property="pendingCount" jdbcType="INTEGER"/>
-        <result column="待配送数量" property="waitingDeliveryCount" jdbcType="INTEGER"/>
-        <result column="配送中数量" property="deliveringCount" jdbcType="INTEGER"/>
+        <result column="merchantName" property="merchantName" jdbcType="VARCHAR"/>
+        <result column="orderCount" property="orderCount" jdbcType="INTEGER"/>
+        <result column="revenue" property="revenue" jdbcType="DECIMAL"/>
+        <result column="pendingCount" property="pendingCount" jdbcType="INTEGER"/>
+        <result column="waitingDeliveryCount" property="waitingDeliveryCount" jdbcType="INTEGER"/>
+        <result column="deliveringCount" property="deliveringCount" jdbcType="INTEGER"/>
+        <!-- 新增今日数据和对比百分比字段 -->
+        <result column="todayOrderCount" property="todayOrderCount" jdbcType="INTEGER"/>
+        <result column="todayRevenue" property="todayRevenue" jdbcType="DECIMAL"/>
+        <result column="orderCountChangePercent" property="orderCountChangePercent" jdbcType="DECIMAL"/>
+        <result column="revenueChangePercent" property="revenueChangePercent" jdbcType="DECIMAL"/>
     </resultMap>
 
     <!-- 根据商家ID查询订单统计 -->
     <select id="getMerchantOrderStatus" resultMap="MerchantOrderStatsResultMap">
+        WITH today_stats AS (
+            -- 今日数据统计
+            SELECT
+                mb.merchant_base_id,
+                mb.merchant_name AS merchantName,
+                COUNT(DISTINCT om.order_main_id) AS todayOrderCount,
+                COALESCE(SUM(om.total_amount)/COUNT(DISTINCT om.order_main_id), 0) AS todayRevenue,
+                COUNT(DISTINCT CASE WHEN om.order_status = 1 THEN om.order_main_id END) AS pendingCount,
+                COUNT(DISTINCT CASE WHEN om.order_status = 2 THEN om.order_main_id END) AS waitingDeliveryCount,
+                COUNT(DISTINCT CASE WHEN om.order_status = 3 THEN om.order_main_id END) AS deliveringCount
+            FROM merchant_base mb
+                     LEFT JOIN order_takeout_detail otd ON mb.merchant_base_id = otd.merchant_id
+                     LEFT JOIN order_main om ON otd.order_main_id = om.order_main_id
+                AND om.order_type = 1  -- 外卖订单
+                AND om.pay_status = 1  -- 已支付订单
+                AND DATE(om.create_time) = CURDATE()  -- 今日订单
+            WHERE mb.merchant_base_id = #{merchantId}
+            GROUP BY mb.merchant_base_id, mb.merchant_name
+        ),
+             yesterday_stats AS (
+                 -- 昨日数据统计
+                 SELECT
+                     mb.merchant_base_id,
+                     COUNT(DISTINCT om.order_main_id) AS yesterdayOrderCount,
+                     COALESCE(SUM(om.pay_amount), 0) AS yesterdayRevenue
+                 FROM merchant_base mb
+                          LEFT JOIN order_takeout_detail otd ON mb.merchant_base_id = otd.merchant_id
+                          LEFT JOIN order_main om ON otd.order_main_id = om.order_main_id
+                     AND om.order_type = 1  -- 外卖订单
+                     AND om.pay_status = 1  -- 已支付订单
+                     AND DATE(om.create_time) = DATE_SUB(CURDATE(), INTERVAL 1 DAY)  -- 昨日订单
+                 WHERE mb.merchant_base_id = #{merchantId}
+                 GROUP BY mb.merchant_base_id
+             ),
+             total_stats AS (
+                 -- 总数据统计
+                 SELECT
+                     mb.merchant_base_id,
+                     COUNT(DISTINCT om.order_main_id) AS orderCount,
+                     COALESCE(SUM(om.pay_amount), 0) AS revenue
+                 FROM merchant_base mb
+                          LEFT JOIN order_takeout_detail otd ON mb.merchant_base_id = otd.merchant_id
+                          LEFT JOIN order_main om ON otd.order_main_id = om.order_main_id
+                     AND om.order_type = 1  -- 外卖订单
+                     AND om.pay_status = 1  -- 已支付订单
+                 WHERE mb.merchant_base_id = #{merchantId}
+                 GROUP BY mb.merchant_base_id
+             )
         SELECT
-            mb.merchant_name AS 商家名称,
-            COUNT(DISTINCT om.order_main_id) AS 订单量,
-            COALESCE(SUM(om.pay_amount), 0) AS 营业额,
-            COUNT(DISTINCT CASE WHEN om.order_status = 1 THEN om.order_main_id END) AS 待处理数量,
-            COUNT(DISTINCT CASE WHEN om.order_status = 2 THEN om.order_main_id END) AS 待配送数量,
-            COUNT(DISTINCT CASE WHEN om.order_status = 3 THEN om.order_main_id END) AS 配送中数量
-        FROM merchant_base mb
-                 LEFT JOIN order_takeout_detail otd ON mb.merchant_base_id = otd.merchant_id
-                 LEFT JOIN order_main om ON otd.order_main_id = om.order_main_id
-            AND om.order_type = 1  -- 外卖订单
-            AND om.pay_status = 1  -- 已支付订单
-        WHERE mb.merchant_base_id = #{merchantId}
-        GROUP BY mb.merchant_base_id, mb.merchant_name
+            ts.merchantName,
+            ts.todayOrderCount,
+            ts.todayRevenue,
+            ts.pendingCount,
+            ts.waitingDeliveryCount,
+            ts.deliveringCount,
+            -- 计算与昨日对比的百分比变化
+            CASE
+                WHEN ys.yesterdayOrderCount = 0 AND ts.todayOrderCount > 0 THEN 100.00
+                WHEN ys.yesterdayOrderCount = 0 AND ts.todayOrderCount = 0 THEN 0.00
+                ELSE ROUND(((ts.todayOrderCount - ys.yesterdayOrderCount) / ys.yesterdayOrderCount) * 100, 2)
+                END AS orderCountChangePercent,
+            CASE
+                WHEN ys.yesterdayRevenue = 0 AND ts.todayRevenue > 0 THEN 100.00
+                WHEN ys.yesterdayRevenue = 0 AND ts.todayRevenue = 0 THEN 0.00
+                ELSE ROUND(((ts.todayRevenue - ys.yesterdayRevenue) / ys.yesterdayRevenue) * 100, 2)
+                END AS revenueChangePercent,
+            -- 总数据
+            tot.orderCount,
+            tot.revenue
+        FROM today_stats ts
+                 LEFT JOIN yesterday_stats ys ON ts.merchant_base_id = ys.merchant_base_id
+                 LEFT JOIN total_stats tot ON ts.merchant_base_id = tot.merchant_base_id
     </select>
 </mapper>
