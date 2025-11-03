@@ -69,4 +69,9 @@ public class ChatMessageController1 {
         int result = chatMessageService.deleteChatMessageByMessageIds(messageIds);
         return result > 0 ? R.ok(result, "删除聊天消息成功") : R.fail("删除聊天消息失败");
     }
+
+    @GetMapping("/recent")
+    public R<List<ChatMessage>> selectRecentlyUpdatedMessages() {
+        return R.ok(chatMessageService.selectRecentlyUpdatedMessages(1));
+    }
 }

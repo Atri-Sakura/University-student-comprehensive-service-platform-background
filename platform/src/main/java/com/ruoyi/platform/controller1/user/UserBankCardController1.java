@@ -1,6 +1,8 @@
 package com.ruoyi.platform.controller1.user;
 
+import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.R;
+import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.platform.domain.UserBankCard;
 import com.ruoyi.platform.service.IUserBankCardService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +18,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/platform/user/bankcard")
-public class UserBankCardController1 {
+public class UserBankCardController1 extends BaseController {
 
     @Autowired
     private IUserBankCardService userBankCardService;
@@ -34,9 +36,10 @@ public class UserBankCardController1 {
      * 查询用户银行卡绑定列表
      */
     @GetMapping("/list")
-    public R<List<UserBankCard>> list(UserBankCard userBankCard) {
+    public TableDataInfo list(UserBankCard userBankCard) {
+        startPage();
         List<UserBankCard> list = userBankCardService.selectUserBankCardList(userBankCard);
-        return R.ok(list);
+        return getDataTable(list);
     }
 
     /**

@@ -71,6 +71,7 @@ public class ChatOperateMethod {
         dbMsg.setFileName(attachment.getFileName());
         dbMsg.setFileExt(attachment.getFileExt());
 
+
         return dbMsg;
     }
 
@@ -114,11 +115,13 @@ public class ChatOperateMethod {
         chatSession.setUpdateTime(new Date());
         chatSession.setLastMsgTime(new Date());
         // 更新消息状态为“已送达”
-        chatMessage.setMsgStatus(1L); // 1-已送达
+        chatMessage.setMsgStatus(chatMessage.getMsgStatus()); // 1-已送达 3-离线消息
         chatMessage.setDeliverTime(new Date());
         chatMessageService.updateChatMessage(chatMessage);
         // 更新会话
+        chatSession.setUnreadCount(chatSession.getUnreadCount() + 1);
         chatSessionService.updateChatSession(chatSession);
+        log.info("当前消息的状态为:{}",chatMessage.getMsgStatus());
     }
 
     /**
@@ -181,16 +184,4 @@ public class ChatOperateMethod {
         return session;
     }
 
-//    public ChatAttachment buildPhotoAttachment(ChatMessageProto.ChatMessage originalMsg) {
-//
-//    }
-
-//    public Long insertPhotoAttachment(ChatMessageProto.Attachment attachment,String url) {
-//        ChatAttachment newAttachment = new ChatAttachment();
-//        newAttachment.setFileName(attachment.getFileName());
-//        newAttachment.setFileSize(attachment.getFileSize());
-//        newAttachment.setAttachmentUrl(url);
-//        newAttachment.setMessageId(attachment.getMessageId());
-//        return
-//    }
 }

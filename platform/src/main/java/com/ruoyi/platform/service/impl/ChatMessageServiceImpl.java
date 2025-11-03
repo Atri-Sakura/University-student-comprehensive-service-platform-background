@@ -1,6 +1,8 @@
 package com.ruoyi.platform.service.impl;
 
+import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import com.ruoyi.common.core.domain.entity.ChatMessage;
 import com.ruoyi.common.utils.DateUtils;
@@ -104,6 +106,27 @@ public class ChatMessageServiceImpl implements IChatMessageService
     public void updateChatMessageStatus(ChatMessage chatMessage,Long statusId){
         chatMessage.setMsgStatus(statusId);
         chatMessageMapper.updateChatMessage(chatMessage);
+    }
+
+    /**
+     * 查询离线消息
+     * @param chatMessage
+     * @return
+     */
+    public List<ChatMessage> selectOfflineChatMessageList(ChatMessage chatMessage){
+        chatMessage.setMsgStatus(3L);
+        return chatMessageMapper.selectChatMessageList(chatMessage);
+    }
+
+    /**
+     * 查询最近消息
+     * @param days
+     * @return
+     */
+    public List<ChatMessage> selectRecentlyUpdatedMessages(Integer days) {
+        long timeMillis = System.currentTimeMillis() - (long) days * 24 * 60 * 60 * 1000;
+        Date startTime = new Date(timeMillis);
+        return chatMessageMapper.selectRecentlyUpdatedMessages(startTime);
     }
 
 

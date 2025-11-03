@@ -22,56 +22,52 @@ public class StreamCleanTask {
     @Autowired
     private RedisCache redisCache;
 
-    // 每天凌晨2点执行清理
     @Scheduled(cron = "0 0 2 * * ?")
     public void cleanExpiredListMessage() {
-        // 计算5天前的时间戳（毫秒）
         long fiveDaysAgo = System.currentTimeMillis() - 5 * 24 * 60 * 60 * 1000;
         log.info("开始清理5天前的聊天消息，过期时间戳: {}", fiveDaysAgo);
 
-        // 1. 获取所有聊天消息的List键（匹配chat:sessionId:*:messages）
         Set<String> listKeys = redisTemplate.keys("chat:sessionId:*:messages");
         if (listKeys == null || listKeys.isEmpty()) {
             log.info("无待清理的Redis List键，任务结束");
             return;
         }
 
-        // 2. 遍历每个List键，清理过期消息
+        int batchSize = 100; // 批次大小，可根据实际情况调整
         for (String listKey : listKeys) {
             try {
-                // 获取列表中所有消息
-                List<ChatMessage> messages = redisCache.getCacheList(listKey);
-                if (messages == null || messages.isEmpty()) {
-                    log.debug("列表 {} 中无消息，跳过清理", listKey);
-                    continue;
-                }
+                long start = 0;
+                long end = batchSize - 1;
+                List<ChatMessage> batch;
+                List<Long> expiredIndexes = new ArrayList<>();
 
-                // 筛选出需要保留的消息（未过期）
-                List<ChatMessage> remainingMessages = new ArrayList<>();
-                int expiredCount = 0;
-
-                for (ChatMessage message : messages) {
-                    // 假设消息的时间戳字段为createTime（毫秒）
-                    if (message.getCreateTime().getTime() >= fiveDaysAgo) {
-                        remainingMessages.add(message);
-                    } else {
-                        expiredCount++;
+                // 分段读取并筛选过期消息索引
+                do {
+                    batch = redisTemplate.opsForList().range(listKey, start, end);
+                    if (batch == null || batch.isEmpty()) {
+                        break;
                     }
-                }
 
-                // 如果有过期消息，更新列表（先清空再添加保留的消息）
-                if (expiredCount > 0) {
-                    // 删除原有列表
-                    redisCache.deleteObject(listKey);
-                    // 添加保留的消息
-                    if (!remainingMessages.isEmpty()) {
-                        redisCache.setCacheList(listKey, remainingMessages);
+                    for (int i = 0; i < batch.size(); i++) {
+                        ChatMessage msg = batch.get(i);
+                        if (msg.getCreateTime().getTime() < fiveDaysAgo) {
+                            expiredIndexes.add(start + i);
+                        }
                     }
-                    log.info("列表 {} 清理完成，删除过期消息 {} 条，保留消息 {} 条",
-                            listKey, expiredCount, remainingMessages.size());
+
+                    start = end + 1;
+                    end += batchSize;
+                } while (batch.size() == batchSize);
+
+                // 用LTRIM原子删除过期消息
+                if (!expiredIndexes.isEmpty()) {
+                    long lastExpiredIndex = expiredIndexes.get(expiredIndexes.size() - 1);
+                    redisTemplate.opsForList().trim(listKey, lastExpiredIndex + 1, -1);
+                    log.info("列表 {} 清理完成，删除过期消息 {} 条", listKey, expiredIndexes.size());
                 } else {
                     log.debug("列表 {} 中无过期消息，无需清理", listKey);
                 }
+
             } catch (Exception e) {
                 log.error("清理列表 {} 时发生异常", listKey, e);
             }

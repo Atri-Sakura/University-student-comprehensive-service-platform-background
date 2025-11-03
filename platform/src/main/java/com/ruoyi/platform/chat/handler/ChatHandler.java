@@ -49,9 +49,10 @@ public class ChatHandler extends SimpleChannelInboundHandler<ChatMessageProto.Ch
             log.info("收到消息: {}", chatMessage);
 
             // 验证必需字段
-
-
-
+            if (messageHandler == null && chatMessage.getMsgType() != 0 && chatMessage.getMsgType() != 4) {
+                sendErrorResponse(ctx, "不支持的消息类型: " + chatMessage.getMsgType());
+                return;
+            }
             // 验证基本字段
             if (Long.valueOf(chatMessage.getFromId()) == null) {
                 sendErrorResponse(ctx, "发送方ID不能为空");
@@ -67,6 +68,9 @@ public class ChatHandler extends SimpleChannelInboundHandler<ChatMessageProto.Ch
                     messageHandler.handler(channelSessionManager, ctx, chatMessage);
                     break;
                 case 2:
+                    messageHandler.handler(channelSessionManager, ctx, chatMessage);
+                    break;
+                case 3:
                     messageHandler.handler(channelSessionManager, ctx, chatMessage);
                     break;
                 default:

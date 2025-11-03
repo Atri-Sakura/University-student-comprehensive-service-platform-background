@@ -49,6 +49,18 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         where message_id = #{messageId}
     </select>
 
+    <!-- 查询最近N天内状态更新的消息（关联会话表，过滤已删除的会话） -->
+    <select id="selectRecentlyUpdatedMessages" resultMap="ChatMessageResult">
+         <include refid="selectChatMessageVo"></include>
+         <where>
+             <if test = "createTime != null ">and create_time > #{createTime} </if>
+             <if test = "isDelete != null ">and is_deleted = 0 </if>
+
+         </where>
+
+    </select>
+
+
     <insert id="insertChatMessage" parameterType="ChatMessage">
         <!-- 自动生成雪花算法ID并赋值给messageId，包裹在SELECT语句中 -->
         <selectKey

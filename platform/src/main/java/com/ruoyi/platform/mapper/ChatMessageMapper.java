@@ -69,4 +69,11 @@ public interface ChatMessageMapper
      * @return
      */
     int batchUpdateUnreadToRead( Long sessionId,  Date readTime);
+
+    /**
+     * 查询最近更新的消息
+     * @param days
+     * @return
+     */
+    List<ChatMessage> selectRecentlyUpdatedMessages(Date date);
 }

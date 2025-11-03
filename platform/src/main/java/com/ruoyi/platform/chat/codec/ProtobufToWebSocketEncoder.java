@@ -32,9 +32,11 @@ public class ProtobufToWebSocketEncoder extends MessageToMessageEncoder<ChatMess
                 headerMsgType = 0x02; // 图片消息
             }else if (msgType == 4) {
                 headerMsgType = 0x04;
+            }else if (msgType == 3) {
+                headerMsgType = 0x03;
             }
             else {
-                headerMsgType = 0x03; // 其他类型（如语音、系统通知等）
+                headerMsgType = 0x05; // 其他类型（如语音、系统通知等）
             }
 
             // 分配缓冲区并写入首部+数据
@@ -62,7 +64,7 @@ public class ProtobufToWebSocketEncoder extends MessageToMessageEncoder<ChatMess
             case 0x00 -> "注册消息";
             case 0x01 -> "文本消息";
             case 0x02 -> "图片消息";
-            case 0x03 -> "其他消息";
+            case 0x03 -> "离线消息";
             case 0x04 -> "系统消息";
             default -> "未知类型";
         };

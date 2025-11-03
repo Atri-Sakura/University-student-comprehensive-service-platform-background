@@ -1,0 +1,11 @@
+# 注意：配置项的层级和参数名必须和@Value中的完全一致
+netty:
+  ssl:
+    enabled: true       # 对应NettyServerChannelInitializer中的@Value("${netty.ssl.enabled}")
+    ssl-port: 8443      # 对应NettyWebSocketServer中要绑定的端口
+
+# SSL证书配置（必须和SslServerContextFactory中的@Value完全匹配）
+ssl:
+  key-store: classpath:server.p12          # 对应@Value("${ssl.key-store}")
+  key-store-password: 123456               # 对应@Value("${ssl.key-store-password}")
+  key-store-type: PKCS12                   # 对应@Value("${ssl.key-store-type}")

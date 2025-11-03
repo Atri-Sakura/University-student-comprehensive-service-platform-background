@@ -62,5 +62,24 @@ public interface IChatMessageService
     public int deleteChatMessageByMessageId(Long messageId);
 
 
+    /**
+     * 修改状态
+     * @param chatMessage
+     * @param statusId
+     */
     public void updateChatMessageStatus(ChatMessage chatMessage,Long statusId);
+
+    /**
+     * 查询离线消息
+     * @param chatMessage
+     * @return
+     */
+    public List<ChatMessage> selectOfflineChatMessageList(ChatMessage chatMessage);
+
+    /**
+     * 查询最近更新的消息
+     * @return
+     */
+    public List<ChatMessage> selectRecentlyUpdatedMessages(Integer days);
+
 }
