@@ -106,4 +106,28 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             #{secondhandGoodsId}
         </foreach>
     </delete>
+
+    <select id="selectSecondhandGoodsListByCategory" parameterType="String" resultType="com.ruoyi.platform.domain.vo.SecondhandGoodsListVO">
+        SELECT
+        sg.secondhand_goods_id AS goodsId,
+        sg.goods_name AS goodsName,
+        sg.price AS price,
+        sg.category AS category,
+        sg.create_time AS createTime,
+        (
+        SELECT image_url
+        FROM secondhand_goods_image
+        WHERE secondhand_goods_id = sg.secondhand_goods_id
+        AND is_main = 1
+        LIMIT 1
+        ) AS mainImageUrl
+        FROM secondhand_goods sg
+        WHERE sg.status = 1
+        <if test="category != null and category != ''">
+            AND sg.category = #{category}
+        </if>
+        ORDER BY sg.create_time DESC
+    </select>
+
+
 </mapper>

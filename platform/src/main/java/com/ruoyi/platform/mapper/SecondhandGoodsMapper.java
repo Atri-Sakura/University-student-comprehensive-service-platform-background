@@ -2,6 +2,8 @@ package com.ruoyi.platform.mapper;
 
 import java.util.List;
 import com.ruoyi.platform.domain.SecondhandGoods;
+import com.ruoyi.platform.domain.vo.SecondhandGoodsListVO;
+import io.lettuce.core.dynamic.annotation.Param;
 
 /**
  * 二手商品(简化版)Mapper接口
@@ -58,4 +60,11 @@ public interface SecondhandGoodsMapper
      * @return 结果
      */
     public int deleteSecondhandGoodsBySecondhandGoodsIds(Long[] secondhandGoodsIds);
+
+    /**
+     * 根据商品分类查询已发布的二手商品
+     * @param category
+     * @return
+     */
+    List<SecondhandGoodsListVO> selectSecondhandGoodsListByCategory(@Param("category") String category);
 }

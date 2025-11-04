@@ -2,6 +2,7 @@ package com.ruoyi.platform.service.impl;
 
 import java.util.List;
 import com.ruoyi.common.utils.DateUtils;
+import com.ruoyi.platform.domain.vo.SecondhandGoodsListVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.ruoyi.platform.mapper.SecondhandGoodsMapper;
@@ -19,6 +20,7 @@ public class SecondhandGoodsServiceImpl implements ISecondhandGoodsService
 {
     @Autowired
     private SecondhandGoodsMapper secondhandGoodsMapper;
+
 
     /**
      * 查询二手商品(简化版)
@@ -92,5 +94,15 @@ public class SecondhandGoodsServiceImpl implements ISecondhandGoodsService
     public int deleteSecondhandGoodsBySecondhandGoodsId(Long secondhandGoodsId)
     {
         return secondhandGoodsMapper.deleteSecondhandGoodsBySecondhandGoodsId(secondhandGoodsId);
+    }
+
+    /**
+     * 根据商品分类查询已发布的二手商品
+     *
+     * @param category 二手商品(简化版)主键
+     * @return 结果
+     */
+    public List<SecondhandGoodsListVO> selectPublishedSecondhandGoodsListByCategory(String category) {
+        return secondhandGoodsMapper.selectSecondhandGoodsListByCategory(category);
     }
 }

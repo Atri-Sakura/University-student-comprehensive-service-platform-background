@@ -58,4 +58,17 @@ public interface ISecondhandGoodsImageService
      * @return 结果
      */
     public int deleteSecondhandGoodsImageBySecondhandGoodsImageId(Long secondhandGoodsImageId);
+
+    /**
+     * 批量插入二手商品图片
+     * @param secondhandGoodsId
+     * @return
+     */
+    /**
+     * 批量插入商品图片
+     *
+     * @param imageList 图片列表
+     * @return 插入结果
+     */
+    int insertSecondhandGoodsImages(List<SecondhandGoodsImage> imageList);
 }

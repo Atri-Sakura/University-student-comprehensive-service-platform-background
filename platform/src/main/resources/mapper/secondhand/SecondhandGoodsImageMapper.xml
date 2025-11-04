@@ -72,4 +72,16 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             #{secondhandGoodsImageId}
         </foreach>
     </delete>
+
+    <!-- ======================================== -->
+    <!--批量插入 -->
+    <insert id="insertSecondhandGoodsImages" parameterType="java.util.List">
+        insert into secondhand_goods_image
+        (secondhand_goods_id, image_url, is_main, sort_order, create_time)
+        values
+        <foreach collection="list" item="item" separator=",">
+            (#{item.secondhandGoodsId}, #{item.imageUrl}, #{item.isMain},
+            #{item.sortOrder}, now())
+        </foreach>
+    </insert>
 </mapper>

@@ -2,6 +2,8 @@ package com.ruoyi.platform.mapper;
 
 import java.util.List;
 import com.ruoyi.platform.domain.SecondhandGoodsImage;
+import com.ruoyi.platform.domain.vo.SecondhandGoodsListVO;
+import io.lettuce.core.dynamic.annotation.Param;
 
 /**
  * 二手商品图片(支持1-9张图片)Mapper接口
@@ -9,8 +11,15 @@ import com.ruoyi.platform.domain.SecondhandGoodsImage;
  * @author ruoyi
  * @date 2025-10-20
  */
-public interface SecondhandGoodsImageMapper 
+public interface SecondhandGoodsImageMapper
 {
+    /**
+     * 批量插入二手商品图片
+     * @param imageList 图片列表
+     * @return
+     */
+    public int insertSecondhandGoodsImages(@Param("list") List<SecondhandGoodsImage> imageList);
+
     /**
      * 查询二手商品图片(支持1-9张图片)
      * 
@@ -58,4 +67,6 @@ public interface SecondhandGoodsImageMapper
      * @return 结果
      */
     public int deleteSecondhandGoodsImageBySecondhandGoodsImageIds(Long[] secondhandGoodsImageIds);
+
+
 }
