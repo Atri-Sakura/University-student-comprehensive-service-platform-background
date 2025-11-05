@@ -129,5 +129,31 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         ORDER BY sg.create_time DESC
     </select>
 
+    <!-- 联表查询商品 + 卖家 -->
+    <select id="selectSecondhandGoodsDetailById" parameterType="long" resultType="com.ruoyi.platform.domain.vo.SecondhandGoodDetailVO">
+        SELECT
+            g.secondhand_goods_id AS goodsId,
+            g.goods_name,
+            g.category,
+            g.price,
+            g.description,
+            g.status,
+            g.view_count,
+            g.favorite_count,
+            g.share_count,
+            g.create_time,
+            u.nickname AS sellerNickname,
+            u.phone AS sellerPhone,
+            u.avatar AS sellerAvatar
+        FROM secondhand_goods g
+                 LEFT JOIN user_base u ON g.user_base_id = u.user_base_id
+        WHERE g.secondhand_goods_id = #{goodsId}
+    </select>
 
+    <!-- 浏览量自增 -->
+    <update id="updateSecondhandGoodViewCount" parameterType="long">
+        UPDATE secondhand_goods
+        SET view_count = view_count + 1
+        WHERE secondhand_goods_id = #{goodsId}
+    </update>
 </mapper>

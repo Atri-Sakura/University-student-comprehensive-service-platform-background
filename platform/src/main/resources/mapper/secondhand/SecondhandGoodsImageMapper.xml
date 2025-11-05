@@ -84,4 +84,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             #{item.sortOrder}, now())
         </foreach>
     </insert>
+
+    <!-- 查询商品图片URL -->
+    <select id="selectSecondhandGoodsImageUrlsByGoodsId" parameterType="long" resultType="string">
+        SELECT image_url
+        FROM secondhand_goods_image
+        WHERE secondhand_goods_id = #{goodsId}
+        ORDER BY sort_order ASC
+    </select>
 </mapper>

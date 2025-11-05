@@ -1,8 +1,13 @@
 package com.ruoyi.platform.service.impl;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+
+import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.utils.DateUtils;
+import com.ruoyi.platform.domain.vo.SecondhandGoodDetailVO;
 import com.ruoyi.platform.domain.vo.SecondhandGoodsListVO;
+import com.ruoyi.platform.mapper.SecondhandGoodsImageMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.ruoyi.platform.mapper.SecondhandGoodsMapper;
@@ -21,6 +26,29 @@ public class SecondhandGoodsServiceImpl implements ISecondhandGoodsService
     @Autowired
     private SecondhandGoodsMapper secondhandGoodsMapper;
 
+    @Autowired
+    private SecondhandGoodsImageMapper secondhandGoodsImageMapper;
+
+    /**
+     * 查询已发布二手商品的详情信息
+     * @param goodsId
+     */
+    @Override
+    public SecondhandGoodDetailVO getSecondhandGoodsDetail(Long goodsId){
+        SecondhandGoodDetailVO detailVO = secondhandGoodsMapper.selectSecondhandGoodsDetailById(goodsId);
+        if(detailVO == null){
+            throw new ServiceException("该商品不存在或已下架");
+        }
+
+        //查找图片
+        List<String> imgUrls = secondhandGoodsImageMapper.selectSecondhandGoodsImageUrlsByGoodsId(goodsId);
+        detailVO.setImageUrls(imgUrls);
+
+        // 3. 浏览量 +1（异步更新也可以
+        secondhandGoodsMapper.updateSecondhandGoodViewCount(goodsId);
+
+        return detailVO;
+    }
 
     /**
      * 查询二手商品(简化版)

@@ -6,6 +6,7 @@ import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.utils.SecurityUtils;
 
+import com.ruoyi.platform.domain.vo.SecondhandGoodDetailVO;
 import com.ruoyi.platform.domain.vo.SecondhandGoodsListVO;
 import com.ruoyi.platform.service.ISecondhandGoodsImageService;
 import com.ruoyi.platform.service.ISecondhandGoodsService;
@@ -30,6 +31,16 @@ public class UserSecondhandGoodsController1 extends BaseController {
      */
     private final SecondhandGoodsPublishService secondhandGoodsPublishService;
     private final ISecondhandGoodsService secondhandGoodsService;
+    /**
+     * 获取已发布的商品的详情
+     *  secondhandGoodsId 商品ID
+     */
+    @GetMapping("/detail/{goodsId}")
+    public AjaxResult getSecondhandGoodsDetail(@PathVariable Long goodsId){
+        SecondhandGoodDetailVO detailVO = secondhandGoodsService.getSecondhandGoodsDetail(goodsId);
+        return AjaxResult.success("获取成功", detailVO);
+    }
+
     /**
      * 查询已发布的商品
      * @param category 分类(可选)
