@@ -104,4 +104,26 @@ public class UserAddressInfoController {
         int result = userAddressService.deleteUserAddressByUserAddressIds(userAddressIds);
         return AjaxResult.success(result > 0 ? "删除收货地址成功" : "删除失败");
     }
+
+    @PutMapping("/setDefault/{userAddressId}")
+    public AjaxResult setDefault(@PathVariable Long userAddressId) {
+        Long userBaseId = SecurityUtils.getUserBaseId();
+
+        // 1. 校验 address 是否属于当前用户
+        UserAddress address = userAddressService.selectUserAddressByUserAddressId(userAddressId);
+        if (address == null || !userBaseId.equals(address.getUserBaseId())) {
+            return AjaxResult.error("无权限操作该地址！");
+        }
+
+        // 2. 先将当前用户所有地址 isDefault = 0
+        userAddressService.updateAllDefaultToZero(userBaseId);
+
+        // 3. 更新目标地址 isDefault = 1
+        UserAddress updateAddr = new UserAddress();
+        updateAddr.setUserAddressId(userAddressId);
+        updateAddr.setIsDefault(1L);
+        userAddressService.updateUserAddress(updateAddr);
+
+        return AjaxResult.success("设为默认地址成功");
+    }
 }
