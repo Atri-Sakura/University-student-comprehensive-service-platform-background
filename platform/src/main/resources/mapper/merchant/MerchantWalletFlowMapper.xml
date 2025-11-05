@@ -130,7 +130,7 @@
             'WITHDRAW_SUCCESS',
             -#{record.withdrawAmount},
             balance,
-            CONCAT('提现成功到账，提现单号#', #{record.withdrawId}),
+            CONCAT('提现成功到账(到账金额',#{record.actualAmount},'，手续费:',#{record.feeAmount},'),单号：' #{record.withdrawId}),
             NOW()
         FROM merchant_wallet
         WHERE merchant_base_id = #{record.merchantBaseId}
@@ -147,7 +147,7 @@
             #{record.merchantBaseId},
             #{record.withdrawId},
             'WITHDRAW_ROLLBACK',
-            (#{record.withdrawAmount} + #{record.feeAmount}),
+            #{record.withdrawAmount},
             balance,
             CONCAT('提现失败退款，提现单号#', #{record.withdrawId}),
             NOW()
