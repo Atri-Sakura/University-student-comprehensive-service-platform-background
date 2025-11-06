@@ -91,4 +91,16 @@ public interface IChatSessionService
      * @return
      */
     public String readUnreadCount(Long sessionId);
+
+    /**
+     * 查询sessionId的
+     * @param fromType
+     * @param fromId
+     * @param toType
+     * @param toId
+     * @return
+     */
+    public List<Long> selectChatSessionIdListByFromTo(Long fromType, Long fromId, Long toType, Long toId);
+
+    public List<ChatSession> selectRecentChatSessions (Long fromType, Long fromId);
 }

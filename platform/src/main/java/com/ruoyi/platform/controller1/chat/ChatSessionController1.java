@@ -7,6 +7,7 @@ import com.ruoyi.platform.service.IChatSessionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.swing.text.AbstractDocument;
 import java.util.List;
 
 /**
@@ -72,10 +73,10 @@ public class ChatSessionController1 {
         return AjaxResult.success(chatSessionService.selectUnreadChatSessionList(fromType, fromId));
     }
 
-//    @GetMapping("/session")
-//    public AjaxResult getChatSessionList(Long fromType, Long fromId) {
-//        return AjaxResult.success(chatSessionService.getSessionList(fromType,fromId));
-//    }
+    @GetMapping("/sessions")
+    public AjaxResult getChatSessionList(Long fromType, Long fromId) {
+        return AjaxResult.success(chatSessionService.selectRecentChatSessions(fromType,fromId));
+    }
 
     @PostMapping("/increaseUnreadCount")
     public AjaxResult increaseUnreadCount(Long sessionId) {

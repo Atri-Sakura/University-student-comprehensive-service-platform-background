@@ -52,6 +52,7 @@ public class MinioFileFactory {
                         .contentType(file.getContentType())
                         .build()
         );
+
         return endpoint + "/" + bucketName + "/" + fileName;
     }
 

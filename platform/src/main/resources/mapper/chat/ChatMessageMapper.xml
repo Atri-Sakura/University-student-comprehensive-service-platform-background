@@ -3,7 +3,8 @@
 PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.ruoyi.platform.mapper.ChatMessageMapper">
-    
+
+    <!-- 基础消息字段映射（非联表查询用） -->
     <resultMap type="ChatMessage" id="ChatMessageResult">
         <result property="messageId"    column="message_id"    />
         <result property="sessionId"    column="session_id"    />
@@ -21,6 +22,83 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="createTime"    column="create_time"    />
         <result property="updateTime"    column="update_time"    />
     </resultMap>
+
+    <!-- JOIN联表查询的结果映射 -->
+    <resultMap type="ChatMessage" id="ChatMessageWithAttachmentsResult">
+        <result property="messageId" column="message_id"/>
+        <result property="sessionId" column="session_id"/>
+        <result property="fromType" column="from_type"/>
+        <result property="fromId" column="from_id"/>
+        <result property="toType" column="to_type"/>
+        <result property="toId" column="to_id"/>
+        <result property="msgType" column="msg_type"/>
+        <result property="msgContent" column="msg_content"/>
+        <result property="msgStatus" column="msg_status"/>
+        <result property="sendTime" column="send_time"/>
+        <result property="deliverTime" column="deliver_time"/>
+        <result property="readTime" column="read_time"/>
+        <result property="isDeleted" column="is_deleted"/>
+
+        <!-- 一对多集合映射 -->
+        <collection property="attachment" ofType="ChatAttachment">
+            <result property="attachmentId" column="attachment_id"/>
+            <result property="messageId" column="att_message_id"/>
+            <result property="attachmentType" column="attachment_type"/>
+            <result property="attachmentUrl" column="attachment_url"/>
+            <result property="fileName" column="file_name"/>
+            <result property="fileSize" column="file_size"/>
+            <result property="fileExt" column="file_ext"/>
+            <result property="expireTime" column="expire_time"/>
+            <result property="isValid" column="is_valid"/>
+        </collection>
+    </resultMap>
+
+    <!-- JOIN联表查询语句 -->
+    <select id="selectChatMessageWithAttachmentsJoin" parameterType="ChatMessage"
+            resultMap="ChatMessageWithAttachmentsResult">
+        SELECT
+        msg.message_id,
+        msg.session_id,
+        msg.from_type,
+        msg.from_id,
+        msg.to_type,
+        msg.to_id,
+        msg.msg_type,
+        msg.msg_content,
+        msg.msg_status,
+        msg.send_time,
+        msg.deliver_time,
+        msg.read_time,
+        msg.is_deleted,
+        att.attachment_id,
+        att.message_id as att_message_id,
+        att.attachment_type,
+        att.attachment_url,
+        att.file_name,
+        att.file_size,
+        att.file_ext,
+        att.expire_time,
+        att.is_valid
+        FROM chat_message msg
+        LEFT JOIN chat_attachment att ON msg.message_id = att.message_id
+        AND att.is_valid = 1
+        AND (att.expire_time IS NULL OR att.expire_time > NOW())
+        <where>
+            msg.is_deleted = 0
+            <if test="sessionId != null">and msg.session_id = #{sessionId}</if>
+            <if test="fromType != null">and msg.from_type = #{fromType}</if>
+            <if test="fromId != null">and msg.from_id = #{fromId}</if>
+            <if test="toType != null">and msg.to_type = #{toType}</if>
+            <if test="toId != null">and msg.to_id = #{toId}</if>
+            <if test="msgType != null">and msg.msg_type = #{msgType}</if>
+            <if test="msgContent != null and msgContent != ''">and msg.msg_content like concat('%', #{msgContent}, '%')</if>
+            <if test="msgStatus != null">and msg.msg_status = #{msgStatus}</if>
+        </where>
+        ORDER BY msg.send_time ASC
+    </select>
+
+
+
 
     <sql id="selectChatMessageVo">
         select message_id, session_id, from_type, from_id, to_type, to_id, msg_type, msg_content, msg_status, send_time, deliver_time, read_time, is_deleted, create_time, update_time from chat_message
@@ -62,12 +140,18 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
 
     <insert id="insertChatMessage" parameterType="ChatMessage">
-        <!-- 自动生成雪花算法ID并赋值给messageId，包裹在SELECT语句中 -->
         <selectKey
                 keyProperty="messageId"
                 resultType="java.lang.Long"
                 order="BEFORE">
-            SELECT ${@com.ruoyi.platform.chat.utils.SnowflakeIdGenerator@getInstance().nextId()}
+            <!-- 只有当 messageId 为 null 时，才执行雪花算法生成 ID -->
+            <if test="messageId == null">
+                SELECT ${@com.ruoyi.platform.chat.utils.SnowflakeIdGenerator@getInstance().nextId()}
+            </if>
+            <!-- 若 messageId 不为 null，直接返回传入的 ID（此处可留空，或返回一个默认值避免语法错误） -->
+            <if test="messageId != null">
+                SELECT #{messageId}
+            </if>
         </selectKey>
 
         insert into chat_message
@@ -106,6 +190,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="updateTime != null">#{updateTime},</if>
         </trim>
     </insert>
+    
+
 
     <update id="batchUpdateUnreadToRead">
         UPDATE chat_message

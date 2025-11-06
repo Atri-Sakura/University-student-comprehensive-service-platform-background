@@ -1,8 +1,8 @@
 package com.ruoyi.platform.auth.aop;
 
-import com.ruoyi.common.utils.netty.NettyClientUtil;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.platform.auth.controller.AuthController;
+import com.ruoyi.platform.chat.utils.NettyClientUtil;
 import com.ruoyi.platform.service.IUserBaseService;
 import com.ruoyi.platform.service.impl.UserBaseServiceImpl;
 import lombok.RequiredArgsConstructor;

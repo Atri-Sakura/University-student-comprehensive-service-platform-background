@@ -45,7 +45,7 @@ public class WebSocketToProtobufDecoder extends MessageToMessageDecoder<WebSocke
 
             // 4. 读取首部消息类型（0x00=注册，0x01=文本，0x02=图片，0x03=其他）
             byte headerMsgType = content.readByte();
-            if (headerMsgType < 0x00 || headerMsgType > 0x04) {
+            if (headerMsgType < 0x00 || headerMsgType > 0x05) {
                 log.warn("未知首部类型: 0x{}，忽略", Integer.toHexString(headerMsgType));
                 return;
             }
@@ -70,7 +70,8 @@ public class WebSocketToProtobufDecoder extends MessageToMessageDecoder<WebSocke
                 case 0x01 -> msgType == 1; // 文本消息必须对应msg_type=1
                 case 0x02 -> msgType == 2; // 图片消息必须对应msg_type=2
                 case 0x03 -> msgType == 3; // 其他类型对应msg_type≥3（离线消息）
-                case 0x04 -> msgType >= 4;
+                case 0x04 -> msgType == 4;
+                case 0x05 -> msgType == 5;//撤回消息
                 default -> false;
             };
 
@@ -99,6 +100,7 @@ public class WebSocketToProtobufDecoder extends MessageToMessageDecoder<WebSocke
             case 0x02 -> "图片消息";
             case 0x03 -> "离线消息（语音/系统通知等）";
             case 0x04 -> "系统消息";
+            case 0x05 -> "撤回消息";
             default -> "未知类型";
         };
     }

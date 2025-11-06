@@ -1,6 +1,7 @@
 package com.ruoyi.platform.service;
 
-import com.ruoyi.common.core.domain.entity.ChatMessage;
+
+import com.ruoyi.platform.domain.ChatMessage;
 
 import java.util.List;
 
@@ -82,4 +83,27 @@ public interface IChatMessageService
      */
     public List<ChatMessage> selectRecentlyUpdatedMessages(Integer days);
 
-}
+    /**
+     * 查询关联消息
+     * @param chatMessage
+     * @return
+     */
+    public List<ChatMessage> selectChatMessageWithAttachmentsJoin(ChatMessage chatMessage);
+
+    /**
+     * 查询两个会话消息
+     * @param sessionIds
+     * @return
+     */
+    public List<ChatMessage> selectMultiSessionMessages(List<Long> sessionIds);
+
+    /**
+     * 查询两个消息会话通过角色
+     * @param fromType
+     * @param fromId
+     * @param toType
+     * @param toId
+     * @return
+     */
+    public List<ChatMessage> selectMultiSessionMessages(Long fromType, Long fromId, Long toType, Long toId);
+    }

@@ -10,7 +10,7 @@ import jakarta.websocket.Session;
  * @author ruoyi
  * @date 2025-10-20
  */
-public interface ChatSessionMapper 
+public interface ChatSessionMapper
 {
     /**
      * 查询聊天会话（管理双方的聊天窗口关系）
@@ -79,11 +79,11 @@ public interface ChatSessionMapper
     public List<ChatSession> selectUnreadChatSessionList(Long fromType,Long fromId);
 
 
-//    /**
-//     * 查询用户所有的会话
-//     * @param fromType
-//     * @param fromId
-//     * @return
-//     */
-//    public List<ChatSession> getSessionList(Long fromType,Long fromId);
+    /**
+     * 查询用户所有的会话
+     * @param fromType
+     * @param fromId
+     * @return
+     */
+    public List<ChatSession> selectRecentChatSessions(Long fromType,Long fromId);
 }

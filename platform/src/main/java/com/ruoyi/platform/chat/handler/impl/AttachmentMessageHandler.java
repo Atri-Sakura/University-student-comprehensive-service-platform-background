@@ -1,13 +1,14 @@
 package com.ruoyi.platform.chat.handler.impl;
 
 
-import com.ruoyi.common.core.domain.entity.ChatMessage;
 import com.ruoyi.common.utils.file.MinioFileUtils;
 import com.ruoyi.platform.chat.handler.MessageHandler;
 import com.ruoyi.platform.chat.manager.ChannelSessionManager;
 import com.ruoyi.platform.chat.method.ChatOperateMethod;
 import com.ruoyi.platform.chat.protobuf.ChatMessageProto;
+import com.ruoyi.platform.chat.utils.ChatCacheUtils;
 import com.ruoyi.platform.domain.ChatAttachment;
+import com.ruoyi.platform.domain.ChatMessage;
 import com.ruoyi.platform.domain.ChatSession;
 import com.ruoyi.platform.service.IChatAttachmentService;
 import com.ruoyi.platform.service.IChatMessageService;
@@ -53,6 +54,8 @@ public class AttachmentMessageHandler implements MessageHandler {
 
     // 临时缓存分片数据（key：messageId，value：合并后的字节数组）
     private final Map<Long, byte[]> chunkCache = new HashMap<>();
+    @Autowired
+    private ChatCacheUtils chatCacheUtils;
 
     @Override
     public long supportType() {
@@ -101,6 +104,7 @@ public class AttachmentMessageHandler implements MessageHandler {
                     }
                     chatAttachmentService.insertChatAttachment(chatOperateMethod.saveImageMessage(attachment, url, messageId));
                     chatOperateMethod.updateSession(dbMsg,session);
+                    chatCacheUtils.cacheChatMessage(dbMsg);
                     forwardMessageToRecipient(channelSessionManager,chatMessage);
                 }
             } catch (Exception ex) {

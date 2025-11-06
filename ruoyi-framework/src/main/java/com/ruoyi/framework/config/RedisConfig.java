@@ -59,6 +59,8 @@ public class RedisConfig extends CachingConfigurerSupport
         return template;
     }
 
+
+
     @Bean
     public DefaultRedisScript<Long> limitScript()
     {

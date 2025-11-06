@@ -1,7 +1,7 @@
 package com.ruoyi.platform.chat.utils;
 
-import com.ruoyi.common.core.domain.entity.ChatMessage;
 import com.ruoyi.common.core.redis.RedisCache;
+import com.ruoyi.platform.domain.ChatMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
