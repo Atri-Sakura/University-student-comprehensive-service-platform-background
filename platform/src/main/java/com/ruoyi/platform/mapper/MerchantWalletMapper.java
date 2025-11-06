@@ -91,20 +91,20 @@ public interface MerchantWalletMapper
      * 出款成功后扣减冻结金额
      *
      * @param merchantBaseId 商家ID
-     * @param totalAmount    总金额（提现金额 + 手续费）
+     * @param withdrawAmount    提现金额
      * @return 影响行数
      */
     int decreaseFreeze(@Param("merchantBaseId") Long merchantBaseId,
-                       @Param("totalAmount") BigDecimal totalAmount);
+                       @Param("withdrawAmount") BigDecimal withdrawAmount);
 
 
     /**
      * 出款失败后退回余额并解冻
      *
      * @param merchantBaseId 商家ID
-     * @param totalAmount    总金额（提现金额 + 手续费）
+     * @param withdrawAmount    提现金额
      * @return 影响行数
      */
     int rollbackFreeze(@Param("merchantBaseId") Long merchantBaseId,
-                       @Param("totalAmount") BigDecimal totalAmount);
+                       @Param("withdrawAmount") BigDecimal withdrawAmount);
 }

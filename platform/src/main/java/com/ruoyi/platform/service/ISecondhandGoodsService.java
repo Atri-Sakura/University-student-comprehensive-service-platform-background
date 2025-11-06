@@ -2,6 +2,8 @@ package com.ruoyi.platform.service;
 
 import java.util.List;
 import com.ruoyi.platform.domain.SecondhandGoods;
+import com.ruoyi.platform.domain.vo.SecondhandGoodDetailVO;
+import com.ruoyi.platform.domain.vo.SecondhandGoodsListVO;
 
 /**
  * 二手商品(简化版)Service接口
@@ -9,8 +11,13 @@ import com.ruoyi.platform.domain.SecondhandGoods;
  * @author ruoyi
  * @date 2025-10-20
  */
-public interface ISecondhandGoodsService 
+public interface ISecondhandGoodsService
 {
+    /**
+     * 查询已发布二手商品的详情信息
+     * @param goodsId
+     */
+    public SecondhandGoodDetailVO getSecondhandGoodsDetail(Long goodsId);
     /**
      * 查询二手商品(简化版)
      * 
@@ -58,4 +65,11 @@ public interface ISecondhandGoodsService
      * @return 结果
      */
     public int deleteSecondhandGoodsBySecondhandGoodsId(Long secondhandGoodsId);
+
+    /**
+     * 根据商品类别查询发布的二手商品列表
+     * @param category
+     * @return
+     */
+    public List<SecondhandGoodsListVO> selectPublishedSecondhandGoodsListByCategory(String category);
 }

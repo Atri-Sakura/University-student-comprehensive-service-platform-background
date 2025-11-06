@@ -47,15 +47,15 @@ public class SecondhandGoods extends BaseEntity
 
     /** 浏览次数 */
     @Excel(name = "浏览次数")
-    private Long viewCount;
+    private Long viewCount = 0L;
 
     /** 收藏次数 */
     @Excel(name = "收藏次数")
-    private Long favoriteCount;
+    private Long favoriteCount = 0L;
 
     /** 分享次数 */
     @Excel(name = "分享次数")
-    private Long shareCount;
+    private Long shareCount = 0L;
 
     /** 售出时间 */
     @JsonFormat(pattern = "yyyy-MM-dd")

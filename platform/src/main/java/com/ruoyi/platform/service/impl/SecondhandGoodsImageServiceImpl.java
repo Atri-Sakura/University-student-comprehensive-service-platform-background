@@ -92,4 +92,17 @@ public class SecondhandGoodsImageServiceImpl implements ISecondhandGoodsImageSer
     {
         return secondhandGoodsImageMapper.deleteSecondhandGoodsImageBySecondhandGoodsImageId(secondhandGoodsImageId);
     }
+
+    /**
+     * 批量插入二手商品图片
+     * @param imageList
+     * @return
+     */
+    @Override
+    public int insertSecondhandGoodsImages(List<SecondhandGoodsImage> imageList) {
+        if (imageList == null || imageList.isEmpty()) {
+            return 0;
+        }
+        return secondhandGoodsImageMapper.insertSecondhandGoodsImages(imageList);
+    }
 }

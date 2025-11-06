@@ -58,4 +58,6 @@ public interface IUserAddressService
      * @return 结果
      */
     public int deleteUserAddressByUserAddressId(Long userAddressId);
+
+    void updateAllDefaultToZero(Long userBaseId);
 }

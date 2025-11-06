@@ -120,4 +120,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             #{userAddressId}
         </foreach>
     </delete>
+
+    <update id="updateAllDefaultToZero" parameterType="Long">
+        update user_address set is_default = 0 where user_base_id = #{userBaseId}
+    </update>
 </mapper>

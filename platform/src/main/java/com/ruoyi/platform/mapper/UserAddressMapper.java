@@ -58,4 +58,6 @@ public interface UserAddressMapper
      * @return 结果
      */
     public int deleteUserAddressByUserAddressIds(Long[] userAddressIds);
+
+    int updateAllDefaultToZero(Long userBaseId);
 }
