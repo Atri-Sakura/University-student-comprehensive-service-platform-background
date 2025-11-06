@@ -156,4 +156,34 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         SET view_count = view_count + 1
         WHERE secondhand_goods_id = #{goodsId}
     </update>
+
+    <!-- 使用行级锁查询商品信息，确保并发下单时数据安全 -->
+    <select id="selectSecondhandGoodsForUpdate"
+            parameterType="long"
+            resultMap="SecondhandGoodsResult">
+        SELECT
+            secondhand_goods_id,
+            user_base_id,
+            goods_name,
+            category,
+            price,
+            description,
+            status,
+            view_count,
+            favorite_count,
+            share_count,
+            create_time
+        FROM secondhand_goods
+        WHERE secondhand_goods_id = #{goodsId}
+            FOR UPDATE
+    </select>
+
+    <!-- 更新二手商品状态 -->
+    <update id="updateSecondhandGoodsStatus">
+        UPDATE secondhand_goods
+        SET status = #{status},
+            update_time = NOW()
+        WHERE secondhand_goods_id = #{goodsId}
+    </update>
+
 </mapper>
