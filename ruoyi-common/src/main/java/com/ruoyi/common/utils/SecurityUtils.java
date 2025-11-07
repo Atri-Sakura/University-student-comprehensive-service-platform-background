@@ -3,6 +3,9 @@ package com.ruoyi.common.utils;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import com.ruoyi.common.core.domain.entity.SysUser;
+import com.ruoyi.common.core.domain.model.IdentityInfo;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -196,6 +199,32 @@ public class SecurityUtils
             return getLoginUser().getMerchantBaseId();
         } catch (Exception e) {
             throw new ServiceException("获取商家ID异常", HttpStatus.UNAUTHORIZED);
+        }
+    }
+
+    public static IdentityInfo getIdentityInfo() {
+        try {
+            LoginUser loginUser = getLoginUser();
+            SysUser sysUser = loginUser.getUser();
+            Integer role = sysUser.getRole();
+            Long id = null;
+            switch (role) {
+                case 0: // 平台管理员
+                case 1: // 普通用户
+                    id = sysUser.getUserBaseId();
+                    break;
+                case 2: // 骑手
+                    id = sysUser.getRiderBaseId();
+                    break;
+                case 3: // 商家
+                    id = sysUser.getMerchantBaseId();
+                    break;
+                default:
+                    id = sysUser.getUserBaseId(); // 如果没有设置，默认返回平台用户id
+            }
+            return new IdentityInfo(role, id);
+        } catch (Exception e) {
+            throw new ServiceException("获取用户身份信息异常", HttpStatus.UNAUTHORIZED);
         }
     }
 
