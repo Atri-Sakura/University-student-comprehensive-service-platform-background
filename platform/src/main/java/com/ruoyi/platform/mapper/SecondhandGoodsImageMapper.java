@@ -14,6 +14,12 @@ import io.lettuce.core.dynamic.annotation.Param;
 public interface SecondhandGoodsImageMapper
 {
     /**
+     * 查询图片列表
+     * @param goodsId
+     * @return
+     */
+    public List<String> selectSecondhandGoodsImageUrlsByGoodsId(Long goodsId);
+    /**
      * 批量插入二手商品图片
      * @param imageList 图片列表
      * @return

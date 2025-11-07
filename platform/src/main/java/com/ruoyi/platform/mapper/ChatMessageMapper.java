@@ -1,6 +1,7 @@
 package com.ruoyi.platform.mapper;
 
-import com.ruoyi.common.core.domain.entity.ChatMessage;
+
+import com.ruoyi.platform.domain.ChatMessage;
 
 import java.util.Date;
 import java.util.List;
@@ -72,8 +73,17 @@ public interface ChatMessageMapper
 
     /**
      * 查询最近更新的消息
-     * @param days
+     * @param date
      * @return
      */
     List<ChatMessage> selectRecentlyUpdatedMessages(Date date);
+
+    /**
+     * 关联查询消息以及消息附件
+     * @param chatMessage
+     * @return
+     */
+    List<ChatMessage> selectChatMessageWithAttachmentsJoin(ChatMessage chatMessage);
+
+
 }

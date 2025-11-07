@@ -1,11 +1,12 @@
 package com.ruoyi.platform.chat.handler.impl;
 
-import com.ruoyi.common.core.domain.entity.ChatMessage;
 import com.ruoyi.common.core.redis.RedisCache;
 import com.ruoyi.platform.chat.handler.MessageHandler;
 import com.ruoyi.platform.chat.manager.ChannelSessionManager;
 import com.ruoyi.platform.chat.method.ChatOperateMethod;
 import com.ruoyi.platform.chat.protobuf.ChatMessageProto;
+import com.ruoyi.platform.chat.utils.ChatCacheUtils;
+import com.ruoyi.platform.domain.ChatMessage;
 import com.ruoyi.platform.domain.ChatSession;
 import com.ruoyi.platform.service.IChatMessageService;
 import com.ruoyi.platform.service.IChatSessionService;
@@ -52,6 +53,8 @@ public class TextMessageHandler implements MessageHandler {
 
     @Autowired
     private RedisTemplate<String, Object> redisTemplate; // 替换RedisCache，使用原生API实现原子操作
+    @Autowired
+    private ChatCacheUtils chatCacheUtils;
 
     @Override
     public long supportType() {
@@ -176,12 +179,7 @@ public class TextMessageHandler implements MessageHandler {
      */
     private void updateMessageCache(String cacheKey, ChatMessage dbMsg) {
         try {
-            // 1. 左推新消息：最新消息在列表头部，符合用户查看习惯
-            redisTemplate.opsForList().rightPush(cacheKey, dbMsg);
-            // 2. 修剪列表：只保留前MAX_CACHE_MESSAGE_COUNT条，超出部分自动删除（原子操作）
-            redisTemplate.opsForList().trim(cacheKey, -MAX_CACHE_MESSAGE_COUNT,  -1);
-            // 3. 设置过期时间：若已存在则刷新过期时间（7天）
-            redisTemplate.expire(cacheKey, CACHE_EXPIRE_DAYS, TimeUnit.DAYS);
+            chatCacheUtils.cacheChatMessage(dbMsg);
             log.debug("消息缓存更新成功，缓存Key: {}, 消息ID: {}", cacheKey, dbMsg.getMessageId());
         } catch (Exception e) {
             // 缓存更新失败不影响主流程（数据库已存储），但需告警
@@ -284,6 +282,7 @@ public class TextMessageHandler implements MessageHandler {
             case 2 -> "已读";
             case 3 -> "离线消息";
             case 4 -> "发送失败";
+            case 5 -> "撤回消息";
             default -> "未知状态（" + status + "）";
         };
     }

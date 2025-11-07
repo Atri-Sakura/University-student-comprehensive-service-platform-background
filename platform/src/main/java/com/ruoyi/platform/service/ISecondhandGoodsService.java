@@ -2,6 +2,7 @@ package com.ruoyi.platform.service;
 
 import java.util.List;
 import com.ruoyi.platform.domain.SecondhandGoods;
+import com.ruoyi.platform.domain.vo.SecondhandGoodDetailVO;
 import com.ruoyi.platform.domain.vo.SecondhandGoodsListVO;
 
 /**
@@ -10,8 +11,13 @@ import com.ruoyi.platform.domain.vo.SecondhandGoodsListVO;
  * @author ruoyi
  * @date 2025-10-20
  */
-public interface ISecondhandGoodsService 
+public interface ISecondhandGoodsService
 {
+    /**
+     * 查询已发布二手商品的详情信息
+     * @param goodsId
+     */
+    public SecondhandGoodDetailVO getSecondhandGoodsDetail(Long goodsId);
     /**
      * 查询二手商品(简化版)
      * 

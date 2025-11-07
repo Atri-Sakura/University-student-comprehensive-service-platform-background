@@ -66,6 +66,25 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             LIMIT 1
     </select>
 
+    <!-- 查询5天内有过消息的会话 -->
+    <select id="selectRecentChatSessions" resultMap="ChatSessionResult">
+        <include refid="selectChatSessionVo"/>
+        <where>
+            <!-- 基础条件：匹配发送方 -->
+            from_type = #{fromType}
+            and from_id = #{fromId}
+            <!-- 时间条件：近5天内有消息（last_msg_time不为空且在5天内） -->
+            and update_time is not null
+            and update_time >= DATE_SUB(NOW(), INTERVAL 5 DAY)
+            <!-- 可选：排除已关闭的会话 -->
+--             and account_status = 1
+        </where>
+        <!-- 按最后一条消息时间倒序，最新会话在前 -->
+        order by update_time desc
+    </select>
+
+
+
 <!--    <select id = "getSessionList"  parameterType = "Long" resultMap="ChatSessionResult"></select>-->
 
 

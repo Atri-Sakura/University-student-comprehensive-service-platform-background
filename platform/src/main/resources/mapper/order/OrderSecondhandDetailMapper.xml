@@ -95,4 +95,13 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             #{orderSecondhandDetailId}
         </foreach>
     </delete>
+
+
+    <!-- 根据 order_main_id 查询对应的商品ID -->
+    <select id="selectGoodsIdByOrderMainId" parameterType="long" resultType="long">
+        SELECT goods_id
+        FROM order_secondhand_detail
+        WHERE order_main_id = #{orderMainId}
+            LIMIT 1
+    </select>
 </mapper>

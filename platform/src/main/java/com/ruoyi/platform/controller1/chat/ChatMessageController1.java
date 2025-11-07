@@ -1,8 +1,8 @@
 package com.ruoyi.platform.controller1.chat;
 
 import com.ruoyi.common.core.domain.R;
-import com.ruoyi.common.core.domain.entity.ChatMessage;
 import com.ruoyi.common.core.redis.RedisCache;
+import com.ruoyi.platform.domain.ChatMessage;
 import com.ruoyi.platform.service.IChatMessageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -73,5 +73,20 @@ public class ChatMessageController1 {
     @GetMapping("/recent")
     public R<List<ChatMessage>> selectRecentlyUpdatedMessages() {
         return R.ok(chatMessageService.selectRecentlyUpdatedMessages(1));
+    }
+
+    @GetMapping("/chatMessageWithAttachment")
+    public R<List<ChatMessage>> selectChatMessageWithAttachment(ChatMessage chatMessage) {
+        return R.ok(chatMessageService.selectChatMessageWithAttachmentsJoin(chatMessage));
+    }
+
+    @GetMapping("multiSessionMessages")
+    public R<List<ChatMessage>> selectMultiSessionMessages(@RequestParam("sessionIds")List<Long> sessionIds) {
+        return R.ok(chatMessageService.selectMultiSessionMessages(sessionIds));
+    }
+
+    @GetMapping("multiSessionMessagesFromTo")
+    public R<List<ChatMessage>> selectMultiSessionMessagesFromTo(Long fromType, Long fromId, Long toType, Long toId) {
+        return R.ok(chatMessageService.selectMultiSessionMessages(fromType, fromId, toType, toId));
     }
 }

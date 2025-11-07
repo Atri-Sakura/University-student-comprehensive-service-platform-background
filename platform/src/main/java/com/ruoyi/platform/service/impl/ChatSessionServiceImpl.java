@@ -1,12 +1,13 @@
 package com.ruoyi.platform.service.impl;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import com.ruoyi.common.core.domain.entity.ChatMessage;
 import com.ruoyi.common.core.redis.RedisCache;
 import com.ruoyi.common.utils.DateUtils;
 import com.ruoyi.platform.chat.protobuf.ChatMessageProto;
+import com.ruoyi.platform.domain.ChatMessage;
 import com.ruoyi.platform.mapper.ChatMessageMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -113,6 +114,22 @@ public class ChatSessionServiceImpl implements IChatSessionService
     {
         return chatSessionMapper.selectChatSessionIdByFromTo(fromType, fromId, toType, toId);
     }
+
+    public List<Long> selectChatSessionIdListByFromTo(Long fromType, Long fromId, Long toType, Long toId)
+    {
+        List<Long> sessionIds = new ArrayList<>();
+        Long l1 = selectChatSessionIdByFromTo(fromType, fromId, toType, toId);
+        Long l2 = selectChatSessionIdByFromTo(toType, toId, fromType, fromId);
+        sessionIds.add(l1);
+        sessionIds.add(l2);
+        return sessionIds;
+    }
+
+    @Override
+    public List<ChatSession> selectRecentChatSessions(Long fromType, Long fromId) {
+        return chatSessionMapper.selectRecentChatSessions(fromType, fromId);
+    }
+
 
     @Override
     public List<ChatSession> selectUnreadChatSessionList(Long fromType,Long fromId)

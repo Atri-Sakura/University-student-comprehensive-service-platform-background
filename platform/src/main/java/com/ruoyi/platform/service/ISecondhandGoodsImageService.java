@@ -11,6 +11,8 @@ import com.ruoyi.platform.domain.SecondhandGoodsImage;
  */
 public interface ISecondhandGoodsImageService 
 {
+
+
     /**
      * 查询二手商品图片(支持1-9张图片)
      * 

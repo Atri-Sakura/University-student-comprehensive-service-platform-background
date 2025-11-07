@@ -1,6 +1,7 @@
 package com.ruoyi.platform.mapper;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -14,8 +15,55 @@ import io.lettuce.core.dynamic.annotation.Param;
  * @author ruoyi
  * @date 2025-10-20
  */
-public interface OrderMainMapper 
-{
+public interface OrderMainMapper {
+
+
+    /**
+     * 插入二手交易订单
+     */
+    int insertSecondhandOrderMain(OrderMain orderMain);
+
+    /**
+     * 修改订单完成时间
+     * @param orderNo
+     * @param completeTime
+     * @return
+     */
+    int updateOrderComplete(@Param("orderNo") String orderNo,
+                            @Param("completeTime") LocalDateTime completeTime);
+
+    /**
+     * 根据订单编号查询订单信息
+     * @param orderNo
+     * @return
+     */
+    OrderMain selectOrderByOrderNo(@Param("orderNo") String orderNo);
+
+    /**
+     * 修改订单支付状态
+     * @param orderNo
+     * @param payStatus
+     * @param orderStatus
+     * @param payTime
+     * @return
+     */
+    int updatePayStatus(@Param("orderNo") String orderNo,
+                        @Param("payStatus") Long payStatus,
+                        @Param("orderStatus") Long orderStatus,
+                        @Param("payTime") LocalDateTime payTime);
+
+    /**
+     * 修改订单状态
+     * @param orderNo
+     * @param orderStatus
+     * @param payStatus
+     * @param cancelReason
+     * @return
+     */
+    int updateOrderStatus(@Param("orderNo") String orderNo,
+                          @Param("orderStatus") Long orderStatus,
+                          @Param("payStatus") Long payStatus,
+                          @Param("cancelReason") String cancelReason);
     /**
      * 查询订单主（整合地址与定位信息）
      * 

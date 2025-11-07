@@ -2,6 +2,7 @@ package com.ruoyi.platform.mapper;
 
 import java.util.List;
 import com.ruoyi.platform.domain.OrderSecondhandDetail;
+import io.lettuce.core.dynamic.annotation.Param;
 
 /**
  * 二手交易订单明细（不含地址信息）Mapper接口
@@ -11,6 +12,10 @@ import com.ruoyi.platform.domain.OrderSecondhandDetail;
  */
 public interface OrderSecondhandDetailMapper 
 {
+    /**
+     * 根据订单主表ID查询对应的二手商品ID
+     */
+    Long selectGoodsIdByOrderMainId(@Param("orderMainId") Long orderMainId);
     /**
      * 查询二手交易订单明细（不含地址信息）
      * 

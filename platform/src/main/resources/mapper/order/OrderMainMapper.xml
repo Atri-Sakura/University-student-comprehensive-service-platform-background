@@ -214,4 +214,91 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
           AND o.complete_time BETWEEN #{startTime} AND #{endTime}
     </select>
 
+
+    <!-- ===============================
+         二手交易订单插入方法
+         =============================== -->
+    <insert id="insertSecondhandOrderMain" parameterType="com.ruoyi.platform.domain.OrderMain"
+            useGeneratedKeys="false">
+
+        INSERT INTO order_main (
+            order_main_id,
+            order_no,
+            user_id,
+            user_nickname,
+            order_type,
+            total_amount,
+            pay_amount,
+            pay_type,
+            pay_status,
+            order_status,
+            pick_address_id,
+            pick_address,
+            pick_contact,
+            pick_phone,
+            deliver_address,
+            deliver_contact,
+            deliver_phone,
+            remark,
+            create_time,
+            update_time
+        ) VALUES (
+                     #{orderMainId},
+                     #{orderNo},
+                     #{userId},
+                     #{userNickname},
+                     #{orderType},
+                     #{totalAmount},
+                     #{payAmount},
+                     #{payType},
+                     #{payStatus},
+                     #{orderStatus},
+
+                     #{pickAddressId},
+                     #{pickAddress},
+                     #{pickContact},
+                     #{pickPhone},
+
+                     #{deliverAddress},
+                     #{deliverContact},
+                     #{deliverPhone},
+                     #{remark},
+                     NOW(),
+                     NOW()
+                 )
+
+    </insert>
+    <!-- 查询二手订单 -->
+    <select id="selectOrderByOrderNo" parameterType="string" resultMap="OrderMainResult">
+        SELECT * FROM order_main WHERE order_no = #{orderNo}
+    </select>
+
+    <!-- 支付成功后更新 -->
+    <update id="updatePayStatus">
+        UPDATE order_main
+        SET pay_status = #{payStatus},
+            order_status = #{orderStatus},
+            pay_time = #{payTime},
+            update_time = NOW()
+        WHERE order_no = #{orderNo}
+    </update>
+
+    <!-- 支付失败更新（订单失效） -->
+    <update id="updateOrderStatus">
+        UPDATE order_main
+        SET order_status = #{orderStatus},
+            pay_status = #{payStatus},
+            cancel_reason = #{cancelReason},
+            update_time = NOW()
+        WHERE order_no = #{orderNo}
+    </update>
+
+    <update id="updateOrderComplete">
+        UPDATE order_main
+        SET order_status = 4,
+            complete_time = #{completeTime},
+            update_time = NOW()
+        WHERE order_no = #{orderNo}
+    </update>
+
 </mapper>

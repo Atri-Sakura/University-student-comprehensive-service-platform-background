@@ -6,9 +6,13 @@ import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.utils.SecurityUtils;
 
+import com.ruoyi.platform.domain.dto.SecondhandOrderCreatDTO;
+import com.ruoyi.platform.domain.vo.SecondhandGoodDetailVO;
 import com.ruoyi.platform.domain.vo.SecondhandGoodsListVO;
+import com.ruoyi.platform.service.IOrderMainService;
 import com.ruoyi.platform.service.ISecondhandGoodsImageService;
 import com.ruoyi.platform.service.ISecondhandGoodsService;
+import com.ruoyi.platform.service.ISecondhandOrderService;
 import com.ruoyi.platform.service.impl.SecondhandGoodsPublishService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -18,18 +22,69 @@ import java.math.BigDecimal;
 
 import java.util.List;
 
+import static com.fasterxml.jackson.databind.type.LogicalType.Map;
 import static com.ruoyi.common.utils.PageUtils.startPage;
 
 @RestController
 @RequestMapping("/api/user/secondhandGoods")
 @RequiredArgsConstructor
 public class UserSecondhandGoodsController1 extends BaseController {
+
     /**
      * 商品发布服务
      * 目前是强一致性的实现，后续优化方向是使用MQ优化通过最终一致优化性能
      */
     private final SecondhandGoodsPublishService secondhandGoodsPublishService;
     private final ISecondhandGoodsService secondhandGoodsService;
+    private final ISecondhandOrderService secondhandOrderService;
+
+    /**
+     * 用户确认二手商品的收货
+     * @param orderNo 订单号
+     * @return 交易确认
+     */
+    @PostMapping("/order/confirm/{orderNo}")
+    public AjaxResult confirmOrder(@PathVariable String orderNo){
+        boolean success = secondhandOrderService.confirmOrder(orderNo);
+        if( success){
+            return AjaxResult.success("确认成功");
+        }else{
+            return AjaxResult.error("确认失败");
+        }
+    }
+
+
+
+    /**
+     * mock支付
+     */
+    @PostMapping("/order/pay/{orderNo}")
+    public AjaxResult payOrder(@PathVariable String orderNo){
+        boolean success = secondhandOrderService.payOrder(orderNo);
+        return success ? AjaxResult.success("支付成功") : AjaxResult.error("支付失败");
+    }
+    /**
+     * 创建二手交易订单
+     * @return 商品详情
+     */
+    @PostMapping("/order/create")
+    public AjaxResult createSecondhandOrder(@RequestBody SecondhandOrderCreatDTO dto){
+        String orderNo = secondhandOrderService.createSecondhandOrder(dto);
+        if (orderNo != null){
+            return AjaxResult.success("创建成功", orderNo);
+        }
+        return AjaxResult.error("创建失败");
+    }
+    /**
+     * 获取已发布的商品的详情
+     *  secondhandGoodsId 商品ID
+     */
+    @GetMapping("/detail/{goodsId}")
+    public AjaxResult getSecondhandGoodsDetail(@PathVariable Long goodsId){
+        SecondhandGoodDetailVO detailVO = secondhandGoodsService.getSecondhandGoodsDetail(goodsId);
+        return AjaxResult.success("获取成功", detailVO);
+    }
+
     /**
      * 查询已发布的商品
      * @param category 分类(可选)
