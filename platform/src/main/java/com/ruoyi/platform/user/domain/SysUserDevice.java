@@ -13,6 +13,8 @@ public class SysUserDevice {
     private String loginIp;
     private LocalDateTime loginTime;
     private String remark;
+    private Boolean online;
+    private String token;
 
     // Getters and Setters
     public Long getId() { return id; }
@@ -35,4 +37,8 @@ public class SysUserDevice {
     public void setLoginTime(LocalDateTime loginTime) { this.loginTime = loginTime; }
     public String getRemark() { return remark; }
     public void setRemark(String remark) { this.remark = remark; }
+    public Boolean getOnline() { return online; }
+    public void setOnline(Boolean online) { this.online = online; }
+    public String getToken() { return token; }
+    public void setToken(String token) { this.token = token; }
 }

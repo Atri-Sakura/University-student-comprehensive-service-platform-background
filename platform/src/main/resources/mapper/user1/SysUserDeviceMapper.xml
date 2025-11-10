@@ -15,6 +15,7 @@
         <result property="loginIp" column="login_ip" />
         <result property="loginTime" column="login_time" />
         <result property="remark" column="remark" />
+        <result property="token" column="token" />
     </resultMap>
 
     <select id="selectSysUserDeviceById" resultMap="SysUserDeviceResultMap">
@@ -69,4 +70,42 @@
             #{id}
         </foreach>
     </delete>
+
+    <!-- 分类查询 -->
+    <select id="selectSysUserDeviceByCategory" resultMap="SysUserDeviceResultMap">
+        SELECT * FROM sys_user_device
+        WHERE user_id = #{userId}
+        <if test="category == 'today'">
+            AND DATE(login_time) = CURDATE()
+        </if>
+        <if test="category == 'week'">
+            AND login_time >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
+        </if>
+        <if test="category == 'month'">
+            AND login_time >= DATE_SUB(CURDATE(), INTERVAL 1 MONTH)
+        </if>
+        ORDER BY login_time DESC
+    </select>
+
+    <!-- 当前登录设备（常见以userId和IP为依据） -->
+    <select id="selectCurrentDevice" resultMap="SysUserDeviceResultMap">
+        SELECT * FROM sys_user_device
+        WHERE user_id = #{userId} AND login_ip = #{loginIp}
+        ORDER BY login_time DESC LIMIT 1
+    </select>
+
+    <!-- 设备下线 -->
+    <update id="offlineDevice">
+        UPDATE sys_user_device SET online = 0 WHERE id = #{id}
+    </update>
+
+    <!-- 总登录次数 -->
+    <select id="totalLoginCount" resultType="int">
+        SELECT COUNT(*) FROM sys_user_device WHERE user_id = #{userId}
+    </select>
+    <!-- 最近一个月登录次数 -->
+    <select id="monthLoginCount" resultType="int">
+        SELECT COUNT(*) FROM sys_user_device
+        WHERE user_id = #{userId} AND login_time >= DATE_SUB(CURDATE(), INTERVAL 1 MONTH)
+    </select>
 </mapper>

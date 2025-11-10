@@ -45,4 +45,25 @@ public class SysUserDeviceServiceImpl implements ISysUserDeviceService {
     public int deleteSysUserDeviceByIds(Long[] ids) {
         return sysUserDeviceMapper.deleteSysUserDeviceByIds(ids);
     }
+
+    @Override
+    public List<SysUserDevice> selectSysUserDeviceByCategory(Long userId, String category) {
+        return sysUserDeviceMapper.selectSysUserDeviceByCategory(userId, category);
+    }
+    @Override
+    public SysUserDevice selectCurrentDevice(Long userId, String loginIp) {
+        return sysUserDeviceMapper.selectCurrentDevice(userId, loginIp);
+    }
+    @Override
+    public int offlineDevice(Long id) {
+        return sysUserDeviceMapper.offlineDevice(id);
+    }
+    @Override
+    public int totalLoginCount(Long userId) {
+        return sysUserDeviceMapper.totalLoginCount(userId);
+    }
+    @Override
+    public int monthLoginCount(Long userId) {
+        return sysUserDeviceMapper.monthLoginCount(userId);
+    }
 }

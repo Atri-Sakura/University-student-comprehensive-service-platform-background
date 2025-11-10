@@ -15,4 +15,14 @@ public interface ISysUserDeviceService {
     int deleteSysUserDeviceById(Long id);
 
     int deleteSysUserDeviceByIds(Long[] ids);
+
+    // 分类
+    List<SysUserDevice> selectSysUserDeviceByCategory(Long userId, String category);
+    // 当前登录设备
+    SysUserDevice selectCurrentDevice(Long userId, String loginIp);
+    // 下线
+    int offlineDevice(Long id);
+    // 统计
+    int totalLoginCount(Long userId);
+    int monthLoginCount(Long userId);
 }
