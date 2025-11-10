@@ -14,6 +14,7 @@ import io.lettuce.core.dynamic.annotation.Param;
  */
 public interface SecondhandGoodsMapper 
 {
+
     /**
      * 更新浏览次数
      * @param goodsId
@@ -78,4 +79,18 @@ public interface SecondhandGoodsMapper
      * @return
      */
     List<SecondhandGoodsListVO> selectSecondhandGoodsListByCategory(@Param("category") String category);
+
+    /**
+     * 查询商品详情时使用行锁
+     * @param goodsId
+     * @return
+     */
+    SecondhandGoods selectSecondhandGoodsForUpdate(Long goodsId);
+
+    /**
+     * 修改商品状态
+     * @param goodsId
+     * @param status
+     */
+    int updateSecondhandGoodsStatus(@Param("goodsId") Long goodsId,@Param("status") Long status);
 }

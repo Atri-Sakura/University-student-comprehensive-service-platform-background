@@ -75,7 +75,7 @@ public class MerchantOrderServiceImpl implements IMerchantOrderService {
         // 构造更新对象
         OrderMain updateOrder = new OrderMain();
         updateOrder.setOrderMainId(orderMainId);
-        updateOrder.setOrderStatus(5L); // 已取消
+        updateOrder.setOrderStatus(5L);
         updateOrder.setCancelOperator(cancelOperator);
 
         // 同时更新支付状态为 已退款 (3)
