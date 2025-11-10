@@ -124,6 +124,7 @@
         update order_main
         <set>
             <if test="orderStatus != null">order_status = #{orderStatus},</if>
+            <if test="payStatus != null">pay_status = #{payStatus},</if>
             <!-- 其他可更新字段 -->
         </set>
         where order_main_id = #{orderMainId}
