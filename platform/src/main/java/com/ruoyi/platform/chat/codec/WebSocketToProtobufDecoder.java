@@ -98,7 +98,7 @@ public class WebSocketToProtobufDecoder extends MessageToMessageDecoder<WebSocke
             case 0x00 -> "注册消息";
             case 0x01 -> "文本消息";
             case 0x02 -> "图片消息";
-            case 0x03 -> "离线消息（语音/系统通知等）";
+            case 0x03 -> "离线消息";
             case 0x04 -> "系统消息";
             case 0x05 -> "撤回消息";
             default -> "未知类型";

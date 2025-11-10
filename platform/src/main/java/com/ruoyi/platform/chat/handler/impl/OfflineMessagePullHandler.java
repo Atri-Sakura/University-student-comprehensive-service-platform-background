@@ -3,6 +3,7 @@ package com.ruoyi.platform.chat.handler.impl;
 import com.ruoyi.platform.chat.handler.MessageHandler;
 import com.ruoyi.platform.chat.manager.ChannelSessionManager;
 import com.ruoyi.platform.chat.protobuf.ChatMessageProto;
+import com.ruoyi.platform.chat.utils.ChatCacheUtils;
 import com.ruoyi.platform.domain.ChatMessage;
 import com.ruoyi.platform.service.IChatMessageService;
 import com.ruoyi.platform.service.IChatSessionService;
@@ -15,10 +16,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
 @Component
@@ -35,10 +39,18 @@ public class OfflineMessagePullHandler implements MessageHandler {
     private IChatMessageService chatMessageService;
 
     @Autowired
+    private ExecutorService executorService;
+
+    @Autowired
+    private TransactionTemplate transactionTemplate;
+
+    @Autowired
     private IChatSessionService chatSessionService;
 
     @Autowired
     private RedisTemplate<String, Object> redisTemplate;
+    @Autowired
+    private ChatCacheUtils chatCacheUtils;
 
     @Override
     public long supportType() {
@@ -47,43 +59,45 @@ public class OfflineMessagePullHandler implements MessageHandler {
 
     @Override
     public void handler(ChannelSessionManager channelSessionManager, ChannelHandlerContext ctx, ChatMessageProto.ChatMessage chatMessage) {
-        try {
-            // 1. 获取上线用户的ID和类型（拉取者即接收方）
-            Long receiverId = chatMessage.getFromId();
-            Long receiverType = (long) chatMessage.getFromType();
-            String receiverKey = receiverType + ":" + receiverId;
-            Channel receiverChannel = channelSessionManager.getChannel(receiverKey);
+        executorService.execute(() -> {
+            try {
+                // 1. 获取上线用户的ID和类型（拉取者即接收方）
+                Long receiverId = chatMessage.getFromId();
+                Long receiverType = (long) chatMessage.getFromType();
+                String receiverKey = receiverType + ":" + receiverId;
+                Channel receiverChannel = channelSessionManager.getChannel(receiverKey);
 
-            // 校验通道是否活跃
-            if (Objects.isNull(receiverChannel) || !receiverChannel.isActive()) {
-                log.warn("用户{}通道已关闭，无法推送离线消息", receiverId);
-                return;
+                // 校验通道是否活跃
+                if (Objects.isNull(receiverChannel) || !receiverChannel.isActive()) {
+                    log.warn("用户{}通道已关闭，无法推送离线消息", receiverId);
+                    return;
+                }
+
+                // 2. 查询该用户的所有离线消息（msg_status=3）
+                ChatMessage queryMsg = new ChatMessage();
+                queryMsg.setToId(receiverId);
+                queryMsg.setToType(receiverType);
+                queryMsg.setMsgStatus(3L);
+                List<ChatMessage> offlineMsgList = chatMessageService.selectChatMessageList(queryMsg);
+
+                if (offlineMsgList.isEmpty()) {
+                    log.debug("用户{}无离线消息", receiverId);
+                    // 发送无离线消息的系统通知
+                    sendNoOfflineMessageResponse(receiverChannel);
+                    return;
+                }
+
+                log.info("为用户{}拉取到{}条离线消息", receiverId, offlineMsgList.size());
+
+                // 3. 推送离线消息给用户，并更新状态和缓存
+                for (ChatMessage offlineMsg : offlineMsgList) {
+                    pushOfflineMessage(channelSessionManager, receiverChannel, offlineMsg);
+                }
+
+            } catch (Exception e) {
+                log.error("处理离线消息拉取异常", e);
             }
-
-            // 2. 查询该用户的所有离线消息（msg_status=3）
-            ChatMessage queryMsg = new ChatMessage();
-            queryMsg.setToId(receiverId);
-            queryMsg.setToType(receiverType);
-            queryMsg.setMsgStatus(3L);
-            List<ChatMessage> offlineMsgList = chatMessageService.selectChatMessageList(queryMsg);
-
-            if (offlineMsgList.isEmpty()) {
-                log.debug("用户{}无离线消息", receiverId);
-                // 发送无离线消息的系统通知
-                sendNoOfflineMessageResponse(receiverChannel);
-                return;
-            }
-
-            log.info("为用户{}拉取到{}条离线消息", receiverId, offlineMsgList.size());
-
-            // 3. 推送离线消息给用户，并更新状态和缓存
-            for (ChatMessage offlineMsg : offlineMsgList) {
-                pushOfflineMessage(channelSessionManager, receiverChannel, offlineMsg);
-            }
-
-        } catch (Exception e) {
-            log.error("处理离线消息拉取异常", e);
-        }
+        });
     }
 
     /**
@@ -104,12 +118,30 @@ public class OfflineMessagePullHandler implements MessageHandler {
                             // 推送成功：更新消息状态为"已送达"
                             offlineMsg.setMsgStatus(1L);
                             offlineMsg.setDeliverTime(new Date());
-                            chatMessageService.updateChatMessage(offlineMsg);
+                            transactionTemplate.execute(status -> {
+                                try {
+                                    // 步骤1：更新数据库状态为“已送达”
+                                    offlineMsg.setMsgStatus(1L);
+                                    offlineMsg.setDeliverTime(new Date());
+                                    int updateRows = chatMessageService.updateChatMessage(offlineMsg); // 注意：此方法需移除@Transactional注解
+                                    if (updateRows == 0) {
+                                        throw new RuntimeException("数据库状态更新失败，消息ID: " + offlineMsg.getMessageId());
+                                    }
 
-                            // 将消息存入Redis缓存
-                            cacheMessage(offlineMsg);
+                                    // 步骤2：写入缓存（若缓存失败，事务会回滚）
+                                    chatCacheUtils.cacheChatMessage(offlineMsg);
 
-                            log.debug("离线消息推送成功并已缓存，消息ID: {}", offlineMsg.getMessageId());
+                                    log.debug("事务提交成功，消息ID: {}", offlineMsg.getMessageId());
+                                    return true; // 事务正常提交
+                                } catch (Exception e) {
+                                    // 发生异常，手动回滚事务
+                                    status.setRollbackOnly();
+                                    log.error("事务执行失败，已回滚，消息ID: {}", offlineMsg.getMessageId(), e);
+
+                                    return false; // 事务回滚
+                                }
+                            });
+
                         } else {
                             log.error("离线消息推送失败，消息ID: {}", offlineMsg.getMessageId(), future.cause());
                         }

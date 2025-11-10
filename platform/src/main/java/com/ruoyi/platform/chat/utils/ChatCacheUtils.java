@@ -52,9 +52,7 @@ public class ChatCacheUtils {
         try {
             String messageIdStr = String.valueOf(messageId);
 
-            // 1. 从 Hash 中获取 sessionId（注意：存入的是 Long 类型，此处应转为 Long）
-            // 错误：String sessionId = (String) ...
-            // 正确：直接获取 Long 类型（Redis 会自动反序列化）
+
             Long sessionId = (Long) redisTemplate.opsForHash().get(MSG_ID_TO_SESSION_ID, messageIdStr);
             if (sessionId == null) {
                 log.warn("消息{}不在缓存中，无需删除", messageId);

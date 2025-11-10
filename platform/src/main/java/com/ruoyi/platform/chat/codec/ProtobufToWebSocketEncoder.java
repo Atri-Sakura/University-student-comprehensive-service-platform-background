@@ -33,7 +33,7 @@ public class ProtobufToWebSocketEncoder extends MessageToMessageEncoder<ChatMess
             }else if (msgType == 4) {
                 headerMsgType = 0x04;
             }else if (msgType == 3) {
-                headerMsgType = 0x03;
+                headerMsgType = 0x03;//离线消息
             }
             else {
                 headerMsgType = 0x05; // 其他类型（如语音、系统通知等）
