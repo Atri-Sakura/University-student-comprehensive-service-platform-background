@@ -1,5 +1,6 @@
 package com.ruoyi.platform.service.impl;
 
+import java.util.Date;
 import java.util.List;
 import com.ruoyi.common.utils.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,9 +28,13 @@ public class MerchantActivityServiceImpl implements IMerchantActivityService
      * @return 商家活动
      */
     @Override
-    public MerchantActivity selectMerchantActivityByMerchantActivityId(Long merchantActivityId)
-    {
-        return merchantActivityMapper.selectMerchantActivityByMerchantActivityId(merchantActivityId);
+    public MerchantActivity selectMerchantActivityByMerchantActivityId(Long merchantActivityId) {
+        MerchantActivity activity = merchantActivityMapper.selectMerchantActivityByMerchantActivityId(merchantActivityId);
+        if (activity != null) {
+            // 自动判断并设置状态
+            activity.setStatus(getRealStatus(activity.getStartTime(), activity.getEndTime()));
+        }
+        return activity;
     }
 
     /**
@@ -39,9 +44,25 @@ public class MerchantActivityServiceImpl implements IMerchantActivityService
      * @return 商家活动
      */
     @Override
-    public List<MerchantActivity> selectMerchantActivityList(MerchantActivity merchantActivity)
-    {
-        return merchantActivityMapper.selectMerchantActivityList(merchantActivity);
+    public List<MerchantActivity> selectMerchantActivityList(MerchantActivity merchantActivity) {
+        List<MerchantActivity> list = merchantActivityMapper.selectMerchantActivityList(merchantActivity);
+        Date now = new Date();
+        for (MerchantActivity act : list) {
+            // 自动判断并设置状态
+            act.setStatus(getRealStatus(act.getStartTime(), act.getEndTime()));
+        }
+        return list;
+    }
+
+    private Long getRealStatus(Date start, Date end) {
+        Date now = new Date();
+        if (now.before(start)) {
+            return 0L; // 未开始
+        }
+        if (now.after(end)) {
+            return 2L; // 已结束
+        }
+        return 1L; // 进行中
     }
 
     /**
