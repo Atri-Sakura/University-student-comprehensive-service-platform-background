@@ -5,6 +5,8 @@ import java.util.concurrent.CompletableFuture;
 
 import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.utils.DateUtils;
+import com.ruoyi.common.utils.StringUtils;
+import com.ruoyi.platform.domain.dto.SecondhandGoodsSearchDTO;
 import com.ruoyi.platform.domain.vo.SecondhandGoodDetailVO;
 import com.ruoyi.platform.domain.vo.SecondhandGoodsListVO;
 import com.ruoyi.platform.mapper.SecondhandGoodsImageMapper;
@@ -29,6 +31,24 @@ public class SecondhandGoodsServiceImpl implements ISecondhandGoodsService
     @Autowired
     private SecondhandGoodsImageMapper secondhandGoodsImageMapper;
 
+    /**
+     * 搜索二手商品
+     * @param dto
+     * @return
+     */
+    @Override
+    public List<SecondhandGoodsListVO> searchSecondhandGoods(SecondhandGoodsSearchDTO dto){
+        // 参数预处理
+        if (StringUtils.isBlank(dto.getSortBy())) {
+            dto.setSortBy("create_time");
+        }
+
+        if (StringUtils.isBlank(dto.getSortOrder())) {
+            dto.setSortOrder("desc");
+        }
+
+        return secondhandGoodsMapper.searchSecondhandGoods(dto);
+    }
     /**
      * 查询已发布二手商品的详情信息
      * @param goodsId

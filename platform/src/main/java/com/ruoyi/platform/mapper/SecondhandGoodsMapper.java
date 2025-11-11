@@ -2,6 +2,7 @@ package com.ruoyi.platform.mapper;
 
 import java.util.List;
 import com.ruoyi.platform.domain.SecondhandGoods;
+import com.ruoyi.platform.domain.dto.SecondhandGoodsSearchDTO;
 import com.ruoyi.platform.domain.vo.SecondhandGoodDetailVO;
 import com.ruoyi.platform.domain.vo.SecondhandGoodsListVO;
 import io.lettuce.core.dynamic.annotation.Param;
@@ -14,7 +15,12 @@ import io.lettuce.core.dynamic.annotation.Param;
  */
 public interface SecondhandGoodsMapper 
 {
-
+    /**
+     * 搜索二手商品
+     * @param dto
+     * @return
+     */
+    public List<SecondhandGoodsListVO> searchSecondhandGoods(SecondhandGoodsSearchDTO dto);
     /**
      * 更新浏览次数
      * @param goodsId
