@@ -1,5 +1,6 @@
 package com.ruoyi.platform.chat.utils;
 
+import com.alibaba.fastjson2.JSON;
 import com.ruoyi.common.core.redis.RedisCache;
 import com.ruoyi.platform.domain.ChatMessage;
 import lombok.extern.slf4j.Slf4j;
@@ -19,10 +20,9 @@ public class StreamCleanTask {
     @Autowired
     private RedisTemplate redisTemplate;
 
-    @Autowired
-    private RedisCache redisCache;
 
-    @Scheduled(cron = "0 0 2 * * ?")
+
+    @Scheduled(cron = "* * 2 * * ?")
     public void cleanExpiredListMessage() {
         long fiveDaysAgo = System.currentTimeMillis() - 5 * 24 * 60 * 60 * 1000;
         log.info("开始清理5天前的聊天消息，过期时间戳: {}", fiveDaysAgo);
@@ -49,7 +49,7 @@ public class StreamCleanTask {
                     }
 
                     for (int i = 0; i < batch.size(); i++) {
-                        ChatMessage msg = batch.get(i);
+                        ChatMessage msg = JSON.parseObject(JSON.toJSONString(batch.get(i)),ChatMessage.class);
                         if (msg.getCreateTime().getTime() < fiveDaysAgo) {
                             expiredIndexes.add(start + i);
                         }

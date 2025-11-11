@@ -73,10 +73,10 @@ public interface ChatMessageMapper
 
     /**
      * 查询最近更新的消息
-     * @param date
+     * @param days
      * @return
      */
-    List<ChatMessage> selectRecentlyUpdatedMessages(Date date);
+    List<ChatMessage> selectRecentlyUpdatedMessages(Integer days);
 
     /**
      * 关联查询消息以及消息附件

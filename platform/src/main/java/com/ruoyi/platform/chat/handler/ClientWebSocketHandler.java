@@ -1,5 +1,6 @@
 package com.ruoyi.platform.chat.handler;
 
+import com.ruoyi.platform.chat.utils.NettyClientUtil;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -8,16 +9,22 @@ import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketClientHandshaker;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.concurrent.CountDownLatch;
 
 @Slf4j
 public class ClientWebSocketHandler extends SimpleChannelInboundHandler<Object> {
 
+
+
+    private NettyClientUtil nettyClientUtil;
     private final WebSocketClientHandshaker handshaker;
     private final CountDownLatch handshakeLatch;
 
-    public ClientWebSocketHandler(WebSocketClientHandshaker handshaker, CountDownLatch handshakeLatch) {
+    public ClientWebSocketHandler(NettyClientUtil nettyClientUtil, WebSocketClientHandshaker handshaker, CountDownLatch handshakeLatch) {
+        this.nettyClientUtil = nettyClientUtil;
         this.handshaker = handshaker;
         this.handshakeLatch = handshakeLatch;
     }
@@ -62,11 +69,13 @@ public class ClientWebSocketHandler extends SimpleChannelInboundHandler<Object> 
     }
 
     @Override
-    public void channelInactive(ChannelHandlerContext ctx) {
-        log.warn("WebSocket连接已关闭");
+    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+        log.warn("WebSocket连接已关闭，触发重连");
         // 连接意外关闭时释放锁存器
         if (!handshaker.isHandshakeComplete()) {
             handshakeLatch.countDown();
         }
+        nettyClientUtil.reconnect();
+        super.channelInactive(ctx);
     }
 }

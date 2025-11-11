@@ -81,7 +81,7 @@ public class OfflineMessagePullHandler implements MessageHandler {
                 List<ChatMessage> offlineMsgList = chatMessageService.selectChatMessageList(queryMsg);
 
                 if (offlineMsgList.isEmpty()) {
-                    log.debug("用户{}无离线消息", receiverId);
+                    log.debug("用户{},暂无离线消息", receiverId);
                     // 发送无离线消息的系统通知
                     sendNoOfflineMessageResponse(receiverChannel);
                     return;

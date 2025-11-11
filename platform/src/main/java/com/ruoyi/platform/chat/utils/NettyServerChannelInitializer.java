@@ -3,6 +3,7 @@ package com.ruoyi.platform.chat.utils;
 import com.ruoyi.platform.chat.codec.*;
 import com.ruoyi.platform.chat.handler.ChatHandler;
 
+import com.ruoyi.platform.chat.handler.HeartBeatServerHandler;
 import com.ruoyi.platform.chat.ssl.SslServerContextFactory;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.socket.SocketChannel;
@@ -32,6 +33,9 @@ public class NettyServerChannelInitializer extends ChannelInitializer<SocketChan
 
     @Autowired
     private SslServerContextFactory sslServerContextFactory;
+
+    @Autowired
+    private HeartBeatServerHandler heartBeatServerHandler;
 
 
     private boolean sslEnabled = true;
@@ -76,12 +80,13 @@ public class NettyServerChannelInitializer extends ChannelInitializer<SocketChan
                 .addLast(new ChunkedWriteHandler())
                 .addLast(new HttpObjectAggregator(64*1024))
 //                .addLast(new WebSocketServerCompressionHandler())
-                .addLast(new WebSocketServerProtocolHandler("/ws", "", true, 64*1024))
                 .addLast(new IdleStateHandler(30, 0, 0))
+                .addLast(new WebSocketServerProtocolHandler("/ws", "", true, 64*1024))
 //                .addLast(new BinaryMessagedDecoder())
 //                .addLast(new WebSocketFrameToBinaryMessageDecoder())
 //                .addLast(new BinaryMessageEncoder())
                 .addLast(new WebSocketToProtobufDecoder())
+                .addLast(heartBeatServerHandler)
                 .addLast(new ProtobufToWebSocketEncoder())
                 .addLast(chatHandler);
 //                .addLast(binaryChatHandler);

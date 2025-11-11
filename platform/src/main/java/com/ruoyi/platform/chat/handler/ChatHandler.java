@@ -49,7 +49,7 @@ public class ChatHandler extends SimpleChannelInboundHandler<ChatMessageProto.Ch
             log.info("收到消息: {}", chatMessage);
 
             // 验证必需字段
-            if (messageHandler == null && chatMessage.getMsgType() != 0 && chatMessage.getMsgType() != 4) {
+            if (messageHandler == null && chatMessage.getMsgType() != 0 && chatMessage.getMsgType() != 4 && chatMessage.getMsgType() != 6) {
                 sendErrorResponse(ctx, "不支持的消息类型: " + chatMessage.getMsgType());
                 return;
             }
@@ -76,6 +76,9 @@ public class ChatHandler extends SimpleChannelInboundHandler<ChatMessageProto.Ch
                 case 5:
                     messageHandler.handler(channelSessionManager, ctx, chatMessage);
                     break;
+//                case 6:
+//                    log.debug("收到心跳消息，用户为[{}:{}]",chatMessage.getFromType(),chatMessage.getFromId());
+//                    break;
                 default:
                     sendErrorResponse(ctx, "不支持的消息类型: " + chatMessage.getMsgType());
             }

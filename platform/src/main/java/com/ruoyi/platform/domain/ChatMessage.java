@@ -77,6 +77,9 @@ public class ChatMessage extends BaseEntity
     @Excel(name = "附件列表")
     private ChatAttachment attachment;
 
+    @Excel(name = "版本号")
+    private Integer version;
+
     public void setAttachment(ChatAttachment attachment)
     {
         this.attachment = attachment;
@@ -215,6 +218,10 @@ public class ChatMessage extends BaseEntity
         return isDeleted;
     }
 
+    public Integer getVersion() { return version;}
+
+    public void setVersion(Integer version) {this.version = version;}
+
     @Override
     public String toString() {
         return new ToStringBuilder(this,ToStringStyle.MULTI_LINE_STYLE)
@@ -233,6 +240,7 @@ public class ChatMessage extends BaseEntity
             .append("isDeleted", getIsDeleted())
             .append("createTime", getCreateTime())
             .append("updateTime", getUpdateTime())
+                .append("version",getVersion())
             .toString();
     }
 }

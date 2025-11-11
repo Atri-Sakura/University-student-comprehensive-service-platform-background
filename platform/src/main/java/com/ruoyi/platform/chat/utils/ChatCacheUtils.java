@@ -98,6 +98,46 @@ public class ChatCacheUtils {
         }
     }
 
+    public void updateMessageInCache(ChatMessage chatMessage) {
+        if(chatMessage.getSessionId() == null || chatMessage.getMessageId() == null) {
+            log.warn("消息会话ID或消息ID为空，无法缓存，消息ID: {}", chatMessage.getMessageId());
+            return;
+        }
+        String cacheKey = buildCacheKey(chatMessage.getSessionId());
+        try{
+            //1、获取缓存中的消息列表
+            List<Object> cacheList = redisTemplate.opsForList().range(cacheKey, 0, -1);
+            if (cacheList == null || cacheList.isEmpty()) {
+                redisTemplate.opsForList().rightPush(cacheKey, chatMessage);
+                redisTemplate.opsForList().trim(cacheKey, -MAX_CACHE_MESSAGE_COUNT, -1);
+                redisTemplate.expire(cacheKey, CACHE_EXPIRE_DAYS, TimeUnit.DAYS);
+                log.info("缓存列表为空，直接添加消息{}", chatMessage);
+                return;
+
+            }
+            boolean found = false;
+            for (int i = 0; i < cacheList.size(); i++) {
+                ChatMessage msg = (ChatMessage) cacheList.get(i);
+                if (msg.getMessageId().equals(chatMessage.getMessageId())) {
+                    redisTemplate.opsForList().set(cacheKey,i,chatMessage);
+                    found = true;
+                    log.info("已更新缓存中的消息{}", chatMessage);
+                    break;
+                }
+            }
+            if (!found) {
+                redisTemplate.opsForList().rightPush(cacheKey, chatMessage);
+                redisTemplate.opsForList().trim(cacheKey, -MAX_CACHE_MESSAGE_COUNT, -1);
+                redisTemplate.expire(cacheKey, CACHE_EXPIRE_DAYS, TimeUnit.DAYS);
+                log.info("缓存中未找到消息{},已增至缓存", chatMessage);
+            }
+        }catch (Exception e){
+            log.error("更新缓存消息{}失败",chatMessage.getMessageId(),e);
+            redisTemplate.delete(cacheKey);
+            log.warn("更新消息缓存失败，已降级删除会话{}的缓存",chatMessage.getMessageId());
+        }
+    }
+
     /**
      * 构建缓存Key（原逻辑不变）
      */

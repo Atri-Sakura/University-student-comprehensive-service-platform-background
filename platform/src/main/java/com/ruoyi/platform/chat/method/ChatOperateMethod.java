@@ -50,6 +50,7 @@ public class ChatOperateMethod {
         dbMsg.setCreateTime(new Date());
         dbMsg.setUpdateTime(new Date());
         dbMsg.setCreateBy(String.valueOf(protoMsg.getFromId()));
+        dbMsg.setVersion(0);
         return dbMsg;
     }
 

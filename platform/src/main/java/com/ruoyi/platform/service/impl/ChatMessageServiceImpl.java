@@ -136,9 +136,8 @@ public class ChatMessageServiceImpl implements IChatMessageService {
      * @return
      */
     public List<ChatMessage> selectRecentlyUpdatedMessages(Integer days) {
-        long timeMillis = System.currentTimeMillis() - (long) days * 24 * 60 * 60 * 1000;
-        Date startTime = new Date(timeMillis);
-        return chatMessageMapper.selectRecentlyUpdatedMessages(startTime);
+
+        return chatMessageMapper.selectRecentlyUpdatedMessages(days);
     }
 
     /**
