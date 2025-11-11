@@ -41,5 +41,16 @@ public interface MerchantAnalyticsMapper {
      */
     List<ProductSalesVO> selectSlowMovingProducts(Long merchantBaseId);
 
+    /**
+     * 查询正面评价内容（rating >=4）
+     * @param limit 限制查询数量（避免数据量过大）
+     */
+    List<String> selectPositiveContents(int limit, Long merchantBaseId);
+
+    /**
+     * 查询负面评价内容（rating <=2）
+     */
+    List<String> selectNegativeContents(int limit, Long merchantBaseId);
+
 
 }
