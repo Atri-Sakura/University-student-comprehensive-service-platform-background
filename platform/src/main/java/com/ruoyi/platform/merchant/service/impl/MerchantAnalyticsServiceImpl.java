@@ -2,18 +2,15 @@ package com.ruoyi.platform.merchant.service.impl;
 
 import com.ruoyi.platform.merchant.mapper.MerchantAnalyticsMapper;
 import com.ruoyi.platform.merchant.service.IMerchantAnalyticsService;
-import com.ruoyi.platform.merchant.vo.OrderStatsVO;
-import com.ruoyi.platform.merchant.vo.EvaluationAnalysisVO;
-import com.ruoyi.platform.merchant.vo.ProductRankingVO;
-import com.ruoyi.platform.merchant.vo.ProductSalesVO;
-import com.ruoyi.platform.merchant.vo.RatingDistributionVO;
+import com.ruoyi.platform.merchant.vo.*;
+import com.ruoyi.platform.utils.AdvancedKeywordExtractionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -22,6 +19,10 @@ public class MerchantAnalyticsServiceImpl implements IMerchantAnalyticsService {
 
     @Autowired
     private MerchantAnalyticsMapper merchantAnalyticsMapper;
+
+    @Autowired
+    private AdvancedKeywordExtractionUtils keywordExtractionService;
+
 
     @Override
     public OrderStatsVO getSalesData(Long merchantBaseId) {
@@ -74,12 +75,33 @@ public class MerchantAnalyticsServiceImpl implements IMerchantAnalyticsService {
         }
         evaluationStats.setRatingDistributions(ratingDistributions);
 
-        // 设置关键词（这里可以根据实际业务从评价内容中提取，这里使用模拟数据）
-        evaluationStats.setPositiveKeywords(Arrays.asList("味道好", "配送快", "包装精美", "服务热情", "性价比高"));
-        evaluationStats.setNegativeKeywords(Arrays.asList("等待时间长", "分量不足", "包装破损"));
+        // 获取正面评价内容限制100个
+        List<String> positiveContents = merchantAnalyticsMapper.selectPositiveContents(100, merchantBaseId);
+        // 获取负面评价内容限制100个
+        List<String> negativeContents = merchantAnalyticsMapper.selectNegativeContents(100, merchantBaseId);
+
+        // 合并所有评论用于关键词提取
+        List<String> allContents = new ArrayList<>();
+        if (positiveContents != null) {
+            allContents.addAll(positiveContents);
+        }
+        if (negativeContents != null) {
+            allContents.addAll(negativeContents);
+        }
+
+        // 使用高级关键词提取服务提取关键词及其出现次数
+        if (!allContents.isEmpty()) {
+            keywordExtractionService.extractKeywordsWithFrequency(evaluationStats, allContents);
+        } else {
+            // 如果没有评论内容，设置空的关键词映射
+            evaluationStats.setPositiveKeywords(Collections.emptyMap());
+            evaluationStats.setNegativeKeywords(Collections.emptyMap());
+            evaluationStats.setKeywordSummary(new KeywordSummary());
+        }
 
         return evaluationStats;
     }
+
 
     @Override
     public ProductRankingVO getTopGoods(Long merchantBaseId) {

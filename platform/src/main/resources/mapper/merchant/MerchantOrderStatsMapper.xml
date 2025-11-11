@@ -21,12 +21,14 @@
     <!-- 根据商家ID查询订单统计 -->
     <select id="getMerchantOrderStatus" resultMap="MerchantOrderStatsResultMap">
         WITH today_stats AS (
-            -- 今日数据统计
+            -- 今日数据统计（订单数包含所有状态，营业额仅含有效订单）
             SELECT
                 mb.merchant_base_id,
                 mb.merchant_name AS merchantName,
-                COUNT(DISTINCT om.order_main_id) AS todayOrderCount,
-                COALESCE(SUM(om.total_amount)/COUNT(DISTINCT om.order_main_id), 0) AS todayRevenue,
+                COUNT(DISTINCT om.order_main_id) AS todayOrderCount,  -- 所有订单（含取消/退款）
+                -- 营业额：仅统计已支付且未取消的订单
+                COALESCE(SUM(CASE WHEN om.pay_status = 1 AND om.order_status != 5 THEN om.total_amount END)/(COUNT(DISTINCT CASE WHEN om.order_status != 5 THEN om.order_main_id END)*2), 0) AS todayRevenue,
+                -- 各状态订单数（包含所有支付状态）
                 COUNT(DISTINCT CASE WHEN om.order_status = 1 THEN om.order_main_id END) AS pendingCount,
                 COUNT(DISTINCT CASE WHEN om.order_status = 2 THEN om.order_main_id END) AS waitingDeliveryCount,
                 COUNT(DISTINCT CASE WHEN om.order_status = 3 THEN om.order_main_id END) AS deliveringCount
@@ -34,7 +36,6 @@
                      LEFT JOIN order_takeout_detail otd ON mb.merchant_base_id = otd.merchant_id
                      LEFT JOIN order_main om ON otd.order_main_id = om.order_main_id
                 AND om.order_type = 1  -- 外卖订单
-                AND om.pay_status = 1  -- 已支付订单
                 AND DATE(om.create_time) = CURDATE()  -- 今日订单
             WHERE mb.merchant_base_id = #{merchantId}
             GROUP BY mb.merchant_base_id, mb.merchant_name
@@ -43,13 +44,13 @@
                  -- 昨日数据统计
                  SELECT
                      mb.merchant_base_id,
-                     COUNT(DISTINCT om.order_main_id) AS yesterdayOrderCount,
-                     COALESCE(SUM(om.pay_amount), 0) AS yesterdayRevenue
+                     COUNT(DISTINCT om.order_main_id) AS yesterdayOrderCount,  -- 所有订单（含取消/退款）
+                     -- 营业额：仅统计已支付且未取消的订单
+                     COALESCE(SUM(CASE WHEN om.pay_status = 1 AND om.order_status != 5 THEN om.pay_amount END), 0) AS yesterdayRevenue
                  FROM merchant_base mb
                           LEFT JOIN order_takeout_detail otd ON mb.merchant_base_id = otd.merchant_id
                           LEFT JOIN order_main om ON otd.order_main_id = om.order_main_id
                      AND om.order_type = 1  -- 外卖订单
-                     AND om.pay_status = 1  -- 已支付订单
                      AND DATE(om.create_time) = DATE_SUB(CURDATE(), INTERVAL 1 DAY)  -- 昨日订单
                  WHERE mb.merchant_base_id = #{merchantId}
                  GROUP BY mb.merchant_base_id
@@ -58,13 +59,13 @@
                  -- 总数据统计
                  SELECT
                      mb.merchant_base_id,
-                     COUNT(DISTINCT om.order_main_id) AS orderCount,
-                     COALESCE(SUM(om.pay_amount), 0) AS revenue
+                     COUNT(DISTINCT om.order_main_id) AS orderCount,  -- 所有订单（含取消/退款）
+                     -- 营业额：仅统计已支付且未取消的订单
+                     COALESCE(SUM(CASE WHEN om.pay_status = 1 AND om.order_status != 5 THEN om.pay_amount END), 0) AS revenue
                  FROM merchant_base mb
                           LEFT JOIN order_takeout_detail otd ON mb.merchant_base_id = otd.merchant_id
                           LEFT JOIN order_main om ON otd.order_main_id = om.order_main_id
                      AND om.order_type = 1  -- 外卖订单
-                     AND om.pay_status = 1  -- 已支付订单
                  WHERE mb.merchant_base_id = #{merchantId}
                  GROUP BY mb.merchant_base_id
              )
