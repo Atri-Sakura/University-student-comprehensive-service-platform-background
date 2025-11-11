@@ -186,4 +186,62 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         WHERE secondhand_goods_id = #{goodsId}
     </update>
 
+    <!-- 搜索商品 -->
+    <select id="searchSecondhandGoods" resultType="com.ruoyi.platform.domain.vo.SecondhandGoodsListVO">
+        SELECT
+        g.secondhand_goods_id AS goodsId,
+        g.goods_name AS goodsName,
+        g.price,
+        g.category,
+        g.create_time,
+        i.image_url AS mainImageUrl
+        FROM secondhand_goods g
+        LEFT JOIN secondhand_goods_image i
+        ON g.secondhand_goods_id = i.secondhand_goods_id
+        AND i.is_main = 1
+        WHERE 1=1
+
+        <!-- ✅ 模糊搜索 -->
+        <if test="keyword != null and keyword != ''">
+            AND (g.goods_name LIKE CONCAT('%', #{keyword}, '%')
+            OR g.description LIKE CONCAT('%', #{keyword}, '%'))
+        </if>
+
+        <!-- ✅ 分类过滤 -->
+        <if test="category != null and category != ''">
+            AND g.category = #{category}
+        </if>
+
+        <!-- ✅ 安全排序字段 -->
+        ORDER BY
+        <choose>
+            <when test="sortBy == 'price'">
+                g.price
+            </when>
+            <when test="sortBy == 'create_time'">
+                g.create_time
+            </when>
+            <when test="sortBy == 'view_count'">
+                g.view_count
+            </when>
+            <!-- 默认 -->
+            <otherwise>
+                g.create_time
+            </otherwise>
+        </choose>
+
+        <!-- ✅ 排序方向：ASC / DESC，默认 DESC -->
+        <choose>
+            <when test="sortOrder != null and sortOrder.toLowerCase() == 'asc'">
+                ASC
+            </when>
+            <otherwise>
+                DESC
+            </otherwise>
+        </choose>
+    </select>
+
+
+
+
 </mapper>

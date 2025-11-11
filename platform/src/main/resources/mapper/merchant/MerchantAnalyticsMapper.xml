@@ -136,5 +136,28 @@
     </select>
 
 
+    <!-- 查询正面评价内容 -->
+    <select id="selectPositiveContents" resultType="java.lang.String">
+        SELECT content
+        FROM merchant_evaluation
+        WHERE rating &gt;= 4
+          AND content IS NOT NULL
+          AND content != ''
+          AND merchant_base_id = #{merchantBaseId}
+        LIMIT #{limit}
+    </select>
+
+    <!-- 查询负面评价内容 -->
+    <select id="selectNegativeContents" resultType="java.lang.String">
+        SELECT content
+        FROM merchant_evaluation
+        WHERE rating &lt;= 2
+        AND content IS NOT NULL
+        AND content != ''
+        AND merchant_base_id = #{merchantBaseId}
+        LIMIT #{limit}
+    </select>
+
+
 
 </mapper>

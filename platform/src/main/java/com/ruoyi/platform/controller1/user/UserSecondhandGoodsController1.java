@@ -6,6 +6,7 @@ import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.utils.SecurityUtils;
 
+import com.ruoyi.platform.domain.dto.SecondhandGoodsSearchDTO;
 import com.ruoyi.platform.domain.dto.SecondhandOrderCreatDTO;
 import com.ruoyi.platform.domain.vo.SecondhandGoodDetailVO;
 import com.ruoyi.platform.domain.vo.SecondhandGoodsListVO;
@@ -38,6 +39,13 @@ public class UserSecondhandGoodsController1 extends BaseController {
     private final ISecondhandGoodsService secondhandGoodsService;
     private final ISecondhandOrderService secondhandOrderService;
 
+
+    @GetMapping("/search")
+    public TableDataInfo search(SecondhandGoodsSearchDTO dto){
+        startPage();
+        List<SecondhandGoodsListVO> list = secondhandGoodsService.searchSecondhandGoods(dto);
+        return getDataTable(list);
+    }
     /**
      * 用户确认二手商品的收货
      * @param orderNo 订单号
