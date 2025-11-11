@@ -108,6 +108,7 @@ public class RetriveMessageHandler implements MessageHandler {
                 // 4. 更新消息状态（撤回）
                 dbMsg.setIsDeleted(1L);
                 dbMsg.setUpdateTime(new Date());
+                dbMsg.setMsgStatus(3L);
                 chatMessageService.updateChatMessage(dbMsg);
 
                 // 5. 清理缓存

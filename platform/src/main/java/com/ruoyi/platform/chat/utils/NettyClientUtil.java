@@ -37,6 +37,7 @@ import java.net.URISyntaxException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Slf4j
@@ -63,7 +64,7 @@ public class NettyClientUtil {
     private static Long currentUserType;
     private static Long currentUserId;
     // 重连计数器（记录当前重试次数）
-    private static volatile int reconnectAttempts = 0;
+    private static final AtomicInteger reconnectAttempts = new AtomicInteger(0);
     // Netty客户端线程池（全局唯一，指定2个线程）
     private static final NioEventLoopGroup group = new NioEventLoopGroup(2);
 
@@ -166,7 +167,7 @@ public class NettyClientUtil {
         cancelExistingReconnectTask();
 
         // 检查是否已达最大重连次数
-        if (reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
+        if (reconnectAttempts.get() >= MAX_RECONNECT_ATTEMPTS) {
             log.error("重连次数已达上限[{}/{}]，停止重试，用户[{}:{}]",
                     reconnectAttempts, MAX_RECONNECT_ATTEMPTS, currentUserType, currentUserId);
             // 此处可添加告警逻辑（如发送邮件/短信通知）
@@ -175,16 +176,16 @@ public class NettyClientUtil {
 
         // 计算指数退避延迟（公式：min(初始延迟 * 2^重试次数, 最大延迟)）
         long delaySeconds = (long) Math.min(
-                INITIAL_RECONNECT_DELAY * Math.pow(2, reconnectAttempts),
+                INITIAL_RECONNECT_DELAY * Math.pow(2, reconnectAttempts.get()),
                 MAX_RECONNECT_DELAY
         );
 
         // 提交重连任务
         reconnectFuture = executorService.schedule(() -> {
             try {
-                reconnectAttempts++; // 递增重试次数
+                int count = reconnectAttempts.incrementAndGet(); // 递增重试次数
                 log.info("开始第{}次重连，延迟{}秒，用户[{}:{}]",
-                        reconnectAttempts, delaySeconds, currentUserType, currentUserId);
+                        count, delaySeconds, currentUserType, currentUserId);
                 connectAndRegister(currentUserType, currentUserId);
             } catch (Exception e) {
                 log.error("重连任务执行异常", e);
@@ -208,7 +209,7 @@ public class NettyClientUtil {
      * 重置重连计数器（连接成功时调用）
      */
     private void resetReconnectAttempts() {
-        reconnectAttempts = 0;
+        reconnectAttempts.set(0);
         cancelExistingReconnectTask(); // 连接成功后取消所有待执行的重连任务
     }
 

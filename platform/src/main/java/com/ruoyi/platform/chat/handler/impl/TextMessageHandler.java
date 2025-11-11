@@ -126,9 +126,11 @@ public class TextMessageHandler implements MessageHandler {
                         dbMsg.setMsgStatus(3L);
                         log.warn("用户还未上线");
                     }
+                    dbMsg.setVersion(dbMsg.getVersion() + 1);
                     chatOperateMethod.updateSession(dbMsg, session);
-                    log.info("cacheKey: {}", cacheKey);
                     if(dbMsg.getMsgStatus() != 3L) {
+                    log.info("cacheKey: {}", cacheKey);
+
                         updateMessageCache(cacheKey, dbMsg);
                     }
                     pushStatusToSender(channelSessionManager, chatMessage, dbMsg.getMsgStatus().intValue());
