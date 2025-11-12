@@ -29,6 +29,49 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         select rider_base_id, user_id, username, password, nickname, avatar, real_name, id_card, id_card_front, id_card_back, phone, audit_status, work_status, credit_score, account_status, create_time, update_time from rider_base
     </sql>
 
+    <!-- ✅ 更新骑手基础信息（昵称、电话） -->
+    <update id="updateRiderBaseInfo">
+        UPDATE rider_base
+        <set>
+            <if test="nickname != null and nickname != ''">
+                nickname = #{nickname},
+            </if>
+            <if test="phone != null and phone != ''">
+                phone = #{phone},
+            </if>
+            update_time = NOW()
+        </set>
+        WHERE rider_base_id = #{riderBaseId}
+    </update>
+
+
+    <!-- ✅ 异步更新头像字段（单独调用） -->
+    <update id="updateRiderAvatarOnly">
+        UPDATE rider_base
+        SET avatar = #{avatarUrl},
+            update_time = NOW()
+        WHERE rider_base_id = #{riderBaseId}
+    </update>
+
+    <!-- 查询单个骑手脱敏信息  -->
+    <select id="selectRiderBaseInfoById" parameterType="long"
+            resultType="com.ruoyi.platform.domain.vo.RiderBaseInfoVO">
+        SELECT
+            rider_base_id   AS riderBaseId,
+            nickname,
+            avatar,
+            real_name       AS realName,
+            id_card         AS idCard,
+            phone,
+            credit_score    AS creditScore,
+            account_status  AS accountStatus,
+            create_time     AS createTime
+        FROM rider_base
+        WHERE rider_base_id = #{riderBaseId}
+          AND account_status != 0
+    LIMIT 1
+    </select>
+
     <!-- 查询单个骑手信息 -->
     <select id="selectRiderBaseByRiderBaseId" parameterType="java.lang.Long" resultMap="RiderBaseResult">
         SELECT

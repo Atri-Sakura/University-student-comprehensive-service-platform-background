@@ -2,6 +2,8 @@ package com.ruoyi.platform.service;
 
 import java.util.List;
 import com.ruoyi.platform.domain.RiderBase;
+import com.ruoyi.platform.domain.vo.RiderBaseInfoVO;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * 骑手基础信息Service接口
@@ -11,6 +13,22 @@ import com.ruoyi.platform.domain.RiderBase;
  */
 public interface IRiderBaseService 
 {
+    /**
+     * 修改骑手基础信息
+     */
+    public boolean updateRiderBaseInfo(
+            Long riderBaseId,
+            String nickname,
+            String phone,
+            MultipartFile avatar
+    );
+    /**
+     * 查询骑手脱敏基础信息
+     *
+     * @param riderBaseId 骑手基础信息主键
+     * @return 骑手基础信息
+     */
+    public RiderBaseInfoVO getRiderBaseInfo(Long riderBaseId);
     /**
      * 查询骑手基础信息
      * 
