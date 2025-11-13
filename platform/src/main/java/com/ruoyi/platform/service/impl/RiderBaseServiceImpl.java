@@ -94,10 +94,16 @@ public class RiderBaseServiceImpl implements IRiderBaseService
         if(vo == null){
             return null;
         }
-
+        //确保不为空才处理
+        if(vo.getIdCard() != null ){
         // ⚙️ 调用脱敏工具类处理
-        vo.setIdCard(MaskUtils.maskIdCard(vo.getIdCard()));
-        vo.setPhone(MaskUtils.maskPhone(vo.getPhone()));
+            vo.setIdCard(MaskUtils.maskIdCard(vo.getIdCard()));
+        }
+
+        if(vo.getPhone() != null){
+            vo.setPhone(MaskUtils.maskPhone(vo.getPhone()));
+        }
+
         return vo;
     }
 
