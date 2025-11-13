@@ -27,6 +27,8 @@
         <result property="latitude"          column="latitude"            />
         <result property="createTime"        column="create_time"         />
         <result property="updateTime"        column="update_time"         />
+        <!-- 新增：支付密码 -->
+        <result property="payPassword"   column="pay_password"    />
     </resultMap>
 
     <sql id="selectMerchantBaseVo">

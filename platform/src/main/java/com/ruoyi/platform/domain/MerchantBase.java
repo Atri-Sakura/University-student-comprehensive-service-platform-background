@@ -89,6 +89,10 @@ public class MerchantBase extends BaseEntity
     @Excel(name = "店铺纬度")
     private BigDecimal latitude;
 
+    /** 支付密码 */
+    @Excel(name = "支付密码")
+    private String payPassword;
+
     /** 对应sys_user表的用户ID */
     private Long userId;
 

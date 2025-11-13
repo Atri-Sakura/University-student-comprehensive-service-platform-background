@@ -13,6 +13,23 @@ import io.lettuce.core.dynamic.annotation.Param;
  */
 public interface RiderBaseMapper
 {
+
+    /**
+     * 更新骑手支付密码
+     */
+    int updateRiderPayPassword(@Param("riderBaseId") Long riderBaseId,
+                               @Param("payPassword") String payPassword);
+    /**
+     * 获取骑手基础信息
+     *
+     */
+    RiderBase selectRiderBaseById(@Param("riderBaseId") Long riderBaseId);
+
+
+    /**
+     * 只更新密码（更安全，避免误改其他字段）
+     */
+    int updateRiderBasePassword(RiderBase riderBase);
     /**
      * 更新骑手基础信息（昵称、电话）
      */
