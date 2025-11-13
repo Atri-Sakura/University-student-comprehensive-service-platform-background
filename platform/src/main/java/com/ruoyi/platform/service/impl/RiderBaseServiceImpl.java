@@ -2,11 +2,19 @@ package com.ruoyi.platform.service.impl;
 
 import java.util.List;
 import com.ruoyi.common.utils.DateUtils;
+import com.ruoyi.common.utils.file.MinioFileUtils;
+import com.ruoyi.platform.domain.vo.RiderBaseInfoVO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import com.ruoyi.platform.mapper.RiderBaseMapper;
 import com.ruoyi.platform.domain.RiderBase;
 import com.ruoyi.platform.service.IRiderBaseService;
+import com.ruoyi.platform.utils.MaskUtils;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
+import static com.ruoyi.framework.datasource.DynamicDataSourceContextHolder.log;
 
 /**
  * 骑手基础信息Service业务层处理
@@ -19,6 +27,85 @@ public class RiderBaseServiceImpl implements IRiderBaseService
 {
     @Autowired
     private RiderBaseMapper riderBaseMapper;
+
+    @Autowired
+    private MinioFileUtils minioFileUtils;
+
+//    @Qualifier("riderUploadExecutor")
+//    @Autowired
+//    private ThreadPoolExecutor riderUploadExecutor;
+    /**
+     * 修改骑手基础信息
+     */
+    @Override
+    @Transactional
+    public boolean updateRiderBaseInfo(
+            Long riderBaseId,
+            String nickname,
+            String phone,
+            MultipartFile avatar
+    ){
+        if (phone != null && !phone.isEmpty()) {
+            String phonePattern = "^1[3-9]\\d{9}$";
+            if (!phone.matches(phonePattern)) {
+                throw new IllegalArgumentException("手机号格式不正确");
+            }
+        }
+        // 上传头像（同步执行）
+        String avatarUrl = null;
+        if (avatar != null && !avatar.isEmpty()) {
+            try {
+                avatarUrl = minioFileUtils.upload(avatar, "user", riderBaseId);
+                log.info("[同步上传] 骑手ID={} 头像上传成功: {}", riderBaseId, avatarUrl);
+            } catch (Exception e) {
+                log.error("[同步上传] 骑手ID={} 上传失败: {}", riderBaseId, e.getMessage(), e);
+                throw new RuntimeException("头像上传失败，请稍后重试");
+            }
+        }
+        int updated = riderBaseMapper.updateRiderBaseInfo(riderBaseId, nickname, phone);
+
+        //若头像上传成功，额外更新 avatar 字段
+        if (avatarUrl != null) {
+            riderBaseMapper.updateRiderAvatarOnly(riderBaseId, avatarUrl);
+        }
+
+//        if(avatar != null && !avatar.isEmpty()){
+//            CompletableFuture.runAsync(() -> {
+//                try {
+//                    String url = minioFileUtils.upload(avatar, "user", riderBaseId);
+//                    log.info("[异步上传] 骑手ID={} 头像上传成功: {}", riderBaseId, url);
+//                    // 异步更新头像字段（单独事务）
+//                    riderBaseMapper.updateRiderAvatarOnly(riderBaseId, url);
+//                }catch (Exception e){
+//                    log.error("[异步上传] 骑手ID={} 上传失败: {}", riderBaseId, e.getMessage());
+//                }
+//            },riderUploadExecutor);
+//        }
+        return updated > 0;
+    }
+    /**
+     * 查询骑手脱敏基础信息
+     * @param riderId
+     * @return 骑手基础信息
+     */
+    @Override
+    public RiderBaseInfoVO getRiderBaseInfo(Long riderId) {
+        RiderBaseInfoVO vo = riderBaseMapper.selectRiderBaseInfoById(riderId);
+        if(vo == null){
+            return null;
+        }
+        //确保不为空才处理
+        if(vo.getIdCard() != null ){
+        // ⚙️ 调用脱敏工具类处理
+            vo.setIdCard(MaskUtils.maskIdCard(vo.getIdCard()));
+        }
+
+        if(vo.getPhone() != null){
+            vo.setPhone(MaskUtils.maskPhone(vo.getPhone()));
+        }
+
+        return vo;
+    }
 
     /**
      * 查询骑手基础信息
