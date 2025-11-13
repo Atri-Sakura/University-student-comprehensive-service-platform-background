@@ -2,6 +2,8 @@ package com.ruoyi.platform.mapper;
 
 import java.util.List;
 import com.ruoyi.platform.domain.RiderBase;
+import com.ruoyi.platform.domain.vo.RiderBaseInfoVO;
+import io.lettuce.core.dynamic.annotation.Param;
 
 /**
  * 骑手基础信息Mapper接口
@@ -9,8 +11,29 @@ import com.ruoyi.platform.domain.RiderBase;
  * @author ruoyi
  * @date 2025-10-16
  */
-public interface RiderBaseMapper 
+public interface RiderBaseMapper
 {
+    /**
+     * 更新骑手基础信息（昵称、电话）
+     */
+    int updateRiderBaseInfo(
+            @Param("riderBaseId") Long riderBaseId,
+            @Param("nickname") String nickname,
+            @Param("phone") String phone
+    );
+
+    /**
+     * 异步更新骑手头像字段
+     */
+    int updateRiderAvatarOnly(
+            @Param("riderBaseId") Long riderBaseId,
+            @Param("avatarUrl") String avatarUrl
+    );
+    /**
+     * 根据骑手ID查询骑手基础信息
+     *
+     */
+    public RiderBaseInfoVO selectRiderBaseInfoById(@Param("riderBaseId")Long riderBaseId);
     /**
      * 查询骑手基础信息
      * 
