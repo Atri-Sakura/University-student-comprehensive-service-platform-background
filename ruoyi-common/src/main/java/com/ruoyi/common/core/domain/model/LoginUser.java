@@ -74,6 +74,8 @@ public class LoginUser implements UserDetails
      */
     private SysUser user;
 
+    private Integer role;
+
     public Long getUserBaseId() {
         return userBaseId;
     }
@@ -106,6 +108,13 @@ public class LoginUser implements UserDetails
     {
         this.user = user;
         this.permissions = permissions;
+        // 添加：从 SysUser 获取 role 和其他 BaseId
+        if (user != null) {
+            this.role = user.getRole();
+            this.userBaseId = user.getUserBaseId();
+            this.riderBaseId = user.getRiderBaseId();
+            this.merchantBaseId = user.getMerchantBaseId();
+        }
     }
 
     public LoginUser(Long userId, Long deptId, SysUser user, Set<String> permissions)
@@ -114,6 +123,13 @@ public class LoginUser implements UserDetails
         this.deptId = deptId;
         this.user = user;
         this.permissions = permissions;
+        // 添加：从 SysUser 获取 role 和其他 BaseId
+        if (user != null) {
+            this.role = user.getRole();
+            this.userBaseId = user.getUserBaseId();
+            this.riderBaseId = user.getRiderBaseId();
+            this.merchantBaseId = user.getMerchantBaseId();
+        }
     }
 
     public Long getUserId()
@@ -145,6 +161,10 @@ public class LoginUser implements UserDetails
     {
         this.token = token;
     }
+
+    public Integer getRole() { return role; }
+
+    public void setRole(Integer role) { this.role = role; }
 
     @JSONField(serialize = false)
     @Override
