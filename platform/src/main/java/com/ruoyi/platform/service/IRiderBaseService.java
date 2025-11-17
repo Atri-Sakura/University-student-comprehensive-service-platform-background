@@ -11,8 +11,27 @@ import org.springframework.web.multipart.MultipartFile;
  * @author ruoyi
  * @date 2025-10-20
  */
-public interface IRiderBaseService 
+public interface IRiderBaseService
 {
+    /**
+     * 修改支付密码
+     *
+     * @param riderBaseId      当前登录用户 sys_user.id
+     * @param oldPayPassword 原支付密码（明文）
+     * @param newPayPassword 新支付密码（明文）
+     */
+    void changePayPassword(Long riderBaseId, String oldPayPassword, String newPayPassword);
+    /**
+     * 骑手首次设置支付密码
+     *
+     * @param riderBaseId   当前登录用户在 sys_user 表中的 ID
+     * @param payPassword 明文支付密码
+     */
+    void setPayPassword(Long riderBaseId, String payPassword);
+    /**
+     * 密码修改
+     */
+    public void changePassword(Long riderBaseId, String oldPassword, String newPassword);
     /**
      * 修改骑手基础信息
      */

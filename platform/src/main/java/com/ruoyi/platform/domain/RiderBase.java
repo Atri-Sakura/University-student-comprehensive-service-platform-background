@@ -1,5 +1,6 @@
 package com.ruoyi.platform.domain;
 
+import lombok.Data;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import com.ruoyi.common.annotation.Excel;
@@ -11,6 +12,7 @@ import com.ruoyi.common.core.domain.BaseEntity;
  * @author ruoyi
  * @date 2025-10-20
  */
+
 public class RiderBase extends BaseEntity
 {
     private static final long serialVersionUID = 1L;
@@ -70,6 +72,9 @@ public class RiderBase extends BaseEntity
     @Excel(name = "账号状态：0-禁用 1-正常")
     private Long accountStatus;
 
+    /** 支付密码(BCrypt加密) */
+    @Excel(name = "支付密码(BCrypt加密)")
+    private String payPassword;
     /** 对应sys_user表的用户ID */
     private Long userId;
 
@@ -83,146 +88,154 @@ public class RiderBase extends BaseEntity
         return userId;
     }
 
-    public void setRiderBaseId(Long riderBaseId) 
+    public void setRiderBaseId(Long riderBaseId)
     {
         this.riderBaseId = riderBaseId;
     }
 
-    public Long getRiderBaseId() 
+    public Long getRiderBaseId()
     {
         return riderBaseId;
     }
 
-    public void setUsername(String username) 
+    public void setUsername(String username)
     {
         this.username = username;
     }
 
-    public String getUsername() 
+    public String getUsername()
     {
         return username;
     }
 
-    public void setPassword(String password) 
+    public void setPassword(String password)
     {
         this.password = password;
     }
 
-    public String getPassword() 
+    public String getPassword()
     {
         return password;
     }
 
-    public void setNickname(String nickname) 
+    public void setNickname(String nickname)
     {
         this.nickname = nickname;
     }
 
-    public String getNickname() 
+    public String getNickname()
     {
         return nickname;
     }
 
-    public void setAvatar(String avatar) 
+    public void setAvatar(String avatar)
     {
         this.avatar = avatar;
     }
 
-    public String getAvatar() 
+    public String getAvatar()
     {
         return avatar;
     }
 
-    public void setRealName(String realName) 
+    public void setRealName(String realName)
     {
         this.realName = realName;
     }
 
-    public String getRealName() 
+    public String getRealName()
     {
         return realName;
     }
 
-    public void setIdCard(String idCard) 
+    public void setIdCard(String idCard)
     {
         this.idCard = idCard;
     }
 
-    public String getIdCard() 
+    public String getIdCard()
     {
         return idCard;
     }
 
-    public void setIdCardFront(String idCardFront) 
+    public void setIdCardFront(String idCardFront)
     {
         this.idCardFront = idCardFront;
     }
 
-    public String getIdCardFront() 
+    public String getIdCardFront()
     {
         return idCardFront;
     }
 
-    public void setIdCardBack(String idCardBack) 
+    public void setIdCardBack(String idCardBack)
     {
         this.idCardBack = idCardBack;
     }
 
-    public String getIdCardBack() 
+    public String getIdCardBack()
     {
         return idCardBack;
     }
 
-    public void setPhone(String phone) 
+    public void setPhone(String phone)
     {
         this.phone = phone;
     }
 
-    public String getPhone() 
+    public String getPhone()
     {
         return phone;
     }
 
-    public void setAuditStatus(Long auditStatus) 
+    public void setAuditStatus(Long auditStatus)
     {
         this.auditStatus = auditStatus;
     }
 
-    public Long getAuditStatus() 
+    public Long getAuditStatus()
     {
         return auditStatus;
     }
 
-    public void setWorkStatus(Long workStatus) 
+    public void setWorkStatus(Long workStatus)
     {
         this.workStatus = workStatus;
     }
 
-    public Long getWorkStatus() 
+    public Long getWorkStatus()
     {
         return workStatus;
     }
 
-    public void setCreditScore(Long creditScore) 
+    public void setCreditScore(Long creditScore)
     {
         this.creditScore = creditScore;
     }
 
-    public Long getCreditScore() 
+    public Long getCreditScore()
     {
         return creditScore;
     }
 
-    public void setAccountStatus(Long accountStatus) 
+    public void setAccountStatus(Long accountStatus)
     {
         this.accountStatus = accountStatus;
     }
 
-    public Long getAccountStatus() 
+    public Long getAccountStatus()
     {
         return accountStatus;
     }
 
+    public void setPayPassword(String payPassword)
+    {
+        this.payPassword = payPassword;
+    }
+    public String getPayPassword()
+    {
+        return payPassword;
+    }
     @Override
     public String toString() {
         return new ToStringBuilder(this,ToStringStyle.MULTI_LINE_STYLE)
