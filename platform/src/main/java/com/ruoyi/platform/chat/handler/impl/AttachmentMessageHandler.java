@@ -21,6 +21,7 @@ import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 
 
@@ -37,7 +38,7 @@ import java.util.concurrent.ExecutorService;
 public class AttachmentMessageHandler implements MessageHandler {
 
     @Autowired
-    private ExecutorService messageExecutor;
+    private ThreadPoolTaskExecutor threadPoolTaskExecutor;
     @Autowired
     private ChatOperateMethod chatOperateMethod;
     @Autowired
@@ -64,7 +65,7 @@ public class AttachmentMessageHandler implements MessageHandler {
 
     @Override
     public void handler(ChannelSessionManager channelSessionManager, ChannelHandlerContext ctx, ChatMessageProto.ChatMessage chatMessage) {
-        messageExecutor.execute(() -> {
+        threadPoolTaskExecutor.execute(() -> {
             try {
                 Integer length = Integer.valueOf(chatMessage.getAttachmentsCount());
 

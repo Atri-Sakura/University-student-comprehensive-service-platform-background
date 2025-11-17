@@ -17,6 +17,7 @@ import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
@@ -31,7 +32,7 @@ public class RetriveMessageHandler implements MessageHandler {
     private static final long PROTOCOL_MAGIC_NUMBER = 0xCAFEBABEL;
 
     @Autowired
-    private ExecutorService messageExecutor;
+    private ThreadPoolTaskExecutor threadPoolTaskExecutor;
 
     @Autowired
     private IChatSessionService chatSessionService;
@@ -58,7 +59,7 @@ public class RetriveMessageHandler implements MessageHandler {
 
     @Override
     public void handler(ChannelSessionManager channelSessionManager, ChannelHandlerContext ctx, ChatMessageProto.ChatMessage chatMessage) {
-        messageExecutor.execute(() -> {
+        threadPoolTaskExecutor.execute(() -> {
             try {
                 // 1. 参数校验
                 if (chatMessage.getMessageId() == 0) {
