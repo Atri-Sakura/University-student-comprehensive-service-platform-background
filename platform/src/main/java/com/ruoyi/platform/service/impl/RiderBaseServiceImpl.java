@@ -1,7 +1,10 @@
 package com.ruoyi.platform.service.impl;
 
 import java.util.List;
+
+import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.utils.DateUtils;
+import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.common.utils.file.MinioFileUtils;
 import com.ruoyi.platform.domain.vo.RiderBaseInfoVO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +37,166 @@ public class RiderBaseServiceImpl implements IRiderBaseService
 //    @Qualifier("riderUploadExecutor")
 //    @Autowired
 //    private ThreadPoolExecutor riderUploadExecutor;
+
+
+    /**
+     * 修改支付密码
+     *
+     * @param riderBaseId      当前登录用户 sys_user.id
+     * @param oldPayPassword 原支付密码（明文）
+     * @param newPayPassword 新支付密码（明文）
+     */
+    @Override
+    public void changePayPassword(Long riderBaseId, String oldPayPassword, String newPayPassword) {
+        // 1. 查当前登录用户对应的骑手
+        RiderBase rider = riderBaseMapper.selectRiderBaseById(riderBaseId);
+        if (rider == null) {
+            throw new ServiceException("当前账号未绑定骑手信息");
+        }
+
+        // 2. 必须已经设置过支付密码才能修改
+        if (rider.getPayPassword() == null || "".equals(rider.getPayPassword())) {
+            throw new ServiceException("尚未设置支付密码，请先设置支付密码");
+        }
+
+        // 3. 校验原支付密码是否正确
+        if (!SecurityUtils.matchesPassword(oldPayPassword, rider.getPayPassword())) {
+            throw new ServiceException("原支付密码不正确");
+        }
+
+        // 4. 校验新支付密码格式（6 位数字）
+        validatePayPassword(newPayPassword);
+
+        // 5. 新支付密码不能和旧的一样
+        if (SecurityUtils.matchesPassword(newPayPassword, rider.getPayPassword())) {
+            throw new ServiceException("新支付密码不能与原支付密码相同");
+        }
+
+        // TODO: 6. 以后可以在这里增加短信验证码校验（再提高一层安全）
+        String encoded = SecurityUtils.encryptPassword(newPayPassword);
+        int rows = riderBaseMapper.updateRiderPayPassword(rider.getRiderBaseId(), encoded);
+        if (rows <= 0) {
+            throw new ServiceException("支付密码修改失败，请稍后重试");
+        }
+
+    }
+
+
+    /**
+     * 骑手首次设置支付密码
+     *
+     * @param riderBaseId   当前登录用户在 sys_user 表中的 ID
+     * @param payPassword 明文支付密码
+     */
+    public void setPayPassword(Long riderBaseId, String payPassword){
+        //检测用户是否存在
+        RiderBase rider = riderBaseMapper.selectRiderBaseById(riderBaseId);
+        if (rider == null) {
+            throw new ServiceException("当前账号未绑定骑手信息");
+        }
+
+        //检验是否已有密码
+        if(rider.getPayPassword()!= null && !"".equals(rider.getPayPassword())){
+            throw new ServiceException("已设置支付密码，请使用修改支付密码功能");
+        }
+
+        // 3. 校验支付密码规则（6 位数字）
+        validatePayPassword(payPassword);
+
+        // TODO: 4. 以后在这里加：短信验证码校验（比如 checkSmsCode(sysUserId, smsCode)）
+
+        // 5. 加密支付密码（BCrypt）
+        String encoded = SecurityUtils.encryptPassword(payPassword);
+
+        // 6. 更新骑手的支付密码
+        int rows = riderBaseMapper.updateRiderPayPassword(rider.getRiderBaseId(), encoded);
+        if (rows <= 0) {
+            throw new ServiceException("支付密码设置失败，请稍后重试");
+        }
+    }
+
+    /**
+     * 支付密码规则：
+     *  - 必须是 6 位数字
+     *  - 你也可以拓展：不能为 000000 / 123456 之类的弱口令
+     */
+    public void validatePayPassword(String payPassword){
+        if (payPassword == null) {
+            throw new ServiceException("支付密码不能为空");
+        }
+
+        if (!payPassword.matches("^[0-9]{6}$")) {
+            throw new ServiceException("支付密码必须为 6 位数字");
+        }
+    }
+
+
+    /**
+     * 骑手修改密码
+     *
+     * @param riderBaseId     当前骑手 ID（从登录信息中拿）
+     * @param oldPassword 原密码（明文）
+     * @param newPassword 新密码（明文）
+     */
+    @Override
+    public void changePassword(Long riderBaseId, String oldPassword, String newPassword){
+        // 1. 查出当前骑手信息
+        RiderBase rider = riderBaseMapper.selectRiderBaseById(riderBaseId);
+        if (rider == null) {
+            throw new ServiceException("骑手不存在");
+        }
+
+        // 2. 校验原密码是否正确（BCrypt）这里是内置的原理是oldPassword 明文加密后对比还是？
+        if (!SecurityUtils.matchesPassword(oldPassword, rider.getPassword())) {
+            throw new ServiceException("原密码不正确");
+        }
+        // 3. 校验新密码规则（长度、空格、字母+数字、不能等于旧密码）
+        validateNewPassword(newPassword, rider.getPassword());
+
+        // 4. 加密新密码并更新数据库
+        String encrypted = SecurityUtils.encryptPassword(newPassword);
+        rider.setPassword(encrypted);
+
+        int rows = riderBaseMapper.updateRiderBasePassword(rider);
+        if (rows <= 0) {
+            throw new ServiceException("修改密码失败，请稍后重试");
+        }
+    }
+
+    /**
+     * 校验新密码规则：
+     *  - 6-20 位
+     *  - 不能包含空格
+     *  - 必须同时包含字母和数字
+     *  - 不能和旧密码相同（旧密码是加密串，用 matches 判断）
+     */
+    private void validateNewPassword(String newPassword, String oldEncryptedPassword){
+        if (newPassword == null) {
+            throw new ServiceException("新密码不能为空");
+        }
+
+        // ① 长度 6-20
+        int len = newPassword.length();
+        if (len < 6 || len > 20) {
+            throw new ServiceException("新密码长度必须为 6-20 位");
+        }
+
+        // ② 不包含空格
+        if (newPassword.contains(" ")) {
+            throw new ServiceException("新密码不能包含空格");
+        }
+
+        // ③ 必须包含字母和数字（你也可以拆成多个 if 写）
+        String regex = "^(?=.*[A-Za-z])(?=.*\\d)\\S{6,20}$";
+        if (!newPassword.matches(regex)) {
+            throw new ServiceException("新密码必须同时包含字母和数字，且不能包含空格");
+        }
+
+        // ④ 不能和旧密码相同（注意旧密码是加密的）
+        if (SecurityUtils.matchesPassword(newPassword, oldEncryptedPassword)) {
+            throw new ServiceException("新密码不能与旧密码相同");
+        }
+    }
     /**
      * 修改骑手基础信息
      */

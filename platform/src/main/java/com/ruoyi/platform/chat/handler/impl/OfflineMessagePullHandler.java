@@ -15,6 +15,7 @@ import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -39,7 +40,7 @@ public class OfflineMessagePullHandler implements MessageHandler {
     private IChatMessageService chatMessageService;
 
     @Autowired
-    private ExecutorService executorService;
+    private ThreadPoolTaskExecutor threadPoolTaskExecutor;
 
     @Autowired
     private TransactionTemplate transactionTemplate;
@@ -59,7 +60,7 @@ public class OfflineMessagePullHandler implements MessageHandler {
 
     @Override
     public void handler(ChannelSessionManager channelSessionManager, ChannelHandlerContext ctx, ChatMessageProto.ChatMessage chatMessage) {
-        executorService.execute(() -> {
+        threadPoolTaskExecutor.execute(() -> {
             try {
                 // 1. 获取上线用户的ID和类型（拉取者即接收方）
                 Long receiverId = chatMessage.getFromId();

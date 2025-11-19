@@ -1,6 +1,7 @@
 package com.ruoyi.platform.chat.handler.impl;
 
 import com.ruoyi.common.core.redis.RedisCache;
+import com.ruoyi.platform.chat.config.SessionThreadPoolManager;
 import com.ruoyi.platform.chat.handler.MessageHandler;
 import com.ruoyi.platform.chat.manager.ChannelSessionManager;
 import com.ruoyi.platform.chat.method.ChatOperateMethod;
@@ -43,6 +44,9 @@ public class TextMessageHandler implements MessageHandler {
     private ExecutorService messageExecutor;
 
     @Autowired
+    private SessionThreadPoolManager sessionThreadPoolManager;
+
+    @Autowired
     private ChatOperateMethod chatOperateMethod;
 
     @Autowired
@@ -65,8 +69,8 @@ public class TextMessageHandler implements MessageHandler {
     public void handler(ChannelSessionManager channelSessionManager, ChannelHandlerContext ctx, ChatMessageProto.ChatMessage chatMessage) {
         // 线程池任务提交：添加try-catch处理拒绝策略，避免未捕获异常导致流程中断
         try {
-            messageExecutor.execute(() -> {
-                try {
+
+
                     // 1. 参数校验：提前过滤无效请求
                     if (!validateParams(chatMessage)) {
                         return;
@@ -87,17 +91,22 @@ public class TextMessageHandler implements MessageHandler {
                         session = chatOperateMethod.ensureSessionExists(dbMsg);
                         sessionId = session.getSessionId();
                     }
-
-                    // 会话二次查询：添加非空校验，避免空指针
                     session = chatSessionService.selectChatSessionBySessionId(sessionId);
-                    if (Objects.isNull(session)) {
-                        log.error("会话查询为空，无法处理消息，sessionId: {}, 消息ID: {}", sessionId, chatMessage.getMessageId());
+
+                    final Long sessionManagerId = sessionId;
+                    final ChatSession chatSession = session;
+                    // 会话二次查询：添加非空校验，避免空指针
+
+                    sessionThreadPoolManager.getExecutor(sessionManagerId).execute(() -> {
+                        try{
+                    if (Objects.isNull(sessionManagerId)) {
+                        log.error("会话查询为空，无法处理消息，sessionId: {}, 消息ID: {}", sessionManagerId, chatMessage.getMessageId());
                         pushStatusToSender(channelSessionManager, chatMessage, 4);
                         return;
                     }
 
                     // 3. 消息存储：数据库持久化
-                    dbMsg.setSessionId(sessionId);
+                    dbMsg.setSessionId(sessionManagerId);
                     int saveSuccess = chatMessageService.insertChatMessage(dbMsg);
                     if (saveSuccess < 1) {
                         log.error("文本消息存储失败，消息ID: {}", chatMessage.getMessageId());
@@ -106,7 +115,7 @@ public class TextMessageHandler implements MessageHandler {
                     }
 
                     // 4. 缓存更新：使用Redis原子命令，解决并发安全与性能问题
-                    String cacheKey = buildCacheKey(sessionId);
+                    String cacheKey = buildCacheKey(sessionManagerId);
 
 
                     // 5. 接收方推送：消息实时投递
@@ -116,7 +125,7 @@ public class TextMessageHandler implements MessageHandler {
                         // 此处可扩展：离线消息存储逻辑（如写入数据库离线表）
                         dbMsg.setMsgStatus(3L);
                         chatMessageService.updateChatMessage(dbMsg);
-                        chatSessionService.increaseUnreadCount(sessionId);
+                        chatSessionService.increaseUnreadCount(sessionManagerId);
 
                     }
 
@@ -127,7 +136,7 @@ public class TextMessageHandler implements MessageHandler {
                         log.warn("用户还未上线");
                     }
                     dbMsg.setVersion(dbMsg.getVersion() + 1);
-                    chatOperateMethod.updateSession(dbMsg, session);
+                    chatOperateMethod.updateSession(dbMsg, chatSession);
                     if(dbMsg.getMsgStatus() != 3L) {
                     log.info("cacheKey: {}", cacheKey);
 

@@ -77,6 +77,9 @@ public class UserBase extends BaseEntity
     @Excel(name = "最后登录IP")
     private String lastLoginIp;
 
+    /** 支付密码（BCrypt加密） */
+    @Excel(name = "支付密码", readConverterExp = "BC=rypt加密")
+    private String payPassword;
     /** 对应sys_user表的用户ID */
     private Long userId;
 
