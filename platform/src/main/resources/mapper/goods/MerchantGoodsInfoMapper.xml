@@ -32,6 +32,27 @@
         select * from merchant_goods where merchant_goods_id = #{merchantGoodsId}
     </select>
 
+    <!-- 新增：查询商品列表 -->
+    <select id="selectMerchantGoodsList" parameterType="MerchantGoods" resultMap="MerchantGoodsResult">
+        select * from merchant_goods
+        <where>
+            <if test="merchantBaseId != null">
+                and merchant_base_id = #{merchantBaseId}
+            </if>
+            <if test="status != null">
+                and status = #{status}
+            </if>
+            <if test="goodsName != null and goodsName != ''">
+                and goods_name like concat('%', #{goodsName}, '%')
+            </if>
+            <if test="category != null and category != ''">
+                and category = #{category}
+            </if>
+            <!-- 可根据需要添加更多查询条件 -->
+        </where>
+        order by create_time desc
+    </select>
+
     <update id="updateMerchantGoods" parameterType="MerchantGoods">
         update merchant_goods
         <trim prefix="SET" suffixOverrides=",">

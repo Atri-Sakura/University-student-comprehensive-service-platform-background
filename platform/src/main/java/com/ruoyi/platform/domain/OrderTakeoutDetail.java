@@ -59,6 +59,10 @@ public class OrderTakeoutDetail extends BaseEntity
     @Excel(name = "商品标签(冗余，如“甜口/冰饮”，用于推荐)")
     private String goodsTags;
 
+    /** 结算状态：0-未结算 1-已结算 */
+    @Excel(name = "结算状态")
+    private Long settleStatus;
+
     public void setOrderTakeoutDetailId(Long orderTakeoutDetailId) 
     {
         this.orderTakeoutDetailId = orderTakeoutDetailId;
@@ -169,20 +173,29 @@ public class OrderTakeoutDetail extends BaseEntity
         return goodsTags;
     }
 
+    public void setSettleStatus(Long settleStatus) {
+        this.settleStatus = settleStatus;
+    }
+
+    public Long getSettleStatus() {
+        return settleStatus;
+    }
+
     @Override
     public String toString() {
-        return new ToStringBuilder(this,ToStringStyle.MULTI_LINE_STYLE)
-            .append("orderTakeoutDetailId", getOrderTakeoutDetailId())
-            .append("orderMainId", getOrderMainId())
-            .append("merchantId", getMerchantId())
-            .append("merchantName", getMerchantName())
-            .append("goodsId", getGoodsId())
-            .append("goodsName", getGoodsName())
-            .append("goodsPrice", getGoodsPrice())
-            .append("quantity", getQuantity())
-            .append("subtotal", getSubtotal())
-            .append("goodsSpec", getGoodsSpec())
-            .append("goodsTags", getGoodsTags())
-            .toString();
+        return new ToStringBuilder(this, ToStringStyle.MULTI_LINE_STYLE)
+                .append("orderTakeoutDetailId", getOrderTakeoutDetailId())
+                .append("orderMainId", getOrderMainId())
+                .append("merchantId", getMerchantId())
+                .append("merchantName", getMerchantName())
+                .append("goodsId", getGoodsId())
+                .append("goodsName", getGoodsName())
+                .append("goodsPrice", getGoodsPrice())
+                .append("quantity", getQuantity())
+                .append("subtotal", getSubtotal())
+                .append("goodsSpec", getGoodsSpec())
+                .append("goodsTags", getGoodsTags())
+                .append("settleStatus", getSettleStatus())
+                .toString();
     }
 }

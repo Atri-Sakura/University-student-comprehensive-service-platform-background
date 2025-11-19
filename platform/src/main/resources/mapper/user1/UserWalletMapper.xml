@@ -17,6 +17,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         select user_wallet_id, user_base_id, balance, freeze_amount, create_time, update_time from user_wallet
     </sql>
 
+    <!-- 根据用户ID查询用户钱包 -->
+    <select id="selectUserWalletByUserBaseId" parameterType="Long" resultMap="UserWalletResult">
+        SELECT * FROM user_wallet WHERE user_base_id = #{userBaseId}
+    </select>
+
     <select id="selectUserWalletList" parameterType="UserWallet" resultMap="UserWalletResult">
         <include refid="selectUserWalletVo"/>
         <where>  
@@ -73,4 +78,23 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             #{userWalletId}
         </foreach>
     </delete>
+
+    <!-- 扣减用户余额（加锁） -->
+    <update id="decreaseBalance">
+        UPDATE user_wallet
+        SET balance = balance - #{amount},
+            update_time = NOW()
+        WHERE user_base_id = #{userId}
+          AND balance >= #{amount}
+          AND status = 1
+    </update>
+
+    <!-- 增加用户余额（退款） -->
+    <update id="increaseBalance">
+        UPDATE user_wallet
+        SET balance = balance + #{amount},
+            update_time = NOW()
+        WHERE user_base_id = #{userId}
+          AND status = 1
+    </update>
 </mapper>

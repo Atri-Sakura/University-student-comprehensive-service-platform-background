@@ -281,6 +281,14 @@ public class MerchantGoods extends BaseEntity
         return oneStarRate;
     }
 
+    /**
+     * 是否上架
+     * @return true: 已上架, false: 未上架
+     */
+    public boolean isOnSale() {
+        return status != null && status == 1L;
+    }
+
     @Override
     public String toString() {
         return new ToStringBuilder(this,ToStringStyle.MULTI_LINE_STYLE)

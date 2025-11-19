@@ -116,4 +116,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         WHERE merchant_base_id = #{merchantBaseId}
     </update>
 
+    <!-- 增加商家余额 -->
+    <update id="increaseBalance">
+        UPDATE merchant_wallet
+        SET balance = balance + #{amount},
+            update_time = NOW()
+        WHERE merchant_base_id = #{merchantId}
+    </update>
+
 </mapper>

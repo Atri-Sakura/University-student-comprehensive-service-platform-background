@@ -83,4 +83,13 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <delete id="deleteRiderWalletByRiderWalletId" parameterType="long">
         DELETE FROM rider_wallet WHERE rider_wallet_id = #{riderWalletId}
     </delete>
+
+    <!-- 补充 RiderWalletMapper.xml 中的方法 -->
+    <!-- 增加骑手余额 -->
+    <update id="increaseBalance">
+        UPDATE rider_wallet
+        SET balance = balance + #{amount},
+            update_time = NOW()
+        WHERE rider_base_id = #{riderId}
+    </update>
 </mapper>

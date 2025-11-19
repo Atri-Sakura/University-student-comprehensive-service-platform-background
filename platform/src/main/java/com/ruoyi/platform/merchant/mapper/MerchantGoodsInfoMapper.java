@@ -2,6 +2,8 @@ package com.ruoyi.platform.merchant.mapper;
 
 import com.ruoyi.platform.domain.MerchantGoods;
 
+import java.util.List;
+
 /**
  * 商品基础信息Mapper接口
  */
@@ -20,4 +22,11 @@ public interface MerchantGoodsInfoMapper {
      * @return 影响行数
      */
     int updateMerchantGoods(MerchantGoods merchantGoods);
+
+    /**
+     * 查询商品列表（支持多条件）
+     * @param merchantGoods 查询条件
+     * @return 商品列表
+     */
+    List<MerchantGoods> selectMerchantGoodsList(MerchantGoods merchantGoods);
 }

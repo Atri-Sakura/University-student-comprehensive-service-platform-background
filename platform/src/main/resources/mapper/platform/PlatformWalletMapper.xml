@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.platform.mapper.PlatformWalletMapper">
+
+    <resultMap type="PlatformWallet" id="PlatformWalletResult">
+        <result property="platformWalletId" column="platform_wallet_id"/>
+        <result property="balance" column="balance"/>
+        <result property="freezeAmount" column="freeze_amount"/>
+        <result property="totalIncome" column="total_income"/>
+        <result property="totalPayout" column="total_payout"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <!-- 查询平台钱包（加锁） -->
+    <select id="selectPlatformWalletForUpdate" parameterType="Long" resultMap="PlatformWalletResult">
+        SELECT * FROM platform_wallet
+        WHERE platform_wallet_id = #{platformWalletId}
+            FOR UPDATE
+    </select>
+
+    <!-- 增加余额和冻结金额（用户支付） -->
+    <update id="increaseBalanceAndFreeze">
+        UPDATE platform_wallet
+        SET balance = balance + #{amount},
+            freeze_amount = freeze_amount + #{amount},
+            total_income = total_income + #{amount},
+            update_time = NOW()
+        WHERE platform_wallet_id = #{platformWalletId}
+    </update>
+
+    <!-- 减少余额和冻结金额（结算） -->
+    <update id="decreaseBalanceAndFreeze">
+        UPDATE platform_wallet
+        SET balance = balance - #{amount},
+            freeze_amount = freeze_amount - #{amount},
+            total_payout = total_payout + #{amount},
+            update_time = NOW()
+        WHERE platform_wallet_id = #{platformWalletId}
+          AND balance >= #{amount}
+          AND freeze_amount >= #{amount}
+    </update>
+
+</mapper>

@@ -148,4 +148,17 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             #{merchantGoodsId}
         </foreach>
     </delete>
+
+    <update id="decreaseStock">
+        UPDATE merchant_goods
+        SET stock = stock - #{quantity}
+        WHERE merchant_goods_id = #{merchantGoodsId}
+          AND stock >= #{quantity}
+    </update>
+
+    <update id="increaseStock">
+        UPDATE merchant_goods
+        SET stock = stock + #{quantity}
+        WHERE merchant_goods_id = #{merchantGoodsId}
+    </update>
 </mapper>

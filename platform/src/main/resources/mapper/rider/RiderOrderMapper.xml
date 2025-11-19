@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.platform.rider.mapper.RiderOrderMapper">
+
+    <resultMap type="OrderMain" id="OrderMainResult">
+        <result property="orderMainId" column="order_main_id"/>
+        <result property="orderNo" column="order_no"/>
+        <result property="userId" column="user_id"/>
+        <result property="userNickname" column="user_nickname"/>
+        <result property="merchantId" column="merchant_id"/>
+        <result property="orderType" column="order_type"/>
+        <result property="totalAmount" column="total_amount"/>
+        <result property="payAmount" column="pay_amount"/>
+        <result property="discountAmount" column="discount_amount"/>
+        <result property="payStatus" column="pay_status"/>
+        <result property="payTime" column="pay_time"/>
+        <result property="payType" column="pay_type"/>
+        <result property="orderStatus" column="order_status"/>
+        <result property="pickAddress" column="pick_address"/>
+        <result property="pickContact" column="pick_contact"/>
+        <result property="pickPhone" column="pick_phone"/>
+        <result property="deliverAddress" column="deliver_address"/>
+        <result property="deliverContact" column="deliver_contact"/>
+        <result property="deliverPhone" column="deliver_phone"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="completeTime" column="complete_time"/>
+    </resultMap>
+
+    <!-- 查询可接单的订单列表（待取货状态且未被接单） -->
+    <select id="selectAvailableOrderList" parameterType="OrderMain" resultMap="OrderMainResult">
+        SELECT DISTINCT om.*
+        FROM order_main om
+        INNER JOIN order_delivery od ON om.order_main_id = od.order_main_id
+        <where>
+            om.order_status = 2  <!-- 2-待取货 -->
+            AND om.pay_status = 1  <!-- 1-已支付 -->
+            AND od.rider_id IS NULL  <!-- 未被骑手接单 -->
+            <if test="orderNo != null and orderNo != ''">
+                AND om.order_no LIKE CONCAT('%', #{orderNo}, '%')
+            </if>
+        </where>
+        ORDER BY om.create_time DESC
+    </select>
+
+    <!-- 查询骑手自己的订单列表 -->
+    <select id="selectRiderOrderList" parameterType="OrderMain" resultMap="OrderMainResult">
+        SELECT DISTINCT om.*
+        FROM order_main om
+        INNER JOIN order_delivery od ON om.order_main_id = od.order_main_id
+        <where>
+            od.rider_id = #{params.riderId}
+            <if test="orderStatus != null">
+                AND om.order_status = #{orderStatus}
+            </if>
+            <if test="orderNo != null and orderNo != ''">
+                AND om.order_no LIKE CONCAT('%', #{orderNo}, '%')
+            </if>
+        </where>
+        ORDER BY om.create_time DESC
+    </select>
+
+    <!-- 查询骑手订单详情 -->
+    <select id="selectRiderOrderById" resultMap="OrderMainResult">
+        SELECT om.*
+        FROM order_main om
+                 INNER JOIN order_delivery od ON om.order_main_id = od.order_main_id
+        WHERE om.order_main_id = #{orderMainId}
+          AND od.rider_id = #{riderId}
+    </select>
+
+</mapper>
