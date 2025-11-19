@@ -1,4 +1,3 @@
-// com/ruoyi/platform/domain/MerchantWalletFlow.java
 package com.ruoyi.platform.domain;
 
 import java.math.BigDecimal;

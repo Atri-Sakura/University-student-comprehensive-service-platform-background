@@ -1,4 +1,3 @@
-// com/ruoyi/platform/domain/RiderWalletRecord.java
 package com.ruoyi.platform.domain;
 
 import java.math.BigDecimal;
