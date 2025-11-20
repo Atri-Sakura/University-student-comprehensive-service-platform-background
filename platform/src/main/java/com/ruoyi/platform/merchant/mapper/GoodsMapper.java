@@ -96,4 +96,10 @@ public interface GoodsMapper {
 
     @Insert("INSERT INTO merchant_goods_image (image_url, merchant_goods_id, is_main) VALUES (#{imgUrl}, #{goodsId}, #{isMain})")
     int addImage(String imgUrl, Long goodsId, Long merchantId, Integer isMain);
+
+    @Select("Select image_url from merchant_goods_image where merchant_goods_image_id = #{goodsImageId}")
+    String getGoodsImagesByGoodsImageId(Integer goodsImageId);
+
+    @Delete("delete from merchant_goods_image where merchant_goods_image_id = #{goodsImageId}")
+    int deleteImage(Integer goodsImageId);
 }

@@ -173,7 +173,18 @@ public class GoodsServiceImpl implements IGoodsService {
     public String deleteImage(Long goodsId, Long merchantId, Integer isMain,Integer goodsImageId) {
         String imgUrl = null;
         try {
-//            imgUrl = goodsMapper.getGoodsImagesByGoodsImageId(goodsImageId);
+            imgUrl = goodsMapper.getGoodsImagesByGoodsImageId(goodsImageId);
+            minioFileUtils.deleteByUrl(imgUrl);
+            int rows = goodsMapper.deleteImage(goodsImageId);
+            int count = 0;
+            while (rows == 0 ){
+                minioFileUtils.deleteByUrl(imgUrl);
+                rows = goodsMapper.deleteImage(goodsImageId);
+                count++;
+                if (count > 10){
+                    return "删除失败，请检查数据格式是否正确";
+                }
+            }
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
