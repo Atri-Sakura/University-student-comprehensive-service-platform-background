@@ -22,7 +22,7 @@ import java.net.URISyntaxException;
 
 @Slf4j
 public class SslTestClient {
-
+    //测试类 请无视
     public static void main(String[] args) throws SSLException, URISyntaxException, InterruptedException {
         String url = "wss://localhost:8443/ws";
         URI uri = new URI(url);

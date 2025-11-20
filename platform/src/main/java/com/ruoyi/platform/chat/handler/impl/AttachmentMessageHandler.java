@@ -75,15 +75,19 @@ public class AttachmentMessageHandler implements MessageHandler {
                 }
 
                 //2. session则初始化
+                Long otherSessionId = chatSessionService.selectChatSessionIdByFromTo((long) chatMessage.getToType(),chatMessage.getToId(),(long) chatMessage.getFromType(),chatMessage.getFromId());
                 Long sessionId = chatSessionService.selectChatSessionIdByFromTo((long) chatMessage.getFromType(), chatMessage.getFromId(), (long) chatMessage.getToType(), chatMessage.getToId());
                 ChatMessage dbMsg = chatOperateMethod.saveTextMessage(chatMessage);
+
                 ChatSession session;
-                if (sessionId == null)
+                ChatSession otherSession;
+                if (sessionId == null || otherSessionId == null)
                 {
                     session = chatOperateMethod.ensureSessionExists(dbMsg) ;
                     dbMsg.setSessionId(session.getSessionId());
                 }
                 session = chatSessionService.selectChatSessionBySessionId(sessionId);
+                otherSession = chatSessionService.selectChatSessionBySessionId(otherSessionId);
                 dbMsg.setSessionId(sessionId);
                 chatMessageService.insertChatMessage(dbMsg);
                 Long messageId = dbMsg.getMessageId();
@@ -105,6 +109,7 @@ public class AttachmentMessageHandler implements MessageHandler {
                     }
                     chatAttachmentService.insertChatAttachment(chatOperateMethod.saveImageMessage(attachment, url, messageId));
                     chatOperateMethod.updateSession(dbMsg,session);
+                    chatOperateMethod.updateSessionWithUnreadCount(dbMsg,otherSession);
                     chatCacheUtils.cacheChatMessage(dbMsg);
                     forwardMessageToRecipient(channelSessionManager,chatMessage);
                 }

@@ -95,6 +95,8 @@ public class TextMessageHandler implements MessageHandler {
 
                     final Long sessionManagerId = sessionId;
                     final ChatSession chatSession = session;
+                    Long receiverChatSessionId = chatSessionService.selectChatSessionIdByFromTo(chatSession.getToType(),chatSession.getToId(),chatSession.getFromType(),chatSession.getFromId());
+                    ChatSession receiverChatSession = chatSessionService.selectChatSessionBySessionId(receiverChatSessionId);
                     // 会话二次查询：添加非空校验，避免空指针
 
                     sessionThreadPoolManager.getExecutor(sessionManagerId).execute(() -> {
@@ -125,7 +127,7 @@ public class TextMessageHandler implements MessageHandler {
                         // 此处可扩展：离线消息存储逻辑（如写入数据库离线表）
                         dbMsg.setMsgStatus(3L);
                         chatMessageService.updateChatMessage(dbMsg);
-                        chatSessionService.increaseUnreadCount(sessionManagerId);
+                        chatSessionService.increaseUnreadCount(receiverChatSessionId);
 
                     }
 
@@ -135,8 +137,10 @@ public class TextMessageHandler implements MessageHandler {
                         dbMsg.setMsgStatus(3L);
                         log.warn("用户还未上线");
                     }
+
                     dbMsg.setVersion(dbMsg.getVersion() + 1);
                     chatOperateMethod.updateSession(dbMsg, chatSession);
+                    chatOperateMethod.updateSessionWithUnreadCount(dbMsg,receiverChatSession);
                     if(dbMsg.getMsgStatus() != 3L) {
                     log.info("cacheKey: {}", cacheKey);
 

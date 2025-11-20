@@ -7,14 +7,11 @@ import com.ruoyi.platform.domain.ChatMessage;
 import com.ruoyi.platform.domain.ChatSession;
 import com.ruoyi.platform.service.IChatMessageService;
 import com.ruoyi.platform.service.IChatSessionService;
-import com.ruoyi.platform.service.impl.ChatAttachmentServiceImpl;
 import lombok.extern.slf4j.Slf4j;
-import org.redisson.client.RedisClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
-import java.util.Objects;
 
 @Component
 @Slf4j
@@ -100,6 +97,29 @@ public class ChatOperateMethod {
     }
 
     /**
+     * 初始化聊天会话（首次消息触发）
+     * @param chatMessage 聊天消息实体
+     * @return 会话实体
+     */
+    public ChatSession initOtherSession(ChatMessage chatMessage) {
+        if (chatMessage == null) {
+            throw new IllegalArgumentException("ChatMessage不能为空");
+        }
+        ChatSession chatSession = new ChatSession();
+        chatSession.setFromId(chatMessage.getToId());
+        chatSession.setToId(chatMessage.getFromId());
+        chatSession.setFromType(chatMessage.getToType());
+        chatSession.setToType(chatMessage.getFromType());
+        chatSession.setCreateTime(new Date());
+        chatSession.setUpdateTime(new Date());
+        // 区分消息类型设置最后一条消息内容
+        chatSession.setLastMsgContent(chatMessage.getMsgType() == 2 ? "[图片]" : chatMessage.getMsgContent());
+        chatSession.setLastMsgType(chatMessage.getMsgType());
+        chatSession.setLastMsgId(chatMessage.getMessageId());
+        return chatSession;
+    }
+
+    /**
      * 更新聊天会话（最新消息触发）
      * @param chatMessage 最新聊天消息
      * @param chatSession 会话实体
@@ -120,10 +140,89 @@ public class ChatOperateMethod {
         chatMessage.setDeliverTime(new Date());
         chatMessageService.updateChatMessage(chatMessage);
         // 更新会话
+        chatSessionService.updateChatSession(chatSession);
+        log.info("当前消息的状态为:{}",chatMessage.getMsgStatus());
+    }
+
+    /**
+     * 更新聊天会话（最新消息触发）
+     * @param chatMessage 最新聊天消息
+     * @param chatSession 会话实体
+     */
+    public void retrieveSession(ChatMessage chatMessage, ChatSession chatSession) {
+        if (chatMessage == null || chatSession == null) {
+            log.error("更新会话失败：ChatMessage或ChatSession为空");
+            return;
+        }
+        // 区分消息类型设置最后一条消息内容
+        chatSession.setLastMsgContent("{}撤回一条消息");
+        chatSession.setLastMsgId(chatMessage.getMessageId());
+        chatSession.setLastMsgType(chatMessage.getMsgType());
+        chatSession.setUpdateTime(new Date());
+        chatSession.setLastMsgTime(new Date());
+        // 更新消息状态为“已送达”
+        chatMessage.setMsgStatus(chatMessage.getMsgStatus()); // 1-已送达 3-离线消息
+        chatMessage.setDeliverTime(new Date());
+        chatMessageService.updateChatMessage(chatMessage);
+        // 更新会话
+        chatSessionService.updateChatSession(chatSession);
+        log.info("当前消息的状态为:{}",chatMessage.getMsgStatus());
+    }
+
+    /**
+     * 修改会话时伴随未读消息的添加
+     * @param chatMessage
+     * @param chatSession
+     */
+    public void updateSessionWithUnreadCount(ChatMessage chatMessage, ChatSession chatSession) {
+        if (chatMessage == null || chatSession == null) {
+            log.error("更新会话失败：ChatMessage或ChatSession为空");
+            return;
+        }
+        // 区分消息类型设置最后一条消息内容
+        chatSession.setLastMsgContent(chatMessage.getMsgType() == 2 ? "[图片]" : chatMessage.getMsgContent());
+        chatSession.setLastMsgId(chatMessage.getMessageId());
+        chatSession.setLastMsgType(chatMessage.getMsgType());
+        chatSession.setUpdateTime(new Date());
+        chatSession.setLastMsgTime(new Date());
+        // 更新消息状态为“已送达”
+        chatMessage.setMsgStatus(chatMessage.getMsgStatus()); // 1-已送达 3-离线消息
+        chatMessage.setDeliverTime(new Date());
+        chatMessageService.updateChatMessage(chatMessage);
+        // 更新会话
         chatSession.setUnreadCount(chatSession.getUnreadCount() + 1);
         chatSessionService.updateChatSession(chatSession);
         log.info("当前消息的状态为:{}",chatMessage.getMsgStatus());
     }
+
+    /**
+     * 修改会话时伴随未读消息的添加
+     * @param chatMessage
+     * @param chatSession
+     */
+    public void updateSessionWithUnreadDecount(ChatMessage chatMessage, ChatSession chatSession) {
+        if (chatMessage == null || chatSession == null) {
+            log.error("更新会话失败：ChatMessage或ChatSession为空");
+            return;
+        }
+        // 区分消息类型设置最后一条消息内容
+        chatSession.setLastMsgContent("{}撤回一条消息");
+        chatSession.setLastMsgId(chatMessage.getMessageId());
+        chatSession.setLastMsgType(chatMessage.getMsgType());
+        chatSession.setUpdateTime(new Date());
+        chatSession.setLastMsgTime(new Date());
+        // 更新消息状态为“已送达”
+        chatMessage.setMsgStatus(chatMessage.getMsgStatus()); // 1-已送达 3-离线消息
+        chatMessage.setDeliverTime(new Date());
+        chatMessageService.updateChatMessage(chatMessage);
+        // 更新会话
+        if(chatSession.getUnreadCount() > 0) {
+            chatSession.setUnreadCount(chatSession.getUnreadCount() - 1);
+        }
+        chatSessionService.updateChatSession(chatSession);
+        log.info("当前消息的状态为:{}",chatMessage.getMsgStatus());
+    }
+
 
     /**
      * 初始化附件消息（用于文件分片传输场景）
@@ -162,10 +261,15 @@ public class ChatOperateMethod {
      * @return 会话实体
      */
     public ChatSession ensureSessionExists(ChatMessage chatMessage) {
-        ChatSession session;
+        ChatSession session,otherSession;
         Long sessionId = chatSessionService.selectChatSessionIdByFromTo(
-                chatMessage.getFromId(), chatMessage.getToId(),
-                chatMessage.getFromType(), chatMessage.getToType()
+                chatMessage.getFromType(), chatMessage.getFromId(),
+                chatMessage.getToType(), chatMessage.getToId()
+        );
+
+        Long otherSessionId = chatSessionService.selectChatSessionIdByFromTo(
+                chatMessage.getToType(),chatMessage.getToId(),
+                chatMessage.getFromType(), chatMessage.getFromId()
         );
 
         if (sessionId == null) {
@@ -178,6 +282,12 @@ public class ChatOperateMethod {
             chatMessage.setSessionId(sessionId);
             chatMessageService.updateChatMessage(chatMessage);
             log.info("初始化新会话，会话ID: {}", sessionId);
+        }
+
+        if(otherSessionId == null) {
+            otherSession = initOtherSession(chatMessage);
+            chatSessionService.insertChatSession(otherSession);
+            log.info("初始化接收方会话，会话ID: {}", otherSessionId);
         }
 
         // 此时sessionId已确保不为null（要么原本存在，要么新生成）
