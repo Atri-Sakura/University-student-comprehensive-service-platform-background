@@ -2,6 +2,7 @@ package com.ruoyi.platform.user.mapper;
 
 import com.ruoyi.platform.domain.UserWallet;
 import com.ruoyi.platform.user.vo.UserWalletRecordVO;
+import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 
@@ -14,4 +15,7 @@ public interface SysUserWalletRecordMapper {
 
     @Select("Select * from user_wallet where user_base_id = #{userId}")
     UserWallet getUserWalletBalanceByUserId(Long userId);
+
+    @Insert("insert into user_wallet(user_base_id,status) values(#{userId},1)")
+    int addWallet(Long userId);
 }

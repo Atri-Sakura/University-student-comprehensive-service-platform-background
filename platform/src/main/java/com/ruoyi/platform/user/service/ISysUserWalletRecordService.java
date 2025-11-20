@@ -9,4 +9,6 @@ public interface ISysUserWalletRecordService {
     List<UserWalletRecordVO> getUserWalletRecord(Long userId);
 
     UserWallet getUserWalletBalance(Long userId);
+
+    int addWallet(Long userId);
 }

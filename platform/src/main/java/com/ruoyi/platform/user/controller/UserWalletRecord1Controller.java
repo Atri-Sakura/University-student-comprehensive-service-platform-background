@@ -9,6 +9,7 @@ import lombok.extern.log4j.Log4j;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -41,5 +42,15 @@ public class UserWalletRecord1Controller {
 //        log.info(String.valueOf(userId));
         List<UserWalletRecordVO> result = sysUserWalletRecordService.getUserWalletRecord(userId);
         return result != null ? AjaxResult.success("查询成功",result): AjaxResult.error("查询失败",result);
+    }
+
+    @PostMapping("/addWallet")
+    public AjaxResult addWallet(){
+        Long userId = SecurityUtils.getUserBaseId();
+        if (userId == null) {
+            return AjaxResult.error("用户未登录");
+        }
+        int rows = sysUserWalletRecordService.addWallet(userId);
+        return AjaxResult.success("添加成功");
     }
 }
