@@ -129,6 +129,22 @@ public class OrderMain extends BaseEntity
     @Excel(name = "完成时间", width = 30, dateFormat = "yyyy-MM-dd")
     private Date completeTime;
 
+    /** 商家ID */
+    @Excel(name = "商家ID")
+    private Long merchantId;
+
+    /** 平台暂存金额 */
+    @Excel(name = "平台暂存金额")
+    private BigDecimal platformHoldAmount;
+
+    /** 商品金额（不含配送费） */
+    @Excel(name = "商品金额")
+    private BigDecimal goodsAmount;
+
+    /** 配送费金额 */
+    @Excel(name = "配送费金额")
+    private BigDecimal deliveryFeeAmount;
+
     private List<OrderTakeoutDetail> orderTakeoutDetailList;
 
     public List<OrderTakeoutDetail> getOrderTakeoutDetailList() {
@@ -409,38 +425,74 @@ public class OrderMain extends BaseEntity
         return completeTime;
     }
 
+    public void setMerchantId(Long merchantId) {
+        this.merchantId = merchantId;
+    }
+
+    public Long getMerchantId() {
+        return merchantId;
+    }
+
+    public void setPlatformHoldAmount(BigDecimal platformHoldAmount) {
+        this.platformHoldAmount = platformHoldAmount;
+    }
+
+    public BigDecimal getPlatformHoldAmount() {
+        return platformHoldAmount;
+    }
+
+    public void setGoodsAmount(BigDecimal goodsAmount) {
+        this.goodsAmount = goodsAmount;
+    }
+
+    public BigDecimal getGoodsAmount() {
+        return goodsAmount;
+    }
+
+    public void setDeliveryFeeAmount(BigDecimal deliveryFeeAmount) {
+        this.deliveryFeeAmount = deliveryFeeAmount;
+    }
+
+    public BigDecimal getDeliveryFeeAmount() {
+        return deliveryFeeAmount;
+    }
+
     @Override
     public String toString() {
-        return new ToStringBuilder(this,ToStringStyle.MULTI_LINE_STYLE)
-            .append("orderMainId", getOrderMainId())
-            .append("orderNo", getOrderNo())
-            .append("userId", getUserId())
-            .append("userNickname", getUserNickname())
-            .append("orderType", getOrderType())
-            .append("totalAmount", getTotalAmount())
-            .append("payAmount", getPayAmount())
-            .append("discountAmount", getDiscountAmount())
-            .append("payStatus", getPayStatus())
-            .append("payTime", getPayTime())
-            .append("payType", getPayType())
-            .append("orderStatus", getOrderStatus())
-            .append("cancelReason", getCancelReason())
-            .append("cancelOperator", getCancelOperator())
-            .append("pickAddressId", getPickAddressId())
-            .append("pickAddress", getPickAddress())
-            .append("pickContact", getPickContact())
-            .append("pickPhone", getPickPhone())
-            .append("pickLongitude", getPickLongitude())
-            .append("pickLatitude", getPickLatitude())
-            .append("deliverAddressId", getDeliverAddressId())
-            .append("deliverAddress", getDeliverAddress())
-            .append("deliverContact", getDeliverContact())
-            .append("deliverPhone", getDeliverPhone())
-            .append("deliverLongitude", getDeliverLongitude())
-            .append("deliverLatitude", getDeliverLatitude())
-            .append("createTime", getCreateTime())
-            .append("updateTime", getUpdateTime())
-            .append("completeTime", getCompleteTime())
-            .toString();
+        return new ToStringBuilder(this, ToStringStyle.MULTI_LINE_STYLE)
+                .append("orderMainId", getOrderMainId())
+                .append("orderNo", getOrderNo())
+                .append("userId", getUserId())
+                .append("userNickname", getUserNickname())
+                .append("merchantId", getMerchantId())
+                .append("orderType", getOrderType())
+                .append("totalAmount", getTotalAmount())
+                .append("payAmount", getPayAmount())
+                .append("discountAmount", getDiscountAmount())
+                .append("platformHoldAmount", getPlatformHoldAmount())
+                .append("goodsAmount", getGoodsAmount())
+                .append("deliveryFeeAmount", getDeliveryFeeAmount())
+                .append("payStatus", getPayStatus())
+                .append("payTime", getPayTime())
+                .append("payType", getPayType())
+                .append("orderStatus", getOrderStatus())
+                .append("cancelReason", getCancelReason())
+                .append("cancelOperator", getCancelOperator())
+                .append("pickAddressId", getPickAddressId())
+                .append("pickAddress", getPickAddress())
+                .append("pickContact", getPickContact())
+                .append("pickPhone", getPickPhone())
+                .append("pickLongitude", getPickLongitude())
+                .append("pickLatitude", getPickLatitude())
+                .append("deliverAddressId", getDeliverAddressId())
+                .append("deliverAddress", getDeliverAddress())
+                .append("deliverContact", getDeliverContact())
+                .append("deliverPhone", getDeliverPhone())
+                .append("deliverLongitude", getDeliverLongitude())
+                .append("deliverLatitude", getDeliverLatitude())
+                .append("createTime", getCreateTime())
+                .append("updateTime", getUpdateTime())
+                .append("completeTime", getCompleteTime())
+                .toString();
     }
 }

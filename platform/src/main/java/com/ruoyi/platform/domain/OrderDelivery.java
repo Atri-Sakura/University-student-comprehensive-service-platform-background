@@ -77,6 +77,18 @@ public class OrderDelivery extends BaseEntity
     @Excel(name = "配送状态：0-待分配 1-已接单 2-已取货 3-已送达")
     private Long deliveryStatus;
 
+    /** 用户支付的配送费 */
+    @Excel(name = "用户支付的配送费")
+    private BigDecimal deliveryFeeFromUser;
+
+    /** 骑手实际收入 */
+    @Excel(name = "骑手实际收入")
+    private BigDecimal riderIncome;
+
+    /** 收入发放状态：0-未发放 1-已发放 */
+    @Excel(name = "收入发放状态")
+    private Long incomeStatus;
+
     public void setOrderDeliveryId(Long orderDeliveryId) 
     {
         this.orderDeliveryId = orderDeliveryId;
@@ -217,23 +229,50 @@ public class OrderDelivery extends BaseEntity
         return deliveryStatus;
     }
 
+    public void setDeliveryFeeFromUser(BigDecimal deliveryFeeFromUser) {
+        this.deliveryFeeFromUser = deliveryFeeFromUser;
+    }
+
+    public BigDecimal getDeliveryFeeFromUser() {
+        return deliveryFeeFromUser;
+    }
+
+    public void setRiderIncome(BigDecimal riderIncome) {
+        this.riderIncome = riderIncome;
+    }
+
+    public BigDecimal getRiderIncome() {
+        return riderIncome;
+    }
+
+    public void setIncomeStatus(Long incomeStatus) {
+        this.incomeStatus = incomeStatus;
+    }
+
+    public Long getIncomeStatus() {
+        return incomeStatus;
+    }
+
     @Override
     public String toString() {
-        return new ToStringBuilder(this,ToStringStyle.MULTI_LINE_STYLE)
-            .append("orderDeliveryId", getOrderDeliveryId())
-            .append("orderMainId", getOrderMainId())
-            .append("riderId", getRiderId())
-            .append("riderNickname", getRiderNickname())
-            .append("deliveryFee", getDeliveryFee())
-            .append("actualPickLongitude", getActualPickLongitude())
-            .append("actualPickLatitude", getActualPickLatitude())
-            .append("actualDeliverLongitude", getActualDeliverLongitude())
-            .append("actualDeliverLatitude", getActualDeliverLatitude())
-            .append("assignTime", getAssignTime())
-            .append("receiveTime", getReceiveTime())
-            .append("pickTime", getPickTime())
-            .append("deliverTime", getDeliverTime())
-            .append("deliveryStatus", getDeliveryStatus())
-            .toString();
+        return new ToStringBuilder(this, ToStringStyle.MULTI_LINE_STYLE)
+                .append("orderDeliveryId", getOrderDeliveryId())
+                .append("orderMainId", getOrderMainId())
+                .append("riderId", getRiderId())
+                .append("riderNickname", getRiderNickname())
+                .append("deliveryFee", getDeliveryFee())
+                .append("deliveryFeeFromUser", getDeliveryFeeFromUser())
+                .append("riderIncome", getRiderIncome())
+                .append("incomeStatus", getIncomeStatus())
+                .append("actualPickLongitude", getActualPickLongitude())
+                .append("actualPickLatitude", getActualPickLatitude())
+                .append("actualDeliverLongitude", getActualDeliverLongitude())
+                .append("actualDeliverLatitude", getActualDeliverLatitude())
+                .append("assignTime", getAssignTime())
+                .append("receiveTime", getReceiveTime())
+                .append("pickTime", getPickTime())
+                .append("deliverTime", getDeliverTime())
+                .append("deliveryStatus", getDeliveryStatus())
+                .toString();
     }
 }

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.platform.mapper.PlatformWalletFlowMapper">
+
+    <resultMap type="PlatformWalletFlow" id="PlatformWalletFlowResult">
+        <result property="flowId" column="flow_id"/>
+        <result property="orderMainId" column="order_main_id"/>
+        <result property="flowType" column="flow_type"/>
+        <result property="flowAmount" column="flow_amount"/>
+        <result property="balanceBefore" column="balance_before"/>
+        <result property="balanceAfter" column="balance_after"/>
+        <result property="freezeBefore" column="freeze_before"/>
+        <result property="freezeAfter" column="freeze_after"/>
+        <result property="description" column="description"/>
+        <result property="createTime" column="create_time"/>
+    </resultMap>
+
+    <!-- 新增平台钱包流水 -->
+    <insert id="insertPlatformWalletFlow" parameterType="PlatformWalletFlow" useGeneratedKeys="true" keyProperty="flowId">
+        INSERT INTO platform_wallet_flow (
+            order_main_id,
+            flow_type,
+            flow_amount,
+            balance_before,
+            balance_after,
+            freeze_before,
+            freeze_after,
+            description,
+            create_time
+        ) VALUES (
+                     #{orderMainId},
+                     #{flowType},
+                     #{flowAmount},
+                     #{balanceBefore},
+                     #{balanceAfter},
+                     #{freezeBefore},
+                     #{freezeAfter},
+                     #{description},
+                     NOW()
+                 )
+    </insert>
+
+    <!-- 查询平台钱包流水列表 -->
+    <select id="selectPlatformWalletFlowList" parameterType="PlatformWalletFlow" resultMap="PlatformWalletFlowResult">
+        SELECT * FROM platform_wallet_flow
+        <where>
+            <if test="orderMainId != null">
+                AND order_main_id = #{orderMainId}
+            </if>
+            <if test="flowType != null and flowType != ''">
+                AND flow_type = #{flowType}
+            </if>
+        </where>
+        ORDER BY create_time DESC
+    </select>
+
+</mapper>

@@ -2,6 +2,7 @@ package com.ruoyi.platform.mapper;
 
 import java.util.List;
 import com.ruoyi.platform.domain.MerchantGoods;
+import io.lettuce.core.dynamic.annotation.Param;
 
 /**
  * 商品Mapper接口
@@ -58,4 +59,22 @@ public interface MerchantGoodsMapper
      * @return 结果
      */
     public int deleteMerchantGoodsByMerchantGoodsIds(Long[] merchantGoodsIds);
+
+    /**
+     * 扣减商品库存
+     *
+     * @param merchantGoodsId 商品ID
+     * @param quantity 数量
+     * @return 影响行数
+     */
+    int decreaseStock(@Param("merchantGoodsId") Long merchantGoodsId, @Param("quantity") Long quantity);
+
+    /**
+     * 增加商品库存（退款时）
+     *
+     * @param merchantGoodsId 商品ID
+     * @param quantity 数量
+     * @return 影响行数
+     */
+    int increaseStock(@Param("merchantGoodsId") Long merchantGoodsId, @Param("quantity") Long quantity);
 }

@@ -108,6 +108,17 @@ public class MerchantGoodsImage extends BaseEntity
         return isMain;
     }
 
+    /**
+     * 是否可展示图片
+     * @return true=此图片可展示，false=不可展示
+     */
+    public boolean isVisible() {
+        // 最简单的逻辑：只要imageUrl不为空即允许展示
+        return imageUrl != null && !imageUrl.trim().isEmpty();
+        // 如果有其他字段控制可见性（比如status），可换成类似：
+        // return status != null && status == 1L; // 例如“1”为可见
+    }
+
     @Override
     public String toString() {
         return new ToStringBuilder(this,ToStringStyle.MULTI_LINE_STYLE)

@@ -2,6 +2,8 @@ package com.ruoyi.platform.merchant.service;
 
 import com.ruoyi.platform.domain.MerchantGoods;
 
+import java.util.List;
+
 /**
  * 商品基础信息Service接口
  */
@@ -20,4 +22,6 @@ public interface IMerchantGoodsInfoService {
      * @return 影响行数
      */
     int updateMerchantGoods(MerchantGoods merchantGoods);
+
+    List<MerchantGoods> selectMerchantGoodsListForCustomer(Long merchantBaseId, long l, Integer pageNum, Integer pageSize);
 }

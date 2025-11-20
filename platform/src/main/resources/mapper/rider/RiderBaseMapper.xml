@@ -22,12 +22,56 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="accountStatus" column="account_status"  />
         <result property="createTime"    column="create_time"     />
         <result property="updateTime"    column="update_time"     />
+        <!-- 新增：支付密码 -->
+        <result property="payPassword"   column="pay_password"    />
     </resultMap>
 
     <!-- ========== 查询语句 ========== -->
     <sql id="selectRiderBaseVo">
         select rider_base_id, user_id, username, password, nickname, avatar, real_name, id_card, id_card_front, id_card_back, phone, audit_status, work_status, credit_score, account_status, create_time, update_time from rider_base
     </sql>
+    <!-- update rider payPassword -->
+    <update id="updateRiderPayPassword">
+        UPDATE rider_base
+        SET
+            pay_password = #{payPassword},
+            update_time = NOW()
+        WHERE rider_base_id = #{riderBaseId}
+    </update>
+
+    <!-- select single riderBase -->
+    <select id="selectRiderBaseById" parameterType="long" resultType="com.ruoyi.platform.domain.RiderBase">
+        SELECT
+            rider_base_id,
+            username,
+            password,
+            nickname,
+            avatar,
+            real_name,
+            id_card,
+            id_card_front,
+            id_card_back,
+            phone,
+            audit_status,
+            work_status,
+            credit_score,
+            account_status,
+            create_time,
+            update_time,
+            pay_password,
+            user_id
+        FROM rider_base
+        WHERE rider_base_id = #{riderBaseId}
+    </select>
+
+    <!-- update rider login password -->
+    <update id="updateRiderBasePassword" parameterType="com.ruoyi.platform.domain.RiderBase">
+        UPDATE rider_base
+        SET
+            password = #{password},
+            update_time = NOW()
+        WHERE rider_base_id = #{riderBaseId}
+    </update>
 
     <!-- ✅ 更新骑手基础信息（昵称、电话） -->
     <update id="updateRiderBaseInfo">

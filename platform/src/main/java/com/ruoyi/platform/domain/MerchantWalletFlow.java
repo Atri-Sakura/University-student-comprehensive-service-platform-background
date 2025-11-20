@@ -12,10 +12,10 @@ import org.apache.commons.lang3.builder.ToStringStyle;
  * 商家钱包流水对象 merchant_wallet_flow
  *
  * 记录每次收入、提现、退款等变动
-
+ *
  * @date 2025-10-24
  */
-public class MerchantWalletFlow extends BaseEntity{
+public class MerchantWalletFlow extends BaseEntity {
     private static final long serialVersionUID = 1L;
 
     /** 流水ID */
@@ -41,6 +41,10 @@ public class MerchantWalletFlow extends BaseEntity{
     /** 金额（正数收入，负数支出） */
     @Excel(name = "金额")
     private BigDecimal flowAmount;
+
+    /** 商品金额（仅订单收入时有值） */
+    @Excel(name = "商品金额")
+    private BigDecimal goodsAmount;
 
     /** 变动后的余额 */
     @Excel(name = "变动后余额")
@@ -73,6 +77,9 @@ public class MerchantWalletFlow extends BaseEntity{
     public BigDecimal getFlowAmount() { return flowAmount; }
     public void setFlowAmount(BigDecimal flowAmount) { this.flowAmount = flowAmount; }
 
+    public BigDecimal getGoodsAmount() { return goodsAmount; }
+    public void setGoodsAmount(BigDecimal goodsAmount) { this.goodsAmount = goodsAmount; }
+
     public BigDecimal getBalanceAfter() { return balanceAfter; }
     public void setBalanceAfter(BigDecimal balanceAfter) { this.balanceAfter = balanceAfter; }
 
@@ -83,8 +90,7 @@ public class MerchantWalletFlow extends BaseEntity{
     public void setCreateTime(Date createTime) { this.createTime = createTime; }
 
     @Override
-    public String toString()
-    {
+    public String toString() {
         return new ToStringBuilder(this, ToStringStyle.MULTI_LINE_STYLE)
                 .append("flowId", getFlowId())
                 .append("merchantBaseId", getMerchantBaseId())
@@ -92,6 +98,7 @@ public class MerchantWalletFlow extends BaseEntity{
                 .append("withdrawId", getWithdrawId())
                 .append("flowType", getFlowType())
                 .append("flowAmount", getFlowAmount())
+                .append("goodsAmount", getGoodsAmount())
                 .append("balanceAfter", getBalanceAfter())
                 .append("description", getDescription())
                 .append("createBy", getCreateBy())

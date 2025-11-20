@@ -121,6 +121,11 @@ public class TokenService
         Map<String, Object> claims = new HashMap<>();
         claims.put(Constants.LOGIN_USER_KEY, token);
         claims.put(Constants.JWT_USERNAME, loginUser.getUsername());
+        claims.put("user_base_id", loginUser.getUserBaseId());
+        claims.put("rider_base_id", loginUser.getRiderBaseId());
+        claims.put("merchant_base_id", loginUser.getMerchantBaseId());
+        claims.put("role", loginUser.getRole());
+
         return createToken(claims);
     }
 
