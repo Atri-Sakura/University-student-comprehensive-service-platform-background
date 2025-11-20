@@ -1,19 +1,28 @@
 package com.ruoyi.platform.merchant.service.impl;
 
+import com.ruoyi.common.utils.file.MinioFileUtils;
+import com.ruoyi.platform.domain.UserBase;
 import com.ruoyi.platform.merchant.dto.MerchantGoodsDTO;
 import com.ruoyi.platform.merchant.mapper.GoodsMapper;
 import com.ruoyi.platform.merchant.service.IGoodsService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class GoodsServiceImpl implements IGoodsService {
     @Autowired
     private GoodsMapper goodsMapper;
+
+    @Autowired
+    private MinioFileUtils minioFileUtils;
 
     @Override
     public Integer upGoods(Long goodsId) {
@@ -130,12 +139,55 @@ public class GoodsServiceImpl implements IGoodsService {
     }
 
     @Override
-    public Integer addImage(Long goodsId, Long merchantId, String url) {
-        return null;
+    public String addImage(MultipartFile file, Long goodsId, Long merchantId, Integer isMain) {
+        String imgUrl = null;
+        try {
+            // 1. 先上传图片到MinIO
+            imgUrl = minioFileUtils.upload(file, "merchantgood", merchantId);
+
+            // 2. 插入数据库记录
+            int affectedRows = goodsMapper.addImage(imgUrl, goodsId, merchantId, isMain);
+
+            if (affectedRows == 0) {
+                // 数据库插入失败，删除已上传的图片
+                minioFileUtils.deleteByUrl(imgUrl);
+                return "database_error";
+            }
+
+            return imgUrl;
+        } catch (Exception e) {
+            // 发生异常，清理已上传的图片
+            if (imgUrl != null) {
+                try {
+                    minioFileUtils.deleteByUrl(imgUrl);
+                } catch (Exception deleteException) {
+                    log.error("清理图片失败: {}", imgUrl, deleteException);
+                }
+            }
+            log.error("添加图片失败", e);
+            return "error";
+        }
     }
 
     @Override
-    public Integer deleteImage(Long goodsId, Long merchantId, String url) {
+    public String deleteImage(Long goodsId, Long merchantId, Integer isMain,Integer goodsImageId) {
+        String imgUrl = null;
+        try {
+            imgUrl = goodsMapper.getGoodsImagesByGoodsImageId(goodsImageId);
+            minioFileUtils.deleteByUrl(imgUrl);
+            int rows = goodsMapper.deleteImage(goodsImageId);
+            int count = 0;
+            while (rows == 0 ){
+                minioFileUtils.deleteByUrl(imgUrl);
+                rows = goodsMapper.deleteImage(goodsImageId);
+                count++;
+                if (count > 10){
+                    return "删除失败，请检查数据格式是否正确";
+                }
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
         return null;
     }
 }
