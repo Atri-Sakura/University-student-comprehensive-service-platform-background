@@ -31,28 +31,16 @@ public interface IUserOrderService {
     OrderMain payAndCreateOrder(Long userId, PayOrderDTO payOrderDTO);
 
     /**
-     * 用户创建外卖订单（保留旧接口，标记为废弃）
-     *
-     * @param createOrderDTO 订单创建DTO
-     * @return 订单信息
-     * @deprecated 建议使用 createPrePayOrder + payAndCreateOrder
-     */
-    @Deprecated
-    OrderMain createTakeoutOrder(CreateOrderDTO createOrderDTO);
-
-    /**
-     * 用户支付订单（保留旧接口，标记为废弃）
+     * 取消预支付订单
      *
      * @param userId 用户ID
-     * @param orderNo 订单编号
-     * @return 支付结果
-     * @deprecated 建议使用 payAndCreateOrder
+     * @param preOrderNo 预订单号
+     * @return 结果
      */
-    @Deprecated
-    boolean payOrder(Long userId, String orderNo);
+    boolean cancelPrePayOrder(Long userId, String preOrderNo);
 
     /**
-     * 用户取消订单（仅待支付状态可取消）
+     * 用户取消订单
      *
      * @param userId 用户ID
      * @param orderMainId 订单ID
@@ -69,13 +57,4 @@ public interface IUserOrderService {
      * @return 结果
      */
     int confirmReceive(Long userId, Long orderMainId);
-
-    /**
-     * 取消预支付订单
-     *
-     * @param userId 用户ID
-     * @param preOrderNo 预订单号
-     * @return 结果
-     */
-    boolean cancelPrePayOrder(Long userId, String preOrderNo);
 }
