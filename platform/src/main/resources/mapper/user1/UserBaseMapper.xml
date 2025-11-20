@@ -10,8 +10,10 @@
         <result property="username"      column="username"        />
         <result property="password"      column="password"        />
         <result property="nickname"      column="nickname"        />
+        <result property="profile"       column="profile"         />
         <result property="avatar"        column="avatar"          />
         <result property="studentId"     column="student_id"      />
+        <result property="school"        column="school"          />
         <result property="college"       column="college"         />
         <result property="major"         column="major"           />
         <result property="grade"         column="grade"           />
@@ -23,12 +25,15 @@
         <result property="lastLoginIp"   column="last_login_ip"   />
         <result property="createTime"    column="create_time"     />
         <result property="updateTime"    column="update_time"     />
-        <!-- 新增：支付密码 -->
         <result property="payPassword"   column="pay_password"    />
     </resultMap>
 
     <sql id="selectUserBaseVo">
-        select user_base_id, user_id, username, password, nickname, avatar, student_id, college, major, grade, gender, phone, credit_score, account_status, last_login_time, last_login_ip, create_time, update_time from user_base
+        select user_base_id, user_id, username, password, nickname, profile, avatar,
+               student_id, school, college, major, grade, gender, phone, credit_score,
+               account_status, last_login_time, last_login_ip, create_time, update_time,
+               pay_password
+        from user_base
     </sql>
 
     <select id="selectUserBaseList" parameterType="UserBase" resultMap="UserBaseResult">
@@ -37,8 +42,10 @@
             <if test="username != null  and username != ''"> and username like concat('%', #{username}, '%')</if>
             <if test="password != null  and password != ''"> and password = #{password}</if>
             <if test="nickname != null  and nickname != ''"> and nickname like concat('%', #{nickname}, '%')</if>
+            <if test="profile != null  and profile != ''"> and profile like concat('%', #{profile}, '%')</if>
             <if test="avatar != null  and avatar != ''"> and avatar = #{avatar}</if>
             <if test="studentId != null  and studentId != ''"> and student_id = #{studentId}</if>
+            <if test="school != null  and school != ''"> and school like concat('%', #{school}, '%')</if>
             <if test="college != null  and college != ''"> and college = #{college}</if>
             <if test="major != null  and major != ''"> and major = #{major}</if>
             <if test="grade != null  and grade != ''"> and grade = #{grade}</if>
@@ -69,8 +76,10 @@
             <if test="username != null and username != ''">username,</if>
             <if test="password != null and password != ''">password,</if>
             <if test="nickname != null and nickname != ''">nickname,</if>
+            <if test="profile != null and profile != ''">profile,</if>
             <if test="avatar != null">avatar,</if>
             <if test="studentId != null and studentId != ''">student_id,</if>
+            <if test="school != null and school != ''">school,</if>
             <if test="college != null and college != ''">college,</if>
             <if test="major != null and major != ''">major,</if>
             <if test="grade != null and grade != ''">grade,</if>
@@ -80,6 +89,7 @@
             <if test="accountStatus != null">account_status,</if>
             <if test="lastLoginTime != null">last_login_time,</if>
             <if test="lastLoginIp != null">last_login_ip,</if>
+            <if test="payPassword != null and payPassword != ''">pay_password,</if>
             <if test="createTime != null">create_time,</if>
             <if test="updateTime != null">update_time,</if>
         </trim>
@@ -89,8 +99,10 @@
             <if test="username != null and username != ''">#{username},</if>
             <if test="password != null and password != ''">#{password},</if>
             <if test="nickname != null and nickname != ''">#{nickname},</if>
+            <if test="profile != null and profile != ''">#{profile},</if>
             <if test="avatar != null">#{avatar},</if>
             <if test="studentId != null and studentId != ''">#{studentId},</if>
+            <if test="school != null and school != ''">#{school},</if>
             <if test="college != null and college != ''">#{college},</if>
             <if test="major != null and major != ''">#{major},</if>
             <if test="grade != null and grade != ''">#{grade},</if>
@@ -100,6 +112,7 @@
             <if test="accountStatus != null">#{accountStatus},</if>
             <if test="lastLoginTime != null">#{lastLoginTime},</if>
             <if test="lastLoginIp != null">#{lastLoginIp},</if>
+            <if test="payPassword != null and payPassword != ''">#{payPassword},</if>
             <if test="createTime != null">#{createTime},</if>
             <if test="updateTime != null">#{updateTime},</if>
         </trim>
@@ -111,8 +124,10 @@
             <if test="username != null and username != ''">username = #{username},</if>
             <if test="password != null and password != ''">password = #{password},</if>
             <if test="nickname != null and nickname != ''">nickname = #{nickname},</if>
+            <if test="profile != null">profile = #{profile},</if>
             <if test="avatar != null">avatar = #{avatar},</if>
             <if test="studentId != null and studentId != ''">student_id = #{studentId},</if>
+            <if test="school != null">school = #{school},</if>
             <if test="college != null and college != ''">college = #{college},</if>
             <if test="major != null and major != ''">major = #{major},</if>
             <if test="grade != null and grade != ''">grade = #{grade},</if>
@@ -122,11 +137,13 @@
             <if test="accountStatus != null">account_status = #{accountStatus},</if>
             <if test="lastLoginTime != null">last_login_time = #{lastLoginTime},</if>
             <if test="lastLoginIp != null">last_login_ip = #{lastLoginIp},</if>
+            <if test="payPassword != null">pay_password = #{payPassword},</if>
             <if test="createTime != null">create_time = #{createTime},</if>
             <if test="updateTime != null">update_time = #{updateTime},</if>
         </trim>
         where user_base_id = #{userBaseId}
     </update>
+
     <!-- 根据电话号码查询用户ID -->
     <select id="selectUserIdByPhone" parameterType="String" resultType="Long">
         SELECT user_base_id

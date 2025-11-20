@@ -1,15 +1,18 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper
-PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.ruoyi.platform.mapper.OrderDeliveryMapper">
-    
+
     <resultMap type="OrderDelivery" id="OrderDeliveryResult">
         <result property="orderDeliveryId"    column="order_delivery_id"    />
         <result property="orderMainId"    column="order_main_id"    />
         <result property="riderId"    column="rider_id"    />
         <result property="riderNickname"    column="rider_nickname"    />
         <result property="deliveryFee"    column="delivery_fee"    />
+        <result property="deliveryFeeFromUser"    column="delivery_fee_from_user"    />
+        <result property="riderIncome"    column="rider_income"    />
+        <result property="incomeStatus"    column="income_status"    />
         <result property="actualPickLongitude"    column="actual_pick_longitude"    />
         <result property="actualPickLatitude"    column="actual_pick_latitude"    />
         <result property="actualDeliverLongitude"    column="actual_deliver_longitude"    />
@@ -22,16 +25,24 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </resultMap>
 
     <sql id="selectOrderDeliveryVo">
-        select order_delivery_id, order_main_id, rider_id, rider_nickname, delivery_fee, actual_pick_longitude, actual_pick_latitude, actual_deliver_longitude, actual_deliver_latitude, assign_time, receive_time, pick_time, deliver_time, delivery_status from order_delivery
+        select order_delivery_id, order_main_id, rider_id, rider_nickname,
+               delivery_fee, delivery_fee_from_user, rider_income, income_status,
+               actual_pick_longitude, actual_pick_latitude, actual_deliver_longitude,
+               actual_deliver_latitude, assign_time, receive_time, pick_time,
+               deliver_time, delivery_status
+        from order_delivery
     </sql>
 
     <select id="selectOrderDeliveryList" parameterType="OrderDelivery" resultMap="OrderDeliveryResult">
         <include refid="selectOrderDeliveryVo"/>
-        <where>  
+        <where>
             <if test="orderMainId != null "> and order_main_id = #{orderMainId}</if>
             <if test="riderId != null "> and rider_id = #{riderId}</if>
             <if test="riderNickname != null  and riderNickname != ''"> and rider_nickname like concat('%', #{riderNickname}, '%')</if>
             <if test="deliveryFee != null "> and delivery_fee = #{deliveryFee}</if>
+            <if test="deliveryFeeFromUser != null "> and delivery_fee_from_user = #{deliveryFeeFromUser}</if>
+            <if test="riderIncome != null "> and rider_income = #{riderIncome}</if>
+            <if test="incomeStatus != null "> and income_status = #{incomeStatus}</if>
             <if test="actualPickLongitude != null "> and actual_pick_longitude = #{actualPickLongitude}</if>
             <if test="actualPickLatitude != null "> and actual_pick_latitude = #{actualPickLatitude}</if>
             <if test="actualDeliverLongitude != null "> and actual_deliver_longitude = #{actualDeliverLongitude}</if>
@@ -43,7 +54,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="deliveryStatus != null "> and delivery_status = #{deliveryStatus}</if>
         </where>
     </select>
-    
+
     <select id="selectOrderDeliveryByOrderDeliveryId" parameterType="Long" resultMap="OrderDeliveryResult">
         <include refid="selectOrderDeliveryVo"/>
         where order_delivery_id = #{orderDeliveryId}
@@ -57,6 +68,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="riderId != null">rider_id,</if>
             <if test="riderNickname != null">rider_nickname,</if>
             <if test="deliveryFee != null">delivery_fee,</if>
+            <if test="deliveryFeeFromUser != null">delivery_fee_from_user,</if>
+            <if test="riderIncome != null">rider_income,</if>
+            <if test="incomeStatus != null">income_status,</if>
             <if test="actualPickLongitude != null">actual_pick_longitude,</if>
             <if test="actualPickLatitude != null">actual_pick_latitude,</if>
             <if test="actualDeliverLongitude != null">actual_deliver_longitude,</if>
@@ -66,13 +80,16 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="pickTime != null">pick_time,</if>
             <if test="deliverTime != null">deliver_time,</if>
             <if test="deliveryStatus != null">delivery_status,</if>
-         </trim>
+        </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="orderDeliveryId != null">#{orderDeliveryId},</if>
             <if test="orderMainId != null">#{orderMainId},</if>
             <if test="riderId != null">#{riderId},</if>
             <if test="riderNickname != null">#{riderNickname},</if>
             <if test="deliveryFee != null">#{deliveryFee},</if>
+            <if test="deliveryFeeFromUser != null">#{deliveryFeeFromUser},</if>
+            <if test="riderIncome != null">#{riderIncome},</if>
+            <if test="incomeStatus != null">#{incomeStatus},</if>
             <if test="actualPickLongitude != null">#{actualPickLongitude},</if>
             <if test="actualPickLatitude != null">#{actualPickLatitude},</if>
             <if test="actualDeliverLongitude != null">#{actualDeliverLongitude},</if>
@@ -82,7 +99,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="pickTime != null">#{pickTime},</if>
             <if test="deliverTime != null">#{deliverTime},</if>
             <if test="deliveryStatus != null">#{deliveryStatus},</if>
-         </trim>
+        </trim>
     </insert>
 
     <update id="updateOrderDelivery" parameterType="OrderDelivery">
@@ -92,6 +109,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="riderId != null">rider_id = #{riderId},</if>
             <if test="riderNickname != null">rider_nickname = #{riderNickname},</if>
             <if test="deliveryFee != null">delivery_fee = #{deliveryFee},</if>
+            <if test="deliveryFeeFromUser != null">delivery_fee_from_user = #{deliveryFeeFromUser},</if>
+            <if test="riderIncome != null">rider_income = #{riderIncome},</if>
+            <if test="incomeStatus != null">income_status = #{incomeStatus},</if>
             <if test="actualPickLongitude != null">actual_pick_longitude = #{actualPickLongitude},</if>
             <if test="actualPickLatitude != null">actual_pick_latitude = #{actualPickLatitude},</if>
             <if test="actualDeliverLongitude != null">actual_deliver_longitude = #{actualDeliverLongitude},</if>
@@ -101,6 +121,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="pickTime != null">pick_time = #{pickTime},</if>
             <if test="deliverTime != null">deliver_time = #{deliverTime},</if>
             <if test="deliveryStatus != null">delivery_status = #{deliveryStatus},</if>
+            order_delivery_id = #{orderDeliveryId}
         </trim>
         where order_delivery_id = #{orderDeliveryId}
     </update>
@@ -110,7 +131,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </delete>
 
     <delete id="deleteOrderDeliveryByOrderDeliveryIds" parameterType="String">
-        delete from order_delivery where order_delivery_id in 
+        delete from order_delivery where order_delivery_id in
         <foreach item="orderDeliveryId" collection="array" open="(" separator="," close=")">
             #{orderDeliveryId}
         </foreach>

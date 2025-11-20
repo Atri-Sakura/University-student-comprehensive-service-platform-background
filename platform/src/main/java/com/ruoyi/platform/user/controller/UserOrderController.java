@@ -9,7 +9,6 @@ import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.platform.domain.OrderMain;
 import com.ruoyi.platform.domain.dto.CreateOrderDTO;
 import com.ruoyi.platform.domain.dto.PayOrderDTO;
-import com.ruoyi.platform.domain.dto.PrePayOrderDTO;
 import com.ruoyi.platform.mapper.OrderMainMapper;
 import com.ruoyi.platform.service.IUserOrderService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +34,7 @@ public class UserOrderController extends BaseController {
     private OrderMainMapper orderMainMapper;
 
     /**
-     * 创建预支付订单（新接口）
+     * 创建预支付订单
      *
      * @param createOrderDTO 订单创建DTO
      * @return 预支付订单信息
@@ -43,20 +42,18 @@ public class UserOrderController extends BaseController {
     @Log(title = "创建预支付订单", businessType = BusinessType.INSERT)
     @PostMapping("/prepay")
     public AjaxResult createPrePayOrder(@RequestBody @Validated CreateOrderDTO createOrderDTO) {
-        // 从SecurityUtils获取当前登录的用户ID和昵称
         Long userId = SecurityUtils.getUserBaseId();
         String userNickname = SecurityUtils.getUsername();
 
         createOrderDTO.setUserId(userId);
         createOrderDTO.setUserNickname(userNickname);
 
-        PrePayOrderDTO prePayOrder = userOrderService.createPrePayOrder(createOrderDTO);
-
-        return AjaxResult.success("订单信息已提交，请在15分钟内完成支付", prePayOrder);
+        return AjaxResult.success("订单信息已提交，请在15分钟内完成支付",
+                userOrderService.createPrePayOrder(createOrderDTO));
     }
 
     /**
-     * 支付并创建订单（新接口）
+     * 支付并创建订单
      *
      * @param payOrderDTO 支付订单DTO
      * @return 订单信息
@@ -65,9 +62,7 @@ public class UserOrderController extends BaseController {
     @PostMapping("/pay-and-create")
     public AjaxResult payAndCreateOrder(@RequestBody @Validated PayOrderDTO payOrderDTO) {
         Long userId = SecurityUtils.getUserBaseId();
-
         OrderMain order = userOrderService.payAndCreateOrder(userId, payOrderDTO);
-
         return AjaxResult.success("支付成功，订单已创建", order);
     }
 
@@ -81,50 +76,8 @@ public class UserOrderController extends BaseController {
     @DeleteMapping("/prepay/{preOrderNo}")
     public AjaxResult cancelPrePayOrder(@PathVariable("preOrderNo") String preOrderNo) {
         Long userId = SecurityUtils.getUserBaseId();
-
         boolean result = userOrderService.cancelPrePayOrder(userId, preOrderNo);
-
         return result ? AjaxResult.success("已取消") : AjaxResult.error("取消失败");
-    }
-
-    /**
-     * 用户创建外卖订单（旧接口，保留向后兼容）
-     *
-     * @param createOrderDTO 订单创建DTO
-     * @return 订单信息
-     * @deprecated 建议使用 /prepay + /pay-and-create
-     */
-    @Deprecated
-    @Log(title = "用户下单", businessType = BusinessType.INSERT)
-    @PostMapping("/create")
-    public AjaxResult createOrder(@RequestBody CreateOrderDTO createOrderDTO) {
-        Long userId = SecurityUtils.getUserBaseId();
-        String userNickname = SecurityUtils.getUsername();
-
-        createOrderDTO.setUserId(userId);
-        createOrderDTO.setUserNickname(userNickname);
-
-        OrderMain order = userOrderService.createTakeoutOrder(createOrderDTO);
-
-        return AjaxResult.success("下单成功", order);
-    }
-
-    /**
-     * 用户支付订单（旧接口，保留向后兼容）
-     *
-     * @param orderNo 订单编号
-     * @return 支付结果
-     * @deprecated 建议使用 /pay-and-create
-     */
-    @Deprecated
-    @Log(title = "用户支付订单", businessType = BusinessType.UPDATE)
-    @PostMapping("/pay/{orderNo}")
-    public AjaxResult payOrder(@PathVariable("orderNo") String orderNo) {
-        Long userId = SecurityUtils.getUserBaseId();
-
-        boolean result = userOrderService.payOrder(userId, orderNo);
-
-        return result ? AjaxResult.success("支付成功") : AjaxResult.error("支付失败");
     }
 
     /**
@@ -139,10 +92,7 @@ public class UserOrderController extends BaseController {
     public AjaxResult cancelOrder(@PathVariable("orderMainId") Long orderMainId,
                                   @RequestParam("cancelReason") String cancelReason) {
         Long userId = SecurityUtils.getUserBaseId();
-
-        int result = userOrderService.cancelOrder(userId, orderMainId, cancelReason);
-
-        return toAjax(result);
+        return toAjax(userOrderService.cancelOrder(userId, orderMainId, cancelReason));
     }
 
     /**
@@ -155,10 +105,7 @@ public class UserOrderController extends BaseController {
     @PutMapping("/confirm/{orderMainId}")
     public AjaxResult confirmReceive(@PathVariable("orderMainId") Long orderMainId) {
         Long userId = SecurityUtils.getUserBaseId();
-
-        int result = userOrderService.confirmReceive(userId, orderMainId);
-
-        return toAjax(result);
+        return toAjax(userOrderService.confirmReceive(userId, orderMainId));
     }
 
     /**
@@ -171,9 +118,7 @@ public class UserOrderController extends BaseController {
     public TableDataInfo list(OrderMain orderMain) {
         startPage();
         Long userId = SecurityUtils.getUserBaseId();
-
         orderMain.setUserId(userId);
-
         List<OrderMain> list = orderMainMapper.selectOrderMainList(orderMain);
         return getDataTable(list);
     }
@@ -187,7 +132,6 @@ public class UserOrderController extends BaseController {
     @GetMapping("/{orderMainId}")
     public AjaxResult getOrderDetail(@PathVariable("orderMainId") Long orderMainId) {
         Long userId = SecurityUtils.getUserBaseId();
-
         OrderMain order = orderMainMapper.selectOrderMainWithDetailsByOrderMainId(orderMainId);
 
         // 权限校验
