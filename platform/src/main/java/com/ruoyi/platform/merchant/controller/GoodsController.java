@@ -9,6 +9,7 @@ import com.ruoyi.platform.merchant.dto.MerchantGoodsDTO;
 import com.ruoyi.platform.merchant.service.IGoodsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -95,24 +96,24 @@ public class GoodsController extends BaseController {
 
     //商家给某个商品添加图片
     @PostMapping("/addImage/{goodsId}")
-    public AjaxResult addImage(@PathVariable Long goodsId,@RequestBody String url){
+    public AjaxResult addImage(@RequestParam("file") MultipartFile file,@PathVariable Long goodsId, @RequestParam Integer isMain){
         Long merchantId = SecurityUtils.getMerchantBaseId();
         if (merchantId == null){
             return null;
         }
-        Integer result = goodsService.addImage(goodsId,merchantId,url);
-        return result > 0 ? AjaxResult.success("添加成功") : AjaxResult.error("添加失败");
+        String imgUrl = goodsService.addImage(file,goodsId,merchantId,isMain);
+        return imgUrl != null ? AjaxResult.success("添加成功") : AjaxResult.error("添加失败");
     }
 
     //商家给某个商品删除图片
     @DeleteMapping("/deleteImage/{goodsId}")
-    public AjaxResult deleteImage(@PathVariable Long goodsId,@RequestBody String url){
+    public AjaxResult deleteImage(@PathVariable Long goodsId,@RequestParam Integer isMain,@RequestParam Integer goodsImageId){
         Long merchantId = SecurityUtils.getMerchantBaseId();
         if (merchantId == null){
-            return null;
+            return AjaxResult.error("删除失败");
         }
-        Integer result = goodsService.deleteImage(goodsId,merchantId,url);
-        return result > 0 ? AjaxResult.success("删除成功") : AjaxResult.error("删除失败");
+        String imgUrl = goodsService.deleteImage(goodsId,merchantId,isMain,goodsImageId);
+        return imgUrl != null ? AjaxResult.success("删除成功") : AjaxResult.error("删除失败");
     }
 
 }

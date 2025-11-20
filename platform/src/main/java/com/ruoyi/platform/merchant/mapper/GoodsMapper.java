@@ -3,10 +3,7 @@ package com.ruoyi.platform.merchant.mapper;
 import com.ruoyi.platform.domain.MerchantGoods;
 import com.ruoyi.platform.merchant.dto.GoodsImageDTO;
 import com.ruoyi.platform.merchant.dto.MerchantGoodsDTO;
-import org.apache.ibatis.annotations.Delete;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Select;
-import org.apache.ibatis.annotations.Update;
+import org.apache.ibatis.annotations.*;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -97,4 +94,6 @@ public interface GoodsMapper {
     @Select("SELECT COUNT(1) FROM merchant_goods WHERE merchant_goods_id = #{goodsId} AND merchant_base_id = #{merchantId}")
     Integer checkGoodsBelongsToMerchant(Long goodsId, Long merchantId);
 
+    @Insert("INSERT INTO merchant_goods_image (image_url, merchant_goods_id, is_main) VALUES (#{imgUrl}, #{goodsId}, #{isMain})")
+    int addImage(String imgUrl, Long goodsId, Long merchantId, Integer isMain);
 }

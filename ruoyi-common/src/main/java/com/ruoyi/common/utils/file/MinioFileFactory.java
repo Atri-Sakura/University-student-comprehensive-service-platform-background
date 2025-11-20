@@ -2,6 +2,7 @@ package com.ruoyi.common.utils.file;
 
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
+import io.minio.RemoveObjectArgs;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -59,8 +60,8 @@ public class MinioFileFactory {
     /**
      * 上传字节数组到MinIO的chat存储桶，并按chat/{id}/文件名结构存储
      * @param data  文件字节数组
-     * @param id    关联的ID（用于路径分级）
      * @param originalFileName 原始文件名（用于保留后缀）
+     * @param id    关联的ID（用于路径分级）
      * @return 存储的对象路径（如 chat/123/test.jpg），失败返回null
      * @throws Exception 异常抛出给上层处理
      */
@@ -102,5 +103,85 @@ public class MinioFileFactory {
             log.error("文件上传失败，ID：{}，原因：{}", id, e.getMessage(), e);
             throw e; // 抛出异常让上层处理（如事务回滚）
         }
+    }
+
+    /**
+     * 根据对象路径删除文件
+     * @param bucketName 存储桶名称
+     * @param objectPath 对象路径（如：123/uuid.jpg 或 chat/123/uuid.jpg）
+     * @return 删除成功返回true，失败返回false
+     */
+    public boolean delete(String bucketName, String objectPath) {
+        try {
+            if (bucketName == null || bucketName.trim().isEmpty()) {
+                throw new IllegalArgumentException("存储桶名称不能为空");
+            }
+            if (objectPath == null || objectPath.trim().isEmpty()) {
+                throw new IllegalArgumentException("对象路径不能为空");
+            }
+
+            minioClient.removeObject(
+                    RemoveObjectArgs.builder()
+                            .bucket(bucketName)
+                            .object(objectPath)
+                            .build()
+            );
+            log.info("文件删除成功，存储桶：{}，对象路径：{}", bucketName, objectPath);
+            return true;
+        } catch (Exception e) {
+            log.error("文件删除失败，存储桶：{}，对象路径：{}，原因：{}", bucketName, objectPath, e.getMessage(), e);
+            return false;
+        }
+    }
+
+    /**
+     * 根据完整URL删除文件
+     * @param fullUrl 完整URL（如：http://182.254.228.15:9000/merchantgood/123/uuid.jpg）
+     * @return 删除成功返回true，失败返回false
+     */
+    public boolean deleteByUrl(String fullUrl) {
+        try {
+            if (fullUrl == null || fullUrl.trim().isEmpty()) {
+                throw new IllegalArgumentException("URL不能为空");
+            }
+
+            // 从完整URL中解析出存储桶和对象路径
+            String[] parts = fullUrl.replace(endpoint + "/", "").split("/", 2);
+            if (parts.length < 2) {
+                throw new IllegalArgumentException("URL格式不正确：" + fullUrl);
+            }
+
+            String bucketName = parts[0];
+            String objectPath = parts[1];
+
+            return delete(bucketName, objectPath);
+        } catch (Exception e) {
+            log.error("根据URL删除文件失败，URL：{}，原因：{}", fullUrl, e.getMessage(), e);
+            return false;
+        }
+    }
+
+
+    /**
+     * 批量删除文件
+     * @param bucketName 存储桶名称
+     * @param objectPaths 对象路径列表
+     * @return 成功删除的文件数量
+     */
+    public int batchDelete(String bucketName, java.util.List<String> objectPaths) {
+        if (objectPaths == null || objectPaths.isEmpty()) {
+            return 0;
+        }
+
+        int successCount = 0;
+        for (String objectPath : objectPaths) {
+            if (delete(bucketName, objectPath)) {
+                successCount++;
+            }
+        }
+
+        log.info("批量删除完成，总计：{}，成功：{}，失败：{}",
+                objectPaths.size(), successCount, objectPaths.size() - successCount);
+        return successCount;
     }
 }

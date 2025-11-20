@@ -1,7 +1,7 @@
 package com.ruoyi.platform.merchant.service;
 
-import com.ruoyi.platform.domain.MerchantGoods;
 import com.ruoyi.platform.merchant.dto.MerchantGoodsDTO;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -23,7 +23,7 @@ public interface IGoodsService {
 
     MerchantGoodsDTO getGoodsDetail(Long goodsId, Long merchantId);
 
-    Integer addImage(Long goodsId, Long merchantId, String url);
+    String addImage(MultipartFile file, Long goodsId, Long merchantId, Integer isMain);
 
-    Integer deleteImage(Long goodsId, Long merchantId, String url);
+    String deleteImage(Long goodsId, Long merchantId, Integer isMain,Integer goodsImageId);
 }
