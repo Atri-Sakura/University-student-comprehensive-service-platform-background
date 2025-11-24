@@ -93,4 +93,34 @@ public class MerchantBaseServiceImpl implements IMerchantBaseService
     {
         return merchantBaseMapper.deleteMerchantBaseByMerchantBaseId(merchantBaseId);
     }
+
+    /**
+     * 根据商家ID获取商家名称
+     *
+     * @param merchantBaseId 商家ID
+     * @return 商家名称
+     */
+    @Override
+    public String getNameById(Long merchantBaseId) {
+        if (merchantBaseId == null) {
+            return null;
+        }
+        MerchantBase merchantBase = merchantBaseMapper.selectMerchantBaseByMerchantBaseId(merchantBaseId);
+        return merchantBase != null ? merchantBase.getMerchantName() : null;
+    }
+
+    /**
+     * 根据手机号获取商家名称
+     *
+     * @param phone 手机号
+     * @return 商家名称
+     */
+    @Override
+    public String getNameByPhone(String phone) {
+        if (phone == null || phone.isEmpty()) {
+            return null;
+        }
+        MerchantBase merchantBase = merchantBaseMapper.selectMerchantBaseByPhone(phone);
+        return merchantBase != null ? merchantBase.getMerchantName() : null;
+    }
 }
