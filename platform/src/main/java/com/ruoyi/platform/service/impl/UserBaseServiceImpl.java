@@ -118,4 +118,34 @@ public class UserBaseServiceImpl implements IUserBaseService
         }
     }
 
+    /**
+     * 根据用户ID获取昵称
+     *
+     * @param userBaseId 用户ID
+     * @return 昵称
+     */
+    @Override
+    public String getNicknameById(Long userBaseId) {
+        if (userBaseId == null) {
+            return null;
+        }
+        UserBase userBase = userBaseMapper.selectUserBaseByUserBaseId(userBaseId);
+        return userBase != null ? userBase.getNickname() : null;
+    }
+
+    /**
+     * 根据手机号获取昵称
+     *
+     * @param phone 手机号
+     * @return 昵称
+     */
+    @Override
+    public String getNicknameByPhone(String phone) {
+        if (phone == null || phone.isEmpty()) {
+            return null;
+        }
+        UserBase userBase = userBaseMapper.selectUserBaseByPhone(phone);
+        return userBase != null ? userBase.getNickname() : null;
+    }
+
 }
