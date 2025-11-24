@@ -1,5 +1,6 @@
 package com.ruoyi.platform.user.service.impl;
 
+import com.ruoyi.platform.domain.UserWallet;
 import com.ruoyi.platform.user.mapper.SysUserWalletRecordMapper;
 import com.ruoyi.platform.user.service.ISysUserWalletRecordService;
 import com.ruoyi.platform.user.vo.UserWalletRecordVO;
@@ -16,5 +17,15 @@ public class SysUserWalletRecordService implements ISysUserWalletRecordService {
     @Override
     public List<UserWalletRecordVO> getUserWalletRecord(Long userId) {
         return userWalletRecordMapper.getUserWalletRecordByUserId(userId);
+    }
+
+    @Override
+    public UserWallet getUserWalletBalance(Long userId) {
+        return userWalletRecordMapper.getUserWalletBalanceByUserId(userId);
+    }
+
+    @Override
+    public int addWallet(Long userId) {
+        return userWalletRecordMapper.addWallet(userId);
     }
 }

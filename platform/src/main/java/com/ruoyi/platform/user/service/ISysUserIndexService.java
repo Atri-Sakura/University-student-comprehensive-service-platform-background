@@ -1,0 +1,18 @@
+package com.ruoyi.platform.user.service;
+
+import com.ruoyi.platform.domain.IndexImgUrl;
+import com.ruoyi.platform.domain.UserTimetable;
+import com.ruoyi.platform.domain.vo.SecondhandGoodDetailVO;
+import com.ruoyi.platform.merchant.vo.MerchantGoodsVO;
+
+import java.util.List;
+
+public interface ISysUserIndexService {
+    List<MerchantGoodsVO> getTakeoutRecommendations();
+
+    List<SecondhandGoodDetailVO> getSecondhandRecommendations();
+
+    List<UserTimetable> getTodayCourses(Long userBaseId);
+
+    List<IndexImgUrl> getIndexImgUrls();
+}

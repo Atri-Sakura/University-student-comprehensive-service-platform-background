@@ -7,8 +7,12 @@ import com.ruoyi.platform.chat.handler.HeartBeatServerHandler;
 import com.ruoyi.platform.chat.ssl.SslServerContextFactory;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.socket.SocketChannel;
+import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpServerCodec;
+import io.netty.handler.codec.http.cors.CorsConfig;
+import io.netty.handler.codec.http.cors.CorsConfigBuilder;
+import io.netty.handler.codec.http.cors.CorsHandler;
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
@@ -75,7 +79,15 @@ public class NettyServerChannelInitializer extends ChannelInitializer<SocketChan
 //            socketChannel.pipeline().addLast("ssl", sslHandler);
 //            log.debug("添加SSL处理器到管道");
 //        }
+        CorsConfig corsConfig = CorsConfigBuilder.forAnyOrigin()
+                .allowCredentials()
+                .allowedRequestMethods(HttpMethod.GET,HttpMethod.GET)
+                .allowedRequestHeaders("*")
+                .maxAge(3600)
+                .build();
+
         socketChannel.pipeline()
+                .addLast(new CorsHandler(corsConfig))
                 .addLast(new HttpServerCodec())
                 .addLast(new ChunkedWriteHandler())
                 .addLast(new HttpObjectAggregator(64*1024))

@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.platform.user.mapper.SysUserIndexMapper">
+
+    <!-- 获取外卖推荐商品（按评价评分降序排序，只展示有主图的） -->
+    <select id="getTakeoutRecommendations" resultType="com.ruoyi.platform.merchant.vo.MerchantGoodsVO">
+        SELECT
+            mg.merchant_goods_id AS merchantGoodsId,
+            mg.merchant_base_id AS merchantBaseId,
+            mg.goods_name AS goodsName,
+            mg.category AS category,
+            mg.sub_category AS subCategory,
+            mg.price AS price,
+            mg.original_price AS originalPrice,
+            mg.stock AS stock,
+            mg.sales_count AS salesCount,
+            mg.description AS description,
+            mg.tag_codes AS tagCodes,
+            mg.status AS status,
+            mg.avg_rating AS avgRating,
+            mg.rating_count AS ratingCount,
+            mg.five_star_rate AS fiveStarRate,
+            mg.four_star_rate AS fourStarRate,
+            mg.three_star_rate AS threeStarRate,
+            mg.two_star_rate AS twoStarRate,
+            mg.one_star_rate AS oneStarRate,
+            mg.create_time AS createTime,
+            mg.update_time AS updateTime,
+            mgi.image_url AS mainImageUrl
+        FROM
+            merchant_goods mg
+                INNER JOIN  -- 改为内连接，只保留有主图的商品
+                merchant_goods_image mgi
+                            ON mg.merchant_goods_id = mgi.merchant_goods_id
+                                AND mgi.is_main = 1  -- 关联主图
+        WHERE
+            mg.status = 1  -- 只查询上架商品
+        ORDER BY
+            mg.avg_rating DESC  -- 按评价评分降序排序
+        LIMIT 10;  -- 可根据实际需求调整推荐数量
+    </select>
+
+    <!-- 获取二手商品推荐（按浏览量降序排序） -->
+    <select id="getSecondhandRecommendations" resultType="com.ruoyi.platform.domain.vo.SecondhandGoodDetailVO">
+        SELECT
+            sg.secondhand_goods_id AS goodsId,
+            sg.goods_name AS goodsName,
+            sg.category AS category,
+            sg.price AS price,
+            sg.description AS description,
+            sg.status AS status,
+            sg.view_count AS viewCount,
+            sg.favorite_count AS favoriteCount,
+            sg.share_count AS shareCount,
+            sg.create_time AS createTime,
+            -- 主图URL（若需多图可调整查询逻辑）
+            (SELECT image_url FROM secondhand_goods_image
+             WHERE secondhand_goods_id = sg.secondhand_goods_id AND is_main = 1
+             LIMIT 1) AS imageUrls  -- 暂存主图，如需多图可改为关联查询
+        FROM
+            secondhand_goods sg
+        WHERE
+            sg.status = 1  -- 只查询在售商品
+        ORDER BY
+            sg.view_count DESC  -- 按浏览量降序排序
+        LIMIT 10;  -- 可根据实际需求调整推荐数量
+    </select>
+
+</mapper>

@@ -82,11 +82,17 @@ public class RetriveMessageHandler implements MessageHandler {
                         (long) chatMessage.getToType(),
                         chatMessage.getToId()
                 );
-                if (sessionId == null) {
+                Long receiverId = chatSessionService.selectChatSessionIdByFromTo(
+                        (long) chatMessage.getToType(),
+                        chatMessage.getToId(),
+                        (long) chatMessage.getFromType(),
+                        chatMessage.getFromId()
+                );
+                if (sessionId == null || receiverId == null) {
                     sendErrorResponse(ctx, "会话不存在");
                     return;
                 }
-
+                ChatSession chatSession = chatSessionService.selectChatSessionBySessionId(sessionId);
                 ChatMessage dbMsg = chatMessageService.selectChatMessageByMessageId(chatMessage.getMessageId());
                 if (dbMsg == null) {
                     sendErrorResponse(ctx, "消息不存在");
@@ -111,6 +117,8 @@ public class RetriveMessageHandler implements MessageHandler {
                 dbMsg.setUpdateTime(new Date());
                 dbMsg.setMsgStatus(3L);
                 chatMessageService.updateChatMessage(dbMsg);
+                chatOperateMethod.retrieveSession(dbMsg,chatSession);
+                chatOperateMethod.updateSessionWithUnreadDecount(dbMsg,chatSessionService.selectChatSessionBySessionId(receiverId));
 
                 // 5. 清理缓存
                 chatCacheUtils.deleteMessageFromCache(chatMessage.getMessageId());
@@ -154,8 +162,10 @@ public class RetriveMessageHandler implements MessageHandler {
                 .setSessionId(sessionId)
                 .setToType(chatMessage.getToType())
                 .setMsgType(5) // 撤回消息类型
-                .setMsgContent("[撤回一条消息]")
+                .setMsgContent("{}[撤回一条消息]")
                 .build();
+
+
 
         // 2. 生成符合协议的ByteBuf缓冲区
         ByteBuf buf = generateByteBuf(notifyMsg);
