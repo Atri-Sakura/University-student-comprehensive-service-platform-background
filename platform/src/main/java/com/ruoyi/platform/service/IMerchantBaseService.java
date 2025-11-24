@@ -58,4 +58,20 @@ public interface IMerchantBaseService
      * @return 结果
      */
     public int deleteMerchantBaseByMerchantBaseId(Long merchantBaseId);
+
+    /**
+     * 根据商家ID获取商家名称
+     *
+     * @param merchantBaseId 商家ID
+     * @return 商家名称
+     */
+    String getNameById(Long merchantBaseId);
+
+    /**
+     * 根据手机号获取商家名称
+     *
+     * @param phone 手机号
+     * @return 商家名称
+     */
+    String getNameByPhone(String phone);
 }

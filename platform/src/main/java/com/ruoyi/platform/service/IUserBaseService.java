@@ -73,4 +73,20 @@ public interface IUserBaseService
      * @return
      */
     public String updateAvatar(MultipartFile file,Long userBaseId);
+
+    /**
+     * 根据用户ID获取昵称
+     *
+     * @param userBaseId 用户ID
+     * @return 昵称
+     */
+    String getNicknameById(Long userBaseId);
+
+    /**
+     * 根据手机号获取昵称
+     *
+     * @param phone 手机号
+     * @return 昵称
+     */
+    String getNicknameByPhone(String phone);
 }
