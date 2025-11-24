@@ -56,7 +56,7 @@ public class UserWalletRecord1Controller {
      * @return 返回操作结果
      */
     @PostMapping("/addWallet")
-    public AjaxResult addWallet() {
+    public AjaxResult addWallet(@RequestParam Long userWalletId) {
         // 获取当前登录用户ID
         Long userId = SecurityUtils.getUserBaseId();
         // 判断用户是否登录
@@ -64,7 +64,7 @@ public class UserWalletRecord1Controller {
             return AjaxResult.error("用户未登录");
         }
         // 调用服务层添加钱包记录
-        int rows = sysUserWalletRecordService.addWallet(userId);
+        int rows = sysUserWalletRecordService.addWallet(userId,userWalletId);
         // 返回操作成功结果
         return rows > 0 ? AjaxResult.success("添加成功") : AjaxResult.error("添加失败");
     }

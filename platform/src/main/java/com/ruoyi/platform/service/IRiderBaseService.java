@@ -109,4 +109,20 @@ public interface IRiderBaseService
      */
     int updateRiderAuthInfo(RiderBase rider);
 
+    /**
+     * 根据骑手ID获取昵称
+     *
+     * @param riderBaseId 骑手ID
+     * @return 昵称
+     */
+    String getNicknameById(Long riderBaseId);
+
+    /**
+     * 根据手机号获取昵称
+     *
+     * @param phone 手机号
+     * @return 昵称
+     */
+    String getNicknameByPhone(String phone);
+
 }
