@@ -52,9 +52,9 @@ public class NettyAspect {
 
             Object[] args = joinPoint.getArgs();
             if (args.length > 0 && args[0] instanceof com.ruoyi.common.core.domain.model.LoginBody loginBody) {
-                Long userBaseId = userBaseService.selectUserBaseIdByPhone(loginBody.getPhonenumber());
-                if (userType > 0 && userBaseId != null) {
-                    nettyClientUtil.connectAndRegister(userType, userBaseId);
+
+                if (userType > 0 && loginBody.getPhonenumber() != null) {
+                    nettyClientUtil.connectAndRegister(userType, Long.parseLong(loginBody.getPhonenumber()));
                 }
             }
         }
