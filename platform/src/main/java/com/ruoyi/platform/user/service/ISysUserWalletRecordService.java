@@ -11,4 +11,10 @@ public interface ISysUserWalletRecordService {
     UserWallet getUserWalletBalance(Long userId);
 
     int addWallet(Long userId);
+
+    int freezeWallet(Long userId);
+
+    int unfreezeWallet(Long userId);
+
+    int setPayPassword(Long userId, String oldPayPassword, String newPayPassword);
 }
