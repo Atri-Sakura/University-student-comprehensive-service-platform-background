@@ -394,33 +394,22 @@ public class AuthServiceImpl implements IAuthService
     }
 
     /**
-     * 生成Long类型的唯一ID
-     * 使用 IdUtils.fastSimpleUUID() 生成UUID字符串，然后转换为Long
-     *
-     * @return Long类型的唯一ID
-     */
-    /**
-     * 生成Long类型的唯一ID
-     * 使用 IdUtils.fastSimpleUUID() 生成UUID字符串，然后转换为Long
+     * 生成Long类型的唯一ID（压缩UUID方案）
+     * 取UUID的前8位16进制字符串转换为Long
+     * 生成的ID约为10-12位数字
      *
      * @return Long类型的唯一ID
      */
     private Long generateLongId()
     {
-        // 获取UUID字符串（32位，去掉横线）
         String uuid = IdUtils.fastSimpleUUID();
-
-        // 取UUID的前15位字符（而不是16位），避免超出Long.MAX_VALUE
-        // Long.MAX_VALUE = 9223372036854775807 (19位十进制数)
-        // 15位16进制 = 最多60位二进制，在Long范围内
-        String hexString = uuid.substring(0, 15);
-
+        String hexString = uuid.substring(0, 8); // 取前8位16进制
         try {
-            // 将16进制字符串转换为Long
+            // 将8位16进制字符串转换为Long（最大值为 4294967295，10位数字）
             return Long.parseLong(hexString, 16);
         } catch (NumberFormatException e) {
-            // 如果转换失败，使用时间戳 + 随机数作为备用方案
-            return System.currentTimeMillis() * 1000 + (long)(Math.random() * 1000);
+            // 如果转换失败，使用时间戳作为备用方案
+            return System.currentTimeMillis();
         }
     }
 }
