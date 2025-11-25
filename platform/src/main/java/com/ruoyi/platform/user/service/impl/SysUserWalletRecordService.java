@@ -25,8 +25,8 @@ public class SysUserWalletRecordService implements ISysUserWalletRecordService {
     }
 
     @Override
-    public int addWallet(Long userId) {
-        return userWalletRecordMapper.addWallet(userId);
+    public int addWallet(Long userId,Long userWalletId) {
+        return userWalletRecordMapper.addWallet(userId,userWalletId);
     }
 
     @Override

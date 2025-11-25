@@ -7,6 +7,7 @@ import com.ruoyi.platform.domain.UserTimetable;
 import com.ruoyi.platform.domain.vo.SecondhandGoodDetailVO;
 import com.ruoyi.platform.merchant.vo.MerchantGoodsVO;
 import com.ruoyi.platform.user.service.ISysUserIndexService;
+import com.ruoyi.platform.user.vo.SecondhandGoodVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -36,7 +37,7 @@ public class UserIndexController {
         if (userBaseId == null) {
             return AjaxResult.error("用户未登录");
         }
-        List<SecondhandGoodDetailVO> secondhandRecommendations = sysUserIndexService.getSecondhandRecommendations();
+        List<SecondhandGoodVO> secondhandRecommendations = sysUserIndexService.getSecondhandRecommendations();
         return secondhandRecommendations != null ? AjaxResult.success("获取成功",secondhandRecommendations) : AjaxResult.error("获取失败");
     }
     //今日课程接口
@@ -48,6 +49,16 @@ public class UserIndexController {
         }
         List<UserTimetable> todayCourses = sysUserIndexService.getTodayCourses(userBaseId);
         return todayCourses !=null ? AjaxResult.success("获取成功",todayCourses) : AjaxResult.error("获取失败");
+    }
+    //用户课程列表
+    @GetMapping("/userCourses")
+    public AjaxResult getUserCourses() {
+        Long userBaseId = SecurityUtils.getUserBaseId();
+        if (userBaseId == null) {
+            return AjaxResult.error("用户未登录");
+        }
+        List<UserTimetable> userCourses = sysUserIndexService.getUserCourses(userBaseId);
+        return userCourses !=null ? AjaxResult.success("获取成功",userCourses) : AjaxResult.error("获取失败");
     }
     //首页轮播图
     @GetMapping("/carousel")

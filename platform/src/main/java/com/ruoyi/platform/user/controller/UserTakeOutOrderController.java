@@ -25,7 +25,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/user/order")
-public class UserOrderController extends BaseController {
+public class UserTakeOutOrderController extends BaseController {
 
     @Autowired
     private IUserOrderService userOrderService;
@@ -143,4 +143,5 @@ public class UserOrderController extends BaseController {
 
         return AjaxResult.success(order);
     }
+    // TODO 查看三种订单详情接口
 }

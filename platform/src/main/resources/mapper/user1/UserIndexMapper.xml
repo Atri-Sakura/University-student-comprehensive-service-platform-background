@@ -43,7 +43,7 @@
     </select>
 
     <!-- 获取二手商品推荐（按浏览量降序排序） -->
-    <select id="getSecondhandRecommendations" resultType="com.ruoyi.platform.domain.vo.SecondhandGoodDetailVO">
+    <select id="getSecondhandRecommendations" resultType="com.ruoyi.platform.user.vo.SecondhandGoodVO">
         SELECT
             sg.secondhand_goods_id AS goodsId,
             sg.goods_name AS goodsName,
@@ -58,7 +58,7 @@
             -- 主图URL（若需多图可调整查询逻辑）
             (SELECT image_url FROM secondhand_goods_image
              WHERE secondhand_goods_id = sg.secondhand_goods_id AND is_main = 1
-             LIMIT 1) AS imageUrls  -- 暂存主图，如需多图可改为关联查询
+             LIMIT 1) AS imageUrl  -- 暂存主图，如需多图可改为关联查询
         FROM
             secondhand_goods sg
         WHERE

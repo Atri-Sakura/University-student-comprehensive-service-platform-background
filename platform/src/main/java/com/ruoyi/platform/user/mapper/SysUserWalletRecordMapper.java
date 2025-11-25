@@ -17,8 +17,8 @@ public interface SysUserWalletRecordMapper {
     @Select("Select * from user_wallet where user_base_id = #{userId}")
     UserWallet getUserWalletBalanceByUserId(Long userId);
 
-    @Insert("insert into user_wallet(user_base_id,status) values(#{userId},1)")
-    int addWallet(Long userId);
+    @Insert("insert into user_wallet(user_wallet_id,user_base_id,status) values(#{userWalletId},#{userId},1)")
+    int addWallet(Long userId,Long userWalletId);
 
     @Update("update user_wallet set status = 0 where user_base_id = #{userId}")
     int freezeWallet(Long userId);

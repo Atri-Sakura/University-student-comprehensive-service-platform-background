@@ -10,7 +10,7 @@ public interface ISysUserWalletRecordService {
 
     UserWallet getUserWalletBalance(Long userId);
 
-    int addWallet(Long userId);
+    int addWallet(Long userId,Long userWalletId);
 
     int freezeWallet(Long userId);
 

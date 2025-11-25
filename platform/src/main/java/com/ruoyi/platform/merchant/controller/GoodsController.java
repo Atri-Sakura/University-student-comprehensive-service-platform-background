@@ -54,7 +54,7 @@ public class GoodsController extends BaseController {
     public AjaxResult deleteGoods(@PathVariable Long goodsId){
         Long merchantId = SecurityUtils.getMerchantBaseId();
         if (merchantId == null){
-            return null;
+            return AjaxResult.error("请先登录");
         }
         Integer result = goodsService.deleteGoods(goodsId,merchantId);
         return result > 0 ? AjaxResult.success("删除成功") : AjaxResult.error("删除失败");
@@ -65,7 +65,7 @@ public class GoodsController extends BaseController {
     public AjaxResult updateGoods(@PathVariable Long goodsId,@RequestBody MerchantGoodsDTO goods){
         Long merchantId = SecurityUtils.getMerchantBaseId();
         if (merchantId == null){
-            return null;
+            return AjaxResult.error("请先登录");
         }
         Integer result = goodsService.updateGoods(goodsId,merchantId,goods);
         return result > 0 ? AjaxResult.success("更新成功") : AjaxResult.error("更新失败");
@@ -76,7 +76,7 @@ public class GoodsController extends BaseController {
     public AjaxResult addGoods(@RequestBody MerchantGoodsDTO goods){
         Long merchantId = SecurityUtils.getMerchantBaseId();
         if (merchantId == null) {
-            return null;
+            return AjaxResult.error("请先登录");
         }
         Integer result = goodsService.addGoods(goods,merchantId);
         return result > 0 ? AjaxResult.success("添加成功") : AjaxResult.error("添加失败");
@@ -88,7 +88,7 @@ public class GoodsController extends BaseController {
     public AjaxResult getGoodsDetail(@PathVariable Long goodsId){
         Long merchantId = SecurityUtils.getMerchantBaseId();
         if (merchantId == null){
-            return null;
+            return AjaxResult.error("请先登录");
         }
         MerchantGoodsDTO merchantGoodsDTO = goodsService.getGoodsDetail(goodsId,merchantId);
         return AjaxResult.success(merchantGoodsDTO);
@@ -99,7 +99,7 @@ public class GoodsController extends BaseController {
     public AjaxResult addImage(@RequestParam("file") MultipartFile file,@PathVariable Long goodsId, @RequestParam Integer isMain){
         Long merchantId = SecurityUtils.getMerchantBaseId();
         if (merchantId == null){
-            return null;
+            return AjaxResult.error("请先登录");
         }
         String imgUrl = goodsService.addImage(file,goodsId,merchantId,isMain);
         return imgUrl != null ? AjaxResult.success("添加成功") : AjaxResult.error("添加失败");
@@ -110,7 +110,7 @@ public class GoodsController extends BaseController {
     public AjaxResult deleteImage(@PathVariable Long goodsId,@RequestParam Integer isMain,@RequestParam Integer goodsImageId){
         Long merchantId = SecurityUtils.getMerchantBaseId();
         if (merchantId == null){
-            return AjaxResult.error("删除失败");
+            return AjaxResult.error("请先登录");
         }
         String imgUrl = goodsService.deleteImage(goodsId,merchantId,isMain,goodsImageId);
         return imgUrl != null ? AjaxResult.success("删除成功") : AjaxResult.error("删除失败");
