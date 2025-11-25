@@ -25,7 +25,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/user/order")
-public class UserOrderController extends BaseController {
+public class UserTakeOutOrderController extends BaseController {
 
     @Autowired
     private IUserOrderService userOrderService;
