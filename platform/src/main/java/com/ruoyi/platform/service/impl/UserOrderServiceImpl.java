@@ -12,6 +12,7 @@ import com.ruoyi.platform.domain.dto.PrePayOrderDTO;
 import com.ruoyi.platform.domain.enums.OperatorTypeEnum;
 import com.ruoyi.platform.domain.enums.OrderStatusEnum;
 import com.ruoyi.platform.domain.enums.PayStatusEnum;
+import com.ruoyi.platform.domain.vo.CreateErrandOrderDto;
 import com.ruoyi.platform.mapper.*;
 import com.ruoyi.platform.merchant.mapper.MerchantAddressInfoMapper;
 import com.ruoyi.platform.merchant.mapper.MerchantInfoMapper;
@@ -25,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -76,6 +78,9 @@ public class UserOrderServiceImpl implements IUserOrderService {
     @Autowired
     private RedisCache redisCache;
 
+    @Autowired
+    private UserAddressMapper userAddressMapper;
+
     /**
      * 创建预支付订单（只校验，不真正创建订单）
      */
@@ -125,6 +130,7 @@ public class UserOrderServiceImpl implements IUserOrderService {
 
         return prePayOrder;
     }
+
 
     /**
      * 支付并创建订单（先扣款，再创建订单）
@@ -200,6 +206,109 @@ public class UserOrderServiceImpl implements IUserOrderService {
             }
             throw new ServiceException("订单创建失败：" + e.getMessage());
         }
+    }
+
+    /**
+     * 支付并创建订单（先扣款，再创建订单）
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public OrderMain payAndCreateErrandOrder(Long userId, PayOrderDTO payOrderDTO,Long userAddressId) {
+        String preOrderNo = payOrderDTO.getPreOrderNo();
+
+        // 1. 从 Redis 获取预订单信息
+        String cacheKey = getPreOrderCacheKey(preOrderNo);
+        CreateErrandOrderDto createOrderDTO = redisCache.getCacheObject(cacheKey);
+        if (createOrderDTO == null) {
+            throw new ServiceException("订单已过期，请重新下单");
+        }
+
+        // 2. 校验用户ID是否匹配
+        if (!createOrderDTO.getUserId().equals(userId)) {
+            throw new ServiceException("订单信息异常");
+        }
+
+        // 3. 重新计算金额（防止金额被篡改）
+        OrderAmountInfo amountInfo = calculateErrandOrderAmount(createOrderDTO);
+
+        // 4. 校验支付金额
+        if (payOrderDTO.getPayAmount().compareTo(amountInfo.getPayAmount()) != 0) {
+            throw new ServiceException("支付金额不正确");
+        }
+
+        // 5. 生成正式订单号
+        String orderNo = generateOrderNo();
+
+        // 6. 先扣款（用户余额 → 平台钱包冻结）
+        try {
+            walletFlowService.userPay(userId, 0L, amountInfo.getPayAmount());
+        } catch (Exception e) {
+            log.error("用户余额扣款失败，预订单号：{}，用户ID：{}", preOrderNo, userId, e);
+            throw new ServiceException("余额不足或支付失败");
+        }
+
+        try {
+            // 7. 创建真正的订单（扣减库存）
+            OrderMain order = createErrandOrderInternal(createOrderDTO, orderNo, amountInfo,userAddressId);
+
+            // 8. 更新订单支付状态为已支付
+            order.setPayStatus(PayStatusEnum.PAID.getCode());
+            order.setPayTime(new Date());
+            order.setPayType(payOrderDTO.getPayType());
+            orderMainMapper.updateOrderMain(order);
+
+            // 9. 删除预订单缓存
+            redisCache.deleteObject(cacheKey);
+
+            // 10. 记录支付日志
+            UserBase user = userBaseMapper.selectUserBaseByUserBaseId(userId);
+            saveStatusLog(order.getOrderMainId(), null, OrderStatusEnum.PENDING_ACCEPT.getCode(),
+                    OperatorTypeEnum.USER, userId,
+                    user.getNickname(), "用户支付并创建订单");
+
+            log.info("用户支付并创建订单成功，订单号：{}，用户ID：{}，配送费：{}",
+                    order.getOrderNo(), userId, amountInfo.getDeliveryFee());
+
+            return order;
+
+        } catch (Exception e) {
+            // 如果订单创建失败，退款
+            log.error("订单创建失败，开始退款，预订单号：{}，用户ID：{}", preOrderNo, userId, e);
+            try {
+                // TODO: 实现退款逻辑
+                // walletFlowService.refundUser(userId, 0L, amountInfo.getPayAmount());
+            } catch (Exception refundEx) {
+                log.error("自动退款失败，需人工处理，预订单号：{}，用户ID：{}", preOrderNo, userId, refundEx);
+            }
+            throw new ServiceException("订单创建失败：" + e.getMessage());
+        }
+    }
+
+    @Override
+    public PrePayOrderDTO createPrePayErrandOrder(CreateErrandOrderDto createErrandOrderDto) {
+        validateErrandOrderParams(createErrandOrderDto);
+
+        OrderAmountInfo amountInfo = calculateErrandOrderAmount(createErrandOrderDto);
+
+        String preOrderNo = generatePreOrderNo();
+
+        String cacheKey = getPreOrderCacheKey(preOrderNo);
+        redisCache.setCacheObject(cacheKey, createErrandOrderDto, PRE_ORDER_EXPIRE_MINUTES, TimeUnit.MINUTES);
+
+        PrePayOrderDTO prePayOrder = new PrePayOrderDTO();
+        prePayOrder.setPreOrderNo(preOrderNo);
+        prePayOrder.setTotalAmount(amountInfo.getTotalAmount());
+        prePayOrder.setPayAmount(amountInfo.getPayAmount());
+        prePayOrder.setGoodsAmount(amountInfo.getGoodsAmount());
+        prePayOrder.setDeliveryFee(amountInfo.getDeliveryFee());
+        prePayOrder.setDiscountAmount(amountInfo.getDiscountAmount());
+        prePayOrder.setCreateTime(new Date());
+        prePayOrder.setExpireTime(new Date(System.currentTimeMillis() + PRE_ORDER_EXPIRE_MINUTES * 60 * 1000));
+
+        log.info("创建预支付订单成功，预订单号：{}，用户ID：{}，配送费：{}",
+                preOrderNo, createErrandOrderDto.getUserId(), amountInfo.getDeliveryFee());
+
+        return prePayOrder;
     }
 
     /**
@@ -452,6 +561,102 @@ public class UserOrderServiceImpl implements IUserOrderService {
     }
 
     /**
+     * 内部方法：真正创建订单
+     */
+    private OrderMain createErrandOrderInternal(CreateErrandOrderDto createOrderDTO, String orderNo, OrderAmountInfo amountInfo,Long userAddressId) {
+
+
+        // 2. 创建订单主表记录
+        OrderMain orderMain = new OrderMain();
+        orderMain.setOrderMainId(com.ruoyi.platform.chat.utils.SnowflakeIdGenerator.getInstance().nextId());
+        orderMain.setOrderNo(orderNo);
+        orderMain.setUserId(createOrderDTO.getUserId());
+        orderMain.setUserNickname(createOrderDTO.getUserNickname());
+
+        orderMain.setOrderType(2L); // 2-跑腿单
+
+        // 金额信息
+        orderMain.setTotalAmount(amountInfo.getTotalAmount());
+        orderMain.setPayAmount(amountInfo.getPayAmount());
+        orderMain.setDiscountAmount(amountInfo.getDiscountAmount());
+        orderMain.setPlatformHoldAmount(amountInfo.getPayAmount()); // 初始平台暂存=实付金额
+        orderMain.setGoodsAmount(amountInfo.getGoodsAmount());
+        orderMain.setDeliveryFeeAmount(amountInfo.getDeliveryFee());
+
+        // 支付状态（已支付）
+        orderMain.setPayStatus(PayStatusEnum.PAID.getCode());
+        orderMain.setPayTime(new Date());
+        orderMain.setPayType(1L); // 默认余额支付
+
+        // 订单状态（待接单）
+        orderMain.setOrderStatus(OrderStatusEnum.PENDING_ACCEPT.getCode());
+
+        // 取货地址（商家地址）
+
+        orderMain.setPickAddressId(userAddressId);
+        UserAddress userAddress = userAddressMapper.selectUserAddressByUserAddressId(userAddressId);
+        orderMain.setPickAddress(userAddress.getProvince() + userAddress.getCity()
+                + userAddress.getDistrict() + userAddress.getDetailAddress());
+        orderMain.setPickContact(userAddress.getReceiver());
+        orderMain.setPickPhone(userAddress.getPhone());
+
+        // 送货地址（用户地址）
+        orderMain.setDeliverAddressId(createOrderDTO.getDeliverAddressId());
+        orderMain.setDeliverAddress(createOrderDTO.getDeliverAddress());
+        orderMain.setDeliverContact(createOrderDTO.getDeliverContact());
+        orderMain.setDeliverPhone(createOrderDTO.getDeliverPhone());
+        orderMain.setDeliverLongitude(createOrderDTO.getDeliverLongitude());
+        orderMain.setDeliverLatitude(createOrderDTO.getDeliverLatitude());
+
+        orderMain.setRemark(createOrderDTO.getRemark());
+        orderMain.setCreateTime(new Date());
+        orderMain.setUpdateTime(new Date());
+
+
+
+        // 插入订单主表
+        int mainResult = orderMainMapper.insertOrderMain(orderMain);
+        if (mainResult == 0) {
+            throw new ServiceException("创建订单失败");
+        }
+
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.MINUTE, 30); // 加上30分钟
+            // 创建跑腿订单明细
+        OrderErrandDetail orderErrandDetail = new OrderErrandDetail();
+        orderErrandDetail.setOrderMainId(orderMain.getOrderMainId());
+        orderErrandDetail.setOrderErrandDetailId(com.ruoyi.platform.chat.utils.SnowflakeIdGenerator.getInstance().nextId());
+        orderErrandDetail.setErrandType(orderMain.getPickAddressId() == 0 ? 2L : 1L);
+        orderErrandDetail.setGoodsDesc(createOrderDTO.getGoodsDesc());
+        orderErrandDetail.setExpectedTime(calendar.getTime());
+
+
+
+        // 4. 创建配送记录
+        OrderDelivery delivery = new OrderDelivery();
+        delivery.setOrderDeliveryId(generateLongId());
+        delivery.setOrderMainId(orderMain.getOrderMainId());
+        delivery.setDeliveryFee(amountInfo.getDeliveryFee());
+        delivery.setDeliveryFeeFromUser(amountInfo.getDeliveryFee());
+        delivery.setRiderIncome(amountInfo.getDeliveryFee()); // 简化：配送费全部给骑手
+        delivery.setIncomeStatus(0L); // 未发放
+        delivery.setAssignTime(new Date());
+        delivery.setDeliveryStatus(0L); // 待分配
+
+        orderDeliveryMapper.insertOrderDelivery(delivery);
+
+        // 5. 记录订单创建日志
+        saveStatusLog(orderMain.getOrderMainId(), null, OrderStatusEnum.PENDING_ACCEPT.getCode(),
+                OperatorTypeEnum.USER, createOrderDTO.getUserId(),
+                createOrderDTO.getUserNickname(), "用户支付并创建订单");
+
+        return orderMain;
+    }
+
+
+
+    /**
      * 恢复商品库存（取消订单时调用）
      */
     private void restoreGoodsStock(Long orderMainId) {
@@ -490,6 +695,20 @@ public class UserOrderServiceImpl implements IUserOrderService {
     }
 
     /**
+     * 参数跑腿校验
+     */
+    private void validateErrandOrderParams(CreateErrandOrderDto createOrderDTO) {
+        if (createOrderDTO.getUserId() == null) {
+            throw new ServiceException("用户ID不能为空");
+        }
+
+        if (createOrderDTO.getDeliverAddressId() == null) {
+            throw new ServiceException("送货地址不能为空");
+        }
+
+    }
+
+    /**
      * 计算订单金额
      */
     private OrderAmountInfo calculateOrderAmount(CreateOrderDTO createOrderDTO) {
@@ -504,6 +723,39 @@ public class UserOrderServiceImpl implements IUserOrderService {
 
         // 2. 计算配送费
         BigDecimal deliveryFee = calculateDeliveryFee(createOrderDTO);
+
+        // 3. 计算优惠金额（暂时为0，后续可扩展）
+        BigDecimal discountAmount = BigDecimal.ZERO;
+
+        // 4. 计算总金额 = 商品金额 + 配送费
+        BigDecimal totalAmount = goodsAmount.add(deliveryFee);
+
+        // 5. 计算实付金额 = 总金额 - 优惠金额
+        BigDecimal payAmount = totalAmount.subtract(discountAmount);
+
+        info.setGoodsAmount(goodsAmount);
+        info.setDeliveryFee(deliveryFee);
+        info.setDiscountAmount(discountAmount);
+        info.setTotalAmount(totalAmount);
+        info.setPayAmount(payAmount);
+
+        return info;
+    }
+
+    /**
+     * 跑腿专用
+     * @param createOrderDTO
+     * @return
+     */
+    private OrderAmountInfo calculateErrandOrderAmount(CreateErrandOrderDto createOrderDTO) {
+        OrderAmountInfo info = new OrderAmountInfo();
+
+        // 1. 计算商品总金额
+        BigDecimal goodsAmount = BigDecimal.ZERO;
+        goodsAmount = createOrderDTO.getGoodsPrice();
+
+        // 2. 计算配送费
+        BigDecimal deliveryFee = new BigDecimal(5.00);
 
         // 3. 计算优惠金额（暂时为0，后续可扩展）
         BigDecimal discountAmount = BigDecimal.ZERO;

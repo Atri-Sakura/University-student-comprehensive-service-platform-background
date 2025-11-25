@@ -28,4 +28,7 @@ public class PayOrderDTO {
 
     /** 支付密码（余额支付时需要） */
     private String payPassword;
+
+    /** 取货地址 */
+    private Long userAddressId;
 }

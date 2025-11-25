@@ -9,23 +9,20 @@ import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.platform.domain.OrderMain;
 import com.ruoyi.platform.domain.dto.CreateOrderDTO;
 import com.ruoyi.platform.domain.dto.PayOrderDTO;
+import com.ruoyi.platform.domain.vo.CreateErrandOrderDto;
 import com.ruoyi.platform.mapper.OrderMainMapper;
 import com.ruoyi.platform.service.IUserOrderService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-/**
- * 用户订单控制器
- *
- * @author ruoyi
- * @date 2025-11-13
- */
 @RestController
-@RequestMapping("/user/order")
-public class UserOrderController extends BaseController {
+@RequestMapping("user/errandOrder")
+@Slf4j
+public class UserErrandOrderController extends BaseController {
 
     @Autowired
     private IUserOrderService userOrderService;
@@ -33,26 +30,23 @@ public class UserOrderController extends BaseController {
     @Autowired
     private OrderMainMapper orderMainMapper;
 
+
+
     /**
-     * 创建预支付订单
-     *
-     * @param createOrderDTO 订单创建DTO
-     * @return 预支付订单信息
+     * 创建跑腿预支付订单
+     * @param
+     * @return
      */
-    @Log(title = "创建预支付订单", businessType = BusinessType.INSERT)
+    @Log(title = "创建预支付跑腿订单", businessType = BusinessType.INSERT)
     @PostMapping("/prepay")
-    public AjaxResult createPrePayOrder(@RequestBody @Validated CreateOrderDTO createOrderDTO) {
+    public AjaxResult createPayOrder(@RequestBody @Validated CreateErrandOrderDto createErrandOrderDTO) {
         Long userId = SecurityUtils.getUserBaseId();
         String userNickname = SecurityUtils.getUsername();
-
-        createOrderDTO.setUserId(userId);
-        createOrderDTO.setUserNickname(userNickname);
-
+        createErrandOrderDTO.setUserId(userId);
+        createErrandOrderDTO.setUserNickname(userNickname);
         return AjaxResult.success("订单信息已提交，请在15分钟内完成支付",
-                userOrderService.createPrePayOrder(createOrderDTO));
+                userOrderService.createPrePayErrandOrder(createErrandOrderDTO));
     }
-
-
 
     /**
      * 支付并创建订单
@@ -64,7 +58,9 @@ public class UserOrderController extends BaseController {
     @PostMapping("/pay-and-create")
     public AjaxResult payAndCreateOrder(@RequestBody @Validated PayOrderDTO payOrderDTO) {
         Long userId = SecurityUtils.getUserBaseId();
-        OrderMain order = userOrderService.payAndCreateOrder(userId, payOrderDTO);
+
+        log.info("{}",userId);
+        OrderMain order = userOrderService.payAndCreateErrandOrder(userId, payOrderDTO,payOrderDTO.getUserAddressId());
         return AjaxResult.success("支付成功，订单已创建", order);
     }
 
