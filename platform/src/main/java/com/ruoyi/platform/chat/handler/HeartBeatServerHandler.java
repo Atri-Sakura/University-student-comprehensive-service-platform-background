@@ -32,7 +32,7 @@ public class HeartBeatServerHandler extends ChannelInboundHandlerAdapter {
         if (msg instanceof ChatMessageProto.ChatMessage) {
             ChatMessageProto.ChatMessage message = (ChatMessageProto.ChatMessage) msg;
             if (message.getMsgType() == 6) {
-                log.info("收到客户端心跳: 用户[{}/{}]", message.getFromType(), message.getFromId());
+                log.info("收到客户端心跳: 用户[{}:{}]", message.getFromType(), message.getFromId());
                 // 可以回复心跳响应
                 ChatMessageProto.ChatMessage ack = ChatMessageProto.ChatMessage.newBuilder()
                         .setMsgType(6)  // 心跳响应

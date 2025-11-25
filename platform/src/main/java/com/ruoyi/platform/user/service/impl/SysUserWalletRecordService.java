@@ -25,7 +25,26 @@ public class SysUserWalletRecordService implements ISysUserWalletRecordService {
     }
 
     @Override
-    public int addWallet(Long userId) {
-        return userWalletRecordMapper.addWallet(userId);
+    public int addWallet(Long userId,Long userWalletId) {
+        return userWalletRecordMapper.addWallet(userId,userWalletId);
+    }
+
+    @Override
+    public int freezeWallet(Long userId) {
+        return userWalletRecordMapper.freezeWallet(userId);
+    }
+
+    @Override
+    public int unfreezeWallet(Long userId) {
+        return userWalletRecordMapper.unfreezeWallet(userId);
+    }
+
+    @Override
+    public int setPayPassword(Long userId, String oldPayPassword, String newPayPassword) {
+        String oldPassword = userWalletRecordMapper.getPayPasswordByUserId(userId);
+        if (oldPassword == null || !oldPassword.equals(oldPayPassword)) {
+            throw new RuntimeException("旧密码错误");
+        }
+        return userWalletRecordMapper.setPayPassword(userId, newPayPassword);
     }
 }
