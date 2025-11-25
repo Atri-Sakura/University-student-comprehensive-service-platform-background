@@ -20,7 +20,7 @@ public class UserWalletRecord1Controller {
     @Autowired
     private ISysUserWalletRecordService sysUserWalletRecordService;
 
-    @GetMapping("getUserWalletBalance")
+    @GetMapping("/getUserWalletBalance")
     public AjaxResult getUserWalletBalance() {
         Long userId = SecurityUtils.getUserBaseId();
         if (userId == null) {
@@ -102,7 +102,6 @@ public class UserWalletRecord1Controller {
         // 返回操作成功结果
         return rows > 0 ? AjaxResult.success("设置成功") : AjaxResult.error("设置失败");
     }
-
 
 
 
