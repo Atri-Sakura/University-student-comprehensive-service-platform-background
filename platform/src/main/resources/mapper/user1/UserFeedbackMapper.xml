@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.platform.mapper.UserFeedbackMapper">
+
+    <resultMap type="com.ruoyi.platform.domain.UserFeedback" id="UserFeedbackResult">
+        <result property="feedbackId"       column="feedback_id"        />
+        <result property="userType"         column="user_type"          />
+        <result property="userId"           column="user_id"            />
+        <result property="userNickname"     column="user_nickname"      />
+        <result property="feedbackTitle"    column="feedback_title"     />
+        <result property="feedbackContent"  column="feedback_content"   />
+        <result property="feedbackType"     column="feedback_type"      />
+        <result property="contactInfo"      column="contact_info"       />
+        <result property="imgUrls"          column="img_urls"           />
+        <result property="status"           column="status"             />
+        <result property="adminReply"       column="admin_reply"        />
+        <result property="handlerId"        column="handler_id"         />
+        <result property="handlerName"      column="handler_name"       />
+        <result property="createTime"       column="create_time"        />
+        <result property="handleTime"       column="handle_time"        />
+        <result property="updateTime"       column="update_time"        />
+    </resultMap>
+
+    <sql id="selectUserFeedbackVo">
+        select feedback_id, user_type, user_id, user_nickname, feedback_title,
+               feedback_content, feedback_type, contact_info, img_urls, status,
+               admin_reply, handler_id, handler_name, create_time, handle_time, update_time
+        from user_feedback
+    </sql>
+
+    <select id="selectUserFeedbackList" parameterType="com.ruoyi.platform.domain.UserFeedback" resultMap="UserFeedbackResult">
+        <include refid="selectUserFeedbackVo"/>
+        <where>
+            <if test="userType != null">
+                AND user_type = #{userType}
+            </if>
+            <if test="userId != null">
+                AND user_id = #{userId}
+            </if>
+            <if test="userNickname != null and userNickname != ''">
+                AND user_nickname like concat('%', #{userNickname}, '%')
+            </if>
+            <if test="feedbackTitle != null and feedbackTitle != ''">
+                AND feedback_title like concat('%', #{feedbackTitle}, '%')
+            </if>
+            <if test="feedbackType != null">
+                AND feedback_type = #{feedbackType}
+            </if>
+            <if test="status != null">
+                AND status = #{status}
+            </if>
+            <if test="handlerId != null">
+                AND handler_id = #{handlerId}
+            </if>
+            <if test="handlerName != null and handlerName != ''">
+                AND handler_name like concat('%', #{handlerName}, '%')
+            </if>
+            <if test="params.beginTime != null and params.beginTime != ''">
+                AND date_format(create_time,'%Y-%m-%d') &gt;= date_format(#{params.beginTime},'%Y-%m-%d')
+            </if>
+            <if test="params.endTime != null and params.endTime != ''">
+                AND date_format(create_time,'%Y-%m-%d') &lt;= date_format(#{params.endTime},'%Y-%m-%d')
+            </if>
+        </where>
+        order by create_time desc
+    </select>
+
+    <select id="selectUserFeedbackById" parameterType="Long" resultMap="UserFeedbackResult">
+        <include refid="selectUserFeedbackVo"/>
+        where feedback_id = #{feedbackId}
+    </select>
+
+    <select id="selectUserFeedbackByUser" resultMap="UserFeedbackResult">
+        <include refid="selectUserFeedbackVo"/>
+        where user_type = #{userType} and user_id = #{userId}
+        order by create_time desc
+    </select>
+
+    <!-- 根据反馈类型统计 -->
+    <select id="statisticsByType" resultType="map">
+        select
+            feedback_type as type,
+            case feedback_type
+                when 1 then '功能建议'
+                when 2 then 'bug反馈'
+                when 3 then '投诉建议'
+                when 4 then '其他'
+                end as typeName,
+            count(*) as count
+        from user_feedback
+        group by feedback_type
+        order by feedback_type
+    </select>
+
+    <!-- 根据处理状态统计 -->
+    <select id="statisticsByStatus" resultType="map">
+        select
+            status,
+            case status
+                when 0 then '待处理'
+                when 1 then '处理中'
+                when 2 then '已解决'
+                when 3 then '已关闭'
+                end as statusName,
+            count(*) as count
+        from user_feedback
+        group by status
+        order by status
+    </select>
+
+    <!-- 根据用户类型统计 -->
+    <select id="statisticsByUserType" resultType="map">
+        select
+            user_type as userType,
+            case user_type
+                when 1 then '学生用户'
+                when 2 then '骑手'
+                when 3 then '商家'
+                end as userTypeName,
+            count(*) as count
+        from user_feedback
+        group by user_type
+        order by user_type
+    </select>
+
+    <insert id="insertUserFeedback" parameterType="com.ruoyi.platform.domain.UserFeedback" useGeneratedKeys="true" keyProperty="feedbackId">
+        insert into user_feedback
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="feedbackId != null">feedback_id,</if>
+            <if test="userType != null">user_type,</if>
+            <if test="userId != null">user_id,</if>
+            <if test="userNickname != null and userNickname != ''">user_nickname,</if>
+            <if test="feedbackTitle != null and feedbackTitle != ''">feedback_title,</if>
+            <if test="feedbackContent != null and feedbackContent != ''">feedback_content,</if>
+            <if test="feedbackType != null">feedback_type,</if>
+            <if test="contactInfo != null and contactInfo != ''">contact_info,</if>
+            <if test="imgUrls != null and imgUrls != ''">img_urls,</if>
+            <if test="status != null">status,</if>
+            <if test="adminReply != null">admin_reply,</if>
+            <if test="handlerId != null">handler_id,</if>
+            <if test="handlerName != null and handlerName != ''">handler_name,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="handleTime != null">handle_time,</if>
+            <if test="updateTime != null">update_time,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="feedbackId != null">#{feedbackId},</if>
+            <if test="userType != null">#{userType},</if>
+            <if test="userId != null">#{userId},</if>
+            <if test="userNickname != null and userNickname != ''">#{userNickname},</if>
+            <if test="feedbackTitle != null and feedbackTitle != ''">#{feedbackTitle},</if>
+            <if test="feedbackContent != null and feedbackContent != ''">#{feedbackContent},</if>
+            <if test="feedbackType != null">#{feedbackType},</if>
+            <if test="contactInfo != null and contactInfo != ''">#{contactInfo},</if>
+            <if test="imgUrls != null and imgUrls != ''">#{imgUrls},</if>
+            <if test="status != null">#{status},</if>
+            <if test="adminReply != null">#{adminReply},</if>
+            <if test="handlerId != null">#{handlerId},</if>
+            <if test="handlerName != null and handlerName != ''">#{handlerName},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="handleTime != null">#{handleTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+        </trim>
+    </insert>
+
+    <update id="updateUserFeedback" parameterType="com.ruoyi.platform.domain.UserFeedback">
+        update user_feedback
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="userType != null">user_type = #{userType},</if>
+            <if test="userId != null">user_id = #{userId},</if>
+            <if test="userNickname != null and userNickname != ''">user_nickname = #{userNickname},</if>
+            <if test="feedbackTitle != null and feedbackTitle != ''">feedback_title = #{feedbackTitle},</if>
+            <if test="feedbackContent != null and feedbackContent != ''">feedback_content = #{feedbackContent},</if>
+            <if test="feedbackType != null">feedback_type = #{feedbackType},</if>
+            <if test="contactInfo != null">contact_info = #{contactInfo},</if>
+            <if test="imgUrls != null">img_urls = #{imgUrls},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="adminReply != null">admin_reply = #{adminReply},</if>
+            <if test="handlerId != null">handler_id = #{handlerId},</if>
+            <if test="handlerName != null and handlerName != ''">handler_name = #{handlerName},</if>
+            <if test="handleTime != null">handle_time = #{handleTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where feedback_id = #{feedbackId}
+    </update>
+
+    <delete id="deleteUserFeedbackById" parameterType="Long">
+        delete from user_feedback where feedback_id = #{feedbackId}
+    </delete>
+
+    <delete id="deleteUserFeedbackByIds" parameterType="Long">
+        delete from user_feedback where feedback_id in
+        <foreach item="feedbackId" collection="array" open="(" separator="," close=")">
+            #{feedbackId}
+        </foreach>
+    </delete>
+</mapper>
