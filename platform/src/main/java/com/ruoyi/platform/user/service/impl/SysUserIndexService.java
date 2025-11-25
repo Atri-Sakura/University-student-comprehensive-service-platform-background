@@ -6,6 +6,7 @@ import com.ruoyi.platform.domain.vo.SecondhandGoodDetailVO;
 import com.ruoyi.platform.merchant.vo.MerchantGoodsVO;
 import com.ruoyi.platform.user.mapper.SysUserIndexMapper;
 import com.ruoyi.platform.user.service.ISysUserIndexService;
+import com.ruoyi.platform.user.vo.SecondhandGoodVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -24,7 +25,7 @@ public class SysUserIndexService implements ISysUserIndexService {
     }
 
     @Override
-    public List<SecondhandGoodDetailVO> getSecondhandRecommendations() {
+    public List<SecondhandGoodVO> getSecondhandRecommendations() {
         return sysUserIndexMapper.getSecondhandRecommendations();
     }
 
@@ -45,5 +46,10 @@ public class SysUserIndexService implements ISysUserIndexService {
     @Override
     public List<IndexImgUrl> getIndexImgUrls() {
         return sysUserIndexMapper.getIndexImgUrls();
+    }
+
+    @Override
+    public List<UserTimetable> getUserCourses(Long userBaseId) {
+        return sysUserIndexMapper.getUserCourses(userBaseId);
     }
 }
