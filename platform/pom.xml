@@ -60,5 +60,21 @@
 <!--            <version>portable-1.8.4</version>-->
 <!--        </dependency>-->
 
+        <!--   下面俩个依赖用于骑手端的身份证图片识别身份证号码     -->
+        <!-- OpenCV Dependency -->
+<!-- TODO        <dependency>-->
+<!--            <groupId>org.opencv</groupId>-->
+<!--            <artifactId>opencv</artifactId>-->
+<!--            <version>4.5.1</version>-->
+<!--        </dependency>-->
+
+        <!-- Tesseract OCR Dependency -->
+        <dependency>
+            <groupId>net.sourceforge.tess4j</groupId>
+            <artifactId>tess4j</artifactId>
+            <version>5.0.0</version>
+        </dependency>
+
+
     </dependencies>
 </project>

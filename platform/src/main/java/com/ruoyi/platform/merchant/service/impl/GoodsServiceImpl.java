@@ -96,7 +96,7 @@ public class GoodsServiceImpl implements IGoodsService {
         if (merchantGoods == null){
             throw new RuntimeException("商品不存在");
         }
-        if (merchantGoods.getMerchantBaseId() != merchantId) {
+        if (!merchantGoods.getMerchantBaseId().equals(merchantId)) {
             throw new RuntimeException("商品不属于该商家");
         }
         return goodsMapper.deleteGoods(goodsId,merchantId);
@@ -108,7 +108,7 @@ public class GoodsServiceImpl implements IGoodsService {
         if (merchantGoods == null){
             throw new RuntimeException("商品不存在");
         }
-        if (merchantGoods.getMerchantBaseId() != merchantId) {
+        if (!merchantGoods.getMerchantBaseId().equals(merchantId)) {
             throw new RuntimeException("商品不属于该商家");
         }
         return goodsMapper.updateGoods(goodsId,merchantId,goods);
