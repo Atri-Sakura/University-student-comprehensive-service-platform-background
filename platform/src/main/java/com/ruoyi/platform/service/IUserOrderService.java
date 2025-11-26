@@ -68,10 +68,26 @@ public interface IUserOrderService {
     int confirmReceive(Long userId, Long orderMainId);
 
     /**
+     * 用户确认跑腿订单收货
+     * @param userId
+     * @param orderMainId
+     * @return
+     */
+    int confirmReceiveErrand(Long userId, Long orderMainId,Long riderId);
+
+    /**
      * 创建并支付跑腿订单
      * @param userId
      * @param payOrderDTO
      * @return
      */
     OrderMain payAndCreateErrandOrder(Long userId, PayOrderDTO payOrderDTO,Long userAddressId);
+
+    /**
+     * 取消跑腿预支付订单
+     * @param userId
+     * @param preOrderNo
+     * @return
+     */
+    boolean cancelPrePayErrandOrder(Long userId, String preOrderNo);
 }

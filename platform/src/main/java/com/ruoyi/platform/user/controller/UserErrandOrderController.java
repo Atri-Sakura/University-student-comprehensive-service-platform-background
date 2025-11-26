@@ -74,7 +74,7 @@ public class UserErrandOrderController extends BaseController {
     @DeleteMapping("/prepay/{preOrderNo}")
     public AjaxResult cancelPrePayOrder(@PathVariable("preOrderNo") String preOrderNo) {
         Long userId = SecurityUtils.getUserBaseId();
-        boolean result = userOrderService.cancelPrePayOrder(userId, preOrderNo);
+        boolean result = userOrderService.cancelPrePayErrandOrder(userId, preOrderNo);
         return result ? AjaxResult.success("已取消") : AjaxResult.error("取消失败");
     }
 
@@ -99,11 +99,19 @@ public class UserErrandOrderController extends BaseController {
      * @param orderMainId 订单ID
      * @return 结果
      */
+    /**
+     * 用户确认收货
+     *
+     * @param orderMainId 订单ID
+     * @param riderId 骑手ID
+     * @return 结果
+     */
     @Log(title = "用户确认收货", businessType = BusinessType.UPDATE)
     @PutMapping("/confirm/{orderMainId}")
-    public AjaxResult confirmReceive(@PathVariable("orderMainId") Long orderMainId) {
+    public AjaxResult confirmReceive(@PathVariable("orderMainId") Long orderMainId,
+                                     @RequestParam(value = "riderId", required = false) Long riderId) {
         Long userId = SecurityUtils.getUserBaseId();
-        return toAjax(userOrderService.confirmReceive(userId, orderMainId));
+        return toAjax(userOrderService.confirmReceiveErrand(userId, orderMainId, riderId));
     }
 
     /**

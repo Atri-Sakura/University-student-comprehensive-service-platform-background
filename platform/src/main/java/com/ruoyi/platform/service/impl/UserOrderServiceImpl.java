@@ -80,6 +80,8 @@ public class UserOrderServiceImpl implements IUserOrderService {
 
     @Autowired
     private UserAddressMapper userAddressMapper;
+    @Autowired
+    private OrderErrandDetailMapper orderErrandDetailMapper;
 
     /**
      * 创建预支付订单（只校验，不真正创建订单）
@@ -337,6 +339,31 @@ public class UserOrderServiceImpl implements IUserOrderService {
     }
 
     /**
+     * 取消预支付订单
+     */
+    @Override
+    public boolean cancelPrePayErrandOrder(Long userId, String preOrderNo) {
+        // 1. 从 Redis 获取预订单信息
+        String cacheKey = getPreOrderCacheKey(preOrderNo);
+        CreateErrandOrderDto createOrderDTO = redisCache.getCacheObject(cacheKey);
+        if (createOrderDTO == null) {
+            throw new ServiceException("预订单不存在或已过期");
+        }
+
+        // 2. 校验用户ID是否匹配
+        if (!createOrderDTO.getUserId().equals(userId)) {
+            throw new ServiceException("无权操作此订单");
+        }
+
+        // 3. 删除预订单缓存
+        redisCache.deleteObject(cacheKey);
+
+        log.info("取消预支付订单成功，预订单号：{}，用户ID：{}", preOrderNo, userId);
+
+        return true;
+    }
+
+    /**
      * 用户取消订单
      */
     @Override
@@ -400,6 +427,7 @@ public class UserOrderServiceImpl implements IUserOrderService {
     public int confirmReceive(Long userId, Long orderMainId) {
         // 1. 查询订单
         OrderMain order = orderMainMapper.selectOrderMainByOrderMainId(orderMainId);
+        log.info("订单ID：{}，用户ID：{}，当前状态：{}", orderMainId, userId, order.getOrderStatus());
         if (order == null) {
             throw new ServiceException("订单不存在");
         }
@@ -429,6 +457,54 @@ public class UserOrderServiceImpl implements IUserOrderService {
             } catch (Exception e) {
                 log.error("结算给商家失败，订单ID：{}，商家ID：{}", orderMainId, order.getMerchantId(), e);
             }
+
+            // 6. 记录状态变更日志
+            UserBase user = userBaseMapper.selectUserBaseByUserBaseId(userId);
+            saveStatusLog(orderMainId, OrderStatusEnum.DELIVERING.getCode(),
+                    OrderStatusEnum.COMPLETED.getCode(),
+                    OperatorTypeEnum.USER, userId,
+                    user.getNickname(), "用户确认收货");
+
+            log.info("用户确认收货成功，订单ID：{}，用户ID：{}", orderMainId, userId);
+        }
+
+        return result;
+    }
+
+    /**
+     * 用户确认收货
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public int confirmReceiveErrand(Long userId, Long orderMainId, Long riderId) {
+        // 1. 查询订单
+        OrderMain order = orderMainMapper.selectOrderMainByOrderMainId(orderMainId);
+        log.info("订单ID：{}，用户ID：{}，当前状态：{}", orderMainId, userId, order.getOrderStatus());
+        if (order == null) {
+            throw new ServiceException("订单不存在");
+        }
+
+        // 2. 校验订单归属
+        if (!order.getUserId().equals(userId)) {
+            throw new ServiceException("无权操作此订单");
+        }
+
+        // 3. 校验订单状态（必须是配送中状态）
+//        if (!OrderStatusEnum.DELIVERING.getCode().equals(order.getOrderStatus())) {
+//            throw new ServiceException("订单状态不正确");
+//        }
+
+        // 4. 更新订单状态为已完成
+        OrderMain updateOrder = new OrderMain();
+        updateOrder.setOrderMainId(orderMainId);
+        updateOrder.setOrderStatus(OrderStatusEnum.COMPLETED.getCode());
+        updateOrder.setCompleteTime(new Date());
+        updateOrder.setUpdateTime(new Date());
+        int result = orderMainMapper.updateOrderMain(updateOrder);
+
+        if (result > 0) {
+            // 5. 结算给骑手（不捕获异常，让异常向上传播）
+            walletFlowService.settleRider(riderId, orderMainId, order.getDeliveryFeeAmount());
 
             // 6. 记录状态变更日志
             UserBase user = userBaseMapper.selectUserBaseByUserBaseId(userId);
@@ -563,8 +639,8 @@ public class UserOrderServiceImpl implements IUserOrderService {
     /**
      * 内部方法：真正创建订单
      */
-    private OrderMain createErrandOrderInternal(CreateErrandOrderDto createOrderDTO, String orderNo, OrderAmountInfo amountInfo,Long userAddressId) {
-
+    private OrderMain createErrandOrderInternal(CreateErrandOrderDto createOrderDTO, String orderNo,
+                                                OrderAmountInfo amountInfo, Long userAddressId) {
 
         // 2. 创建订单主表记录
         OrderMain orderMain = new OrderMain();
@@ -591,28 +667,38 @@ public class UserOrderServiceImpl implements IUserOrderService {
         // 订单状态（待接单）
         orderMain.setOrderStatus(OrderStatusEnum.PENDING_ACCEPT.getCode());
 
-        // 取货地址（商家地址）
+        // 取货地址处理（支持帮我买订单：userAddressId 为 null）
+        if (userAddressId != null) {
+            orderMain.setPickAddressId(userAddressId);
+            UserAddress userAddress = userAddressMapper.selectUserAddressByUserAddressId(userAddressId);
+            if (userAddress != null) {
+                orderMain.setPickAddress(userAddress.getProvince() + userAddress.getCity()
+                        + userAddress.getDistrict() + userAddress.getDetailAddress());
+                orderMain.setPickContact(userAddress.getReceiver());
+                orderMain.setPickPhone(userAddress.getPhone());
+            }
+        } else {
+            // 帮我买订单：设置默认取件地址信息
+            orderMain.setPickAddressId(null);
+            orderMain.setPickAddress("帮我买（无固定取件地址）");
+            orderMain.setPickContact("用户指定");
+            orderMain.setPickPhone(createOrderDTO.getDeliverPhone()); // 使用收货电话
+        }
 
-        orderMain.setPickAddressId(userAddressId);
-        UserAddress userAddress = userAddressMapper.selectUserAddressByUserAddressId(userAddressId);
-        orderMain.setPickAddress(userAddress.getProvince() + userAddress.getCity()
-                + userAddress.getDistrict() + userAddress.getDetailAddress());
-        orderMain.setPickContact(userAddress.getReceiver());
-        orderMain.setPickPhone(userAddress.getPhone());
-
-        // 送货地址（用户地址）
+        // 送货地址（用户地址）- 确保不为空
+        if (createOrderDTO.getDeliverAddressId() == null || createOrderDTO.getDeliverAddress() == null) {
+            throw new ServiceException("收货地址不能为空");
+        }
         orderMain.setDeliverAddressId(createOrderDTO.getDeliverAddressId());
         orderMain.setDeliverAddress(createOrderDTO.getDeliverAddress());
         orderMain.setDeliverContact(createOrderDTO.getDeliverContact());
         orderMain.setDeliverPhone(createOrderDTO.getDeliverPhone());
         orderMain.setDeliverLongitude(createOrderDTO.getDeliverLongitude());
         orderMain.setDeliverLatitude(createOrderDTO.getDeliverLatitude());
-
+        orderMain.setOrderStatus(OrderStatusEnum.PENDING_PICKUP.getCode());
         orderMain.setRemark(createOrderDTO.getRemark());
         orderMain.setCreateTime(new Date());
         orderMain.setUpdateTime(new Date());
-
-
 
         // 插入订单主表
         int mainResult = orderMainMapper.insertOrderMain(orderMain);
@@ -620,18 +706,22 @@ public class UserOrderServiceImpl implements IUserOrderService {
             throw new ServiceException("创建订单失败");
         }
 
-
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.MINUTE, 30); // 加上30分钟
-            // 创建跑腿订单明细
+
+        // 创建跑腿订单明细（修复帮我买订单判断逻辑）
         OrderErrandDetail orderErrandDetail = new OrderErrandDetail();
         orderErrandDetail.setOrderMainId(orderMain.getOrderMainId());
         orderErrandDetail.setOrderErrandDetailId(com.ruoyi.platform.chat.utils.SnowflakeIdGenerator.getInstance().nextId());
-        orderErrandDetail.setErrandType(orderMain.getPickAddressId() == 0 ? 2L : 1L);
+
+        // 正确判断订单类型：取件地址为空 → 帮我买（2），否则 → 配送（1）
+        orderErrandDetail.setErrandType(userAddressId == null ? 2L : 1L);
         orderErrandDetail.setGoodsDesc(createOrderDTO.getGoodsDesc());
         orderErrandDetail.setExpectedTime(calendar.getTime());
+        orderErrandDetail.setAdvanceAmount(orderMain.getGoodsAmount());
+        orderErrandDetail.setTipAmount(orderMain.getDeliveryFeeAmount());
 
-
+        orderErrandDetailMapper.insertOrderErrandDetail(orderErrandDetail);
 
         // 4. 创建配送记录
         OrderDelivery delivery = new OrderDelivery();
