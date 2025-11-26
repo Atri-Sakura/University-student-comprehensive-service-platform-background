@@ -23,8 +23,8 @@ public class RiderQualificationCertificationService implements IRiderQualificati
         String imgUrl1 = null;
         try {
             // 1. 先上传图片到MinIO
-            imgUrl = minioFileUtils.upload(frontFile, "rider", riderBaseId);
-            imgUrl1 = minioFileUtils.upload(backFile, "rider", riderBaseId);
+            imgUrl = minioFileUtils.upload(frontFile, "riderqualificationcertification", riderBaseId);
+            imgUrl1 = minioFileUtils.upload(backFile, "riderqualificationcertification", riderBaseId);
 
             int affectedRows = 0;
             // 2. 将图片URL保存到数据库
