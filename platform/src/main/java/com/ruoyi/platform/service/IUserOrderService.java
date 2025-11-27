@@ -4,6 +4,7 @@ import com.ruoyi.platform.domain.OrderMain;
 import com.ruoyi.platform.domain.dto.CreateOrderDTO;
 import com.ruoyi.platform.domain.dto.PayOrderDTO;
 import com.ruoyi.platform.domain.dto.PrePayOrderDTO;
+import com.ruoyi.platform.domain.vo.CreateErrandOrderDto;
 
 /**
  * 用户订单服务接口
@@ -29,6 +30,14 @@ public interface IUserOrderService {
      * @return 订单信息
      */
     OrderMain payAndCreateOrder(Long userId, PayOrderDTO payOrderDTO);
+
+    /**
+     * 创建预支付跑腿订单（只校验，不真正创建订单）
+     * @param createErrandOrderDto
+     * @return
+     */
+    PrePayOrderDTO createPrePayErrandOrder(CreateErrandOrderDto createErrandOrderDto);
+
 
     /**
      * 取消预支付订单
@@ -57,4 +66,28 @@ public interface IUserOrderService {
      * @return 结果
      */
     int confirmReceive(Long userId, Long orderMainId);
+
+    /**
+     * 用户确认跑腿订单收货
+     * @param userId
+     * @param orderMainId
+     * @return
+     */
+    int confirmReceiveErrand(Long userId, Long orderMainId,Long riderId);
+
+    /**
+     * 创建并支付跑腿订单
+     * @param userId
+     * @param payOrderDTO
+     * @return
+     */
+    OrderMain payAndCreateErrandOrder(Long userId, PayOrderDTO payOrderDTO,Long userAddressId);
+
+    /**
+     * 取消跑腿预支付订单
+     * @param userId
+     * @param preOrderNo
+     * @return
+     */
+    boolean cancelPrePayErrandOrder(Long userId, String preOrderNo);
 }

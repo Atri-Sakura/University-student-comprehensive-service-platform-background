@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
@@ -204,8 +205,9 @@ public class WalletFlowServiceImpl implements IWalletFlowService {
      * @param deliveryFee 配送费
      */
     @Override
-    @Transactional(rollbackFor = Exception.class)
+    @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = Exception.class)
     public void settleRider(Long riderId, Long orderMainId, BigDecimal deliveryFee) {
+        // 原有业务逻辑保持不变...
         // 1. 查询平台钱包（加行锁）
         PlatformWallet platformWallet = platformWalletMapper.selectPlatformWalletForUpdate(PLATFORM_WALLET_ID);
         if (platformWallet == null) {
