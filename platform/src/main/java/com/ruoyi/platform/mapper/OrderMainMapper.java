@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import com.ruoyi.platform.domain.OrderDelivery;
 import com.ruoyi.platform.domain.OrderMain;
 import io.lettuce.core.dynamic.annotation.Param;
 
@@ -127,4 +128,11 @@ public interface OrderMainMapper {
     BigDecimal selectMerchantTodayRefund(@Param("merchantId") Long merchantId,
                                          @Param("startTime") Date startTime,
                                          @Param("endTime") Date endTime);
+
+    /**
+     * 根据订单ID查询配送信息
+     * @param orderMainId 订单ID
+     * @return 配送信息
+     */
+    OrderDelivery selectOrderDeliveryByOrderMainId(Long orderMainId);
 }

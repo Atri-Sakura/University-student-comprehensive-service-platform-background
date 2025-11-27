@@ -1,27 +1,35 @@
-package com.ruoyi.platform.mapper;
+package com. ruoyi.platform.mapper;
 
 import java.util.List;
-import com.ruoyi.platform.domain.OrderDelivery;
+import com.ruoyi. platform.domain.OrderDelivery;
 
 /**
  * 订单配送（含实际配送定位）Mapper接口
- * 
+ *
  * @author ruoyi
  * @date 2025-10-20
  */
-public interface OrderDeliveryMapper 
+public interface OrderDeliveryMapper
 {
     /**
      * 查询订单配送（含实际配送定位）
-     * 
+     *
      * @param orderDeliveryId 订单配送（含实际配送定位）主键
      * @return 订单配送（含实际配送定位）
      */
     public OrderDelivery selectOrderDeliveryByOrderDeliveryId(Long orderDeliveryId);
 
     /**
+     * 根据订单ID查询配送信息
+     *
+     * @param orderMainId 订单ID
+     * @return 订单配送信息
+     */
+    public OrderDelivery selectOrderDeliveryByOrderMainId(Long orderMainId);
+
+    /**
      * 查询订单配送（含实际配送定位）列表
-     * 
+     *
      * @param orderDelivery 订单配送（含实际配送定位）
      * @return 订单配送（含实际配送定位）集合
      */
@@ -29,7 +37,7 @@ public interface OrderDeliveryMapper
 
     /**
      * 新增订单配送（含实际配送定位）
-     * 
+     *
      * @param orderDelivery 订单配送（含实际配送定位）
      * @return 结果
      */
@@ -37,7 +45,7 @@ public interface OrderDeliveryMapper
 
     /**
      * 修改订单配送（含实际配送定位）
-     * 
+     *
      * @param orderDelivery 订单配送（含实际配送定位）
      * @return 结果
      */
@@ -45,7 +53,7 @@ public interface OrderDeliveryMapper
 
     /**
      * 删除订单配送（含实际配送定位）
-     * 
+     *
      * @param orderDeliveryId 订单配送（含实际配送定位）主键
      * @return 结果
      */
@@ -53,7 +61,7 @@ public interface OrderDeliveryMapper
 
     /**
      * 批量删除订单配送（含实际配送定位）
-     * 
+     *
      * @param orderDeliveryIds 需要删除的数据主键集合
      * @return 结果
      */

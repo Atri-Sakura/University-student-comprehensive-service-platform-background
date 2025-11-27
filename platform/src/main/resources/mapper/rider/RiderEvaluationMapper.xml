@@ -4,6 +4,158 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.ruoyi.platform.mapper.RiderEvaluationMapper">
 
-    <!-- 通用查询映射结果 -->
-    
+    <resultMap type="RiderEvaluation" id="RiderEvaluationResult">
+        <result property="riderEvaluationId"    column="rider_evaluation_id"    />
+        <result property="riderBaseId"    column="rider_base_id"    />
+        <result property="userId"    column="user_id"    />
+        <result property="userNickname"    column="user_nickname"    />
+        <result property="orderId"    column="order_id"    />
+        <result property="orderNo"    column="order_no"    />
+        <result property="rating"    column="rating"    />
+        <result property="content"    column="content"    />
+        <result property="createTime"    column="create_time"    />
+    </resultMap>
+
+    <sql id="selectRiderEvaluationVo">
+        select rider_evaluation_id, rider_base_id, user_id, order_id, rating, content, create_time
+        from rider_evaluation
+    </sql>
+
+    <select id="selectRiderEvaluationList" parameterType="RiderEvaluation" resultMap="RiderEvaluationResult">
+        select
+        re.rider_evaluation_id,
+        re.rider_base_id,
+        re. user_id,
+        ub.nickname as user_nickname,
+        re.order_id,
+        om.order_no,
+        re.rating,
+        re.content,
+        re.create_time
+        from rider_evaluation re
+        left join user_base ub on re.user_id = ub. user_base_id
+        left join order_main om on re.order_id = om.order_main_id
+        <where>
+            <if test="riderBaseId != null "> and re.rider_base_id = #{riderBaseId}</if>
+            <if test="userId != null "> and re.user_id = #{userId}</if>
+            <if test="orderId != null "> and re.order_id = #{orderId}</if>
+            <if test="rating != null "> and re.rating = #{rating}</if>
+        </where>
+        order by re.create_time desc
+    </select>
+
+    <select id="selectRiderEvaluationByRiderEvaluationId" parameterType="Long" resultMap="RiderEvaluationResult">
+        select
+        re.rider_evaluation_id,
+        re.rider_base_id,
+        re.user_id,
+        ub.nickname as user_nickname,
+        re. order_id,
+        om. order_no,
+        re. rating,
+        re.content,
+        re.create_time
+        from rider_evaluation re
+        left join user_base ub on re.user_id = ub.user_base_id
+        left join order_main om on re.order_id = om.order_main_id
+        where re.rider_evaluation_id = #{riderEvaluationId}
+    </select>
+
+    <select id="selectRiderEvaluationByOrderId" parameterType="Long" resultMap="RiderEvaluationResult">
+        select
+        re.rider_evaluation_id,
+        re.rider_base_id,
+        re.user_id,
+        ub.nickname as user_nickname,
+        re.order_id,
+        om.order_no,
+        re.rating,
+        re.content,
+        re.create_time
+        from rider_evaluation re
+        left join user_base ub on re.user_id = ub. user_base_id
+        left join order_main om on re. order_id = om.order_main_id
+        where re. order_id = #{orderId}
+    </select>
+
+    <select id="selectRiderEvaluationStatistics" parameterType="Long" resultType="com.ruoyi.platform.domain.vo.RiderEvaluationStatisticsVO">
+        select
+        IFNULL(ROUND(AVG(rating), 1), 0.0) as avgRating,
+        COUNT(*) as totalCount,
+        SUM(CASE WHEN rating = 5 THEN 1 ELSE 0 END) as fiveStarCount,
+        SUM(CASE WHEN rating = 4 THEN 1 ELSE 0 END) as fourStarCount,
+        SUM(CASE WHEN rating = 3 THEN 1 ELSE 0 END) as threeStarCount,
+        SUM(CASE WHEN rating = 2 THEN 1 ELSE 0 END) as twoStarCount,
+        SUM(CASE WHEN rating = 1 THEN 1 ELSE 0 END) as oneStarCount,
+        IFNULL(ROUND(SUM(CASE WHEN rating = 5 THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 0), 0) as fiveStarRate,
+        IFNULL(ROUND(SUM(CASE WHEN rating = 4 THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 0), 0) as fourStarRate,
+        IFNULL(ROUND(SUM(CASE WHEN rating = 3 THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 0), 0) as threeStarRate,
+        IFNULL(ROUND(SUM(CASE WHEN rating = 2 THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 0), 0) as twoStarRate,
+        IFNULL(ROUND(SUM(CASE WHEN rating = 1 THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 0), 0) as oneStarRate
+        from rider_evaluation
+        where rider_base_id = #{riderBaseId}
+    </select>
+
+    <select id="selectRiderEvaluationListByRating" resultMap="RiderEvaluationResult">
+        select
+        re.rider_evaluation_id,
+        re.rider_base_id,
+        re. user_id,
+        ub.nickname as user_nickname,
+        re.order_id,
+        om.order_no,
+        re.rating,
+        re.content,
+        re.create_time
+        from rider_evaluation re
+        left join user_base ub on re. user_id = ub.user_base_id
+        left join order_main om on re.order_id = om.order_main_id
+        where re.rider_base_id = #{riderBaseId}
+        <if test="minRating != null and maxRating != null">
+            and re. rating between #{minRating} and #{maxRating}
+        </if>
+        order by re. create_time desc
+    </select>
+
+    <insert id="insertRiderEvaluation" parameterType="RiderEvaluation">
+        insert into rider_evaluation
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="riderEvaluationId != null">rider_evaluation_id,</if>
+            <if test="riderBaseId != null">rider_base_id,</if>
+            <if test="userId != null">user_id,</if>
+            <if test="orderId != null">order_id,</if>
+            <if test="rating != null">rating,</if>
+            <if test="content != null">content,</if>
+            <if test="createTime != null">create_time,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="riderEvaluationId != null">#{riderEvaluationId},</if>
+            <if test="riderBaseId != null">#{riderBaseId},</if>
+            <if test="userId != null">#{userId},</if>
+            <if test="orderId != null">#{orderId},</if>
+            <if test="rating != null">#{rating},</if>
+            <if test="content != null">#{content},</if>
+            <if test="createTime != null">#{createTime},</if>
+        </trim>
+    </insert>
+
+    <update id="updateRiderEvaluation" parameterType="RiderEvaluation">
+        update rider_evaluation
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="rating != null">rating = #{rating},</if>
+            <if test="content != null">content = #{content},</if>
+        </trim>
+        where rider_evaluation_id = #{riderEvaluationId}
+    </update>
+
+    <delete id="deleteRiderEvaluationByRiderEvaluationId" parameterType="Long">
+        delete from rider_evaluation where rider_evaluation_id = #{riderEvaluationId}
+    </delete>
+
+    <delete id="deleteRiderEvaluationByRiderEvaluationIds" parameterType="String">
+        delete from rider_evaluation where rider_evaluation_id in
+        <foreach item="riderEvaluationId" collection="array" open="(" separator="," close=")">
+            #{riderEvaluationId}
+        </foreach>
+    </delete>
 </mapper>
