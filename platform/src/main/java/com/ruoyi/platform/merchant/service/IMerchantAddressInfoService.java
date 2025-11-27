@@ -15,6 +15,13 @@ public interface IMerchantAddressInfoService {
     MerchantAddress selectMerchantAddressByMerchantBaseId(Long merchantBaseId);
 
     /**
+     * 新增商家地址信息
+     * @param merchantAddress 商家地址信息
+     * @return 影响行数
+     */
+    int insertMerchantAddress(MerchantAddress merchantAddress);
+
+    /**
      * 修改商家地址信息
      * @param merchantAddress 商家地址信息
      * @return 影响行数

@@ -23,6 +23,33 @@
         select * from merchant_address where merchant_base_id = #{merchantBaseId}
     </select>
 
+    <!-- 新增商家地址 -->
+    <insert id="insertMerchantAddress" parameterType="MerchantAddress">
+        INSERT INTO merchant_address (
+            merchant_address_id,
+            merchant_base_id,
+            province,
+            city,
+            district,
+            detail_address,
+            contact_person,
+            contact_phone,
+            create_time,
+            update_time
+        ) VALUES (
+                     #{merchantAddressId},
+                     #{merchantBaseId},
+                     #{province},
+                     #{city},
+                     #{district},
+                     #{detailAddress},
+                     #{contactPerson},
+                     #{contactPhone},
+                     #{createTime},
+                     #{updateTime}
+                 )
+    </insert>
+
     <!-- 修改商家地址信息 -->
     <update id="updateMerchantAddress" parameterType="MerchantAddress">
         update merchant_address

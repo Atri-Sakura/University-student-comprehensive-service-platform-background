@@ -20,4 +20,9 @@ public interface MerchantAddressInfoMapper {
      * @return 影响行数
      */
     int updateMerchantAddress(MerchantAddress merchantAddress);
+
+    /**
+     * 新增商家地址
+     */
+    int insertMerchantAddress(MerchantAddress merchantAddress);
 }
