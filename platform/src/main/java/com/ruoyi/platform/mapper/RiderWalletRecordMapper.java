@@ -2,6 +2,7 @@ package com.ruoyi.platform.mapper;
 
 import java.util.List;
 import com.ruoyi.platform.domain.RiderWalletRecord;
+import io.lettuce.core.dynamic.annotation.Param;
 
 /**
  * 骑手钱包流水Mapper接口
@@ -11,6 +12,20 @@ import com.ruoyi.platform.domain.RiderWalletRecord;
  */
 public interface RiderWalletRecordMapper 
 {
+    int updateTradeStatusByRelatedId(@Param("relatedId") Long relatedId,
+                                     @Param("tradeStatus") Long tradeStatus);
+
+    // 提现失败/成功按 out_biz_no 对应的 pay_order 再扩展也行
+    int updateStatusByRelatedId(
+            @Param("relatedId") Long relatedId,
+            @Param("tradeStatus") Integer tradeStatus
+    );
+
+    // 支付成功后按 related_id 更新状态
+    int updateStatusOnRechargeSuccessByRelatedId(
+            @Param("relatedId") Long relatedId,
+            @Param("tradeStatus") Integer tradeStatus
+    );
     /**
      * 查询骑手钱包流水
      * 

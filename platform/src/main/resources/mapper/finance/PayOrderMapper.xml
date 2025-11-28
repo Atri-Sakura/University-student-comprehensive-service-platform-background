@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ruoyi.platform.mapper.PayOrderMapper">
+
+    <!-- 如果你已有 resultMap 就用已有的；没有就加一个 -->
+    <resultMap id="PayOrderResult" type="com.ruoyi.platform.domain.PayOrder">
+        <id     property="payOrderId"     column="pay_order_id"/>
+        <result property="outTradeNo"     column="out_trade_no"/>
+        <result property="channel"        column="channel"/>
+        <result property="ownerType"      column="owner_type"/>
+        <result property="ownerId"        column="owner_id"/>
+        <result property="bizType"        column="biz_type"/>
+        <result property="bizId"          column="biz_id"/>
+        <result property="totalAmount"    column="total_amount"/>
+        <result property="status"         column="status"/>
+        <result property="channelTradeNo" column="channel_trade_no"/>
+        <result property="notifyStatus"   column="notify_status"/>
+        <result property="notifyTimes"    column="notify_times"/>
+        <result property="createTime"     column="create_time"/>
+        <result property="updateTime"     column="update_time"/>
+    </resultMap>
+
+    <insert id="insertPayOrder"
+            parameterType="com.ruoyi.platform.domain.PayOrder">
+        insert into pay_order
+        (
+        pay_order_id,
+        out_trade_no,
+        channel,
+        owner_type,
+        owner_id,
+        biz_type,
+        biz_id,
+        total_amount,
+        status,
+        channel_trade_no,
+        notify_status,
+        notify_times,
+        create_time,
+        update_time
+        )
+        values
+        (
+        #{payOrderId},
+        #{outTradeNo},
+        #{channel},
+        #{ownerType},
+        #{ownerId},
+        #{bizType},
+        #{bizId},
+        #{totalAmount},
+        #{status},
+        #{channelTradeNo},
+        #{notifyStatus},
+        #{notifyTimes},
+        #{createTime},
+        #{updateTime}
+        )
+    </insert>
+
+    <update id="updateStatusById">
+        update pay_order
+        set status = #{status},
+        update_time = now()
+        where pay_order_id = #{payOrderId}
+    </update>
+
+    <select id="selectByOutTradeNo" resultMap="PayOrderResult">
+        select
+        pay_order_id,
+        out_trade_no,
+        channel,
+        owner_type,
+        owner_id,
+        biz_type,
+        biz_id,
+        total_amount,
+        status,
+        channel_trade_no,
+        notify_status,
+        notify_times,
+        create_time,
+        update_time
+        from pay_order
+        where out_trade_no = #{outTradeNo}
+    </select>
+
+    <update id="updateById" parameterType="com.ruoyi.platform.domain.PayOrder">
+        update pay_order
+        <set>
+            <!-- 只改你在 notify 里设置过的字段，其它不动 -->
+            <if test="status != null">
+                status = #{status},
+            </if>
+            <if test="channelTradeNo != null">
+                channel_trade_no = #{channelTradeNo},
+            </if>
+            <if test="notifyStatus != null">
+                notify_status = #{notifyStatus},
+            </if>
+            <if test="notifyTimes != null">
+                notify_times = #{notifyTimes},
+            </if>
+            <if test="updateTime != null">
+                update_time = #{updateTime},
+            </if>
+        </set>
+        where pay_order_id = #{payOrderId}
+    </update>
+</mapper>

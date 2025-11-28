@@ -3,6 +3,7 @@ package com.ruoyi.platform.domain;
 import java.math.BigDecimal;
 import java.util.Date;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.Data;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import com.ruoyi.common.annotation.Excel;
@@ -14,6 +15,7 @@ import com.ruoyi.common.core.domain.BaseEntity;
  * @author ruoyi
  * @date 2025-10-20
  */
+@Data
 public class UserWalletRecord extends BaseEntity
 {
     private static final long serialVersionUID = 1L;
@@ -35,7 +37,7 @@ public class UserWalletRecord extends BaseEntity
 
     /** 交易类型：1-充值 2-提现 3-外卖支付 4-跑腿支付 5-退款 */
     @Excel(name = "交易类型：1-充值 2-提现 3-外卖支付 4-跑腿支付 5-退款")
-    private Long tradeType;
+    private Long tradeType;   // tinyint -> Long 没问题
 
     /** 关联订单ID */
     @Excel(name = "关联订单ID")
@@ -46,89 +48,27 @@ public class UserWalletRecord extends BaseEntity
     private Long tradeStatus;
 
     /** 交易时间 */
-    @JsonFormat(pattern = "yyyy-MM-dd")
-    @Excel(name = "交易时间", width = 30, dateFormat = "yyyy-MM-dd")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @Excel(name = "交易时间", width = 30, dateFormat = "yyyy-MM-dd HH:mm:ss")
     private Date tradeTime;
 
-    public void setUserWalletRecordId(Long userWalletRecordId) 
-    {
-        this.userWalletRecordId = userWalletRecordId;
-    }
+    /** 幂等键，同一笔业务唯一标识 */
+    private String requestId;
 
-    public Long getUserWalletRecordId() 
-    {
-        return userWalletRecordId;
-    }
+    /** 支付渠道：1-支付宝 2-微信 3-银行卡 */
+    private Long payChannel;
 
-    public void setUserWalletId(Long userWalletId) 
-    {
-        this.userWalletId = userWalletId;
-    }
+    /** 商户侧支付单号/提现单号（发给支付宝的） */
+    private String outTradeNo;
 
-    public Long getUserWalletId() 
-    {
-        return userWalletId;
-    }
+    /** 三方返回的交易号(如支付宝trade_no) */
+    private String channelTradeNo;
 
-    public void setUserBaseId(Long userBaseId) 
-    {
-        this.userBaseId = userBaseId;
-    }
+    /** 最后一次支付通知时间 */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private Date notifyTime;
 
-    public Long getUserBaseId() 
-    {
-        return userBaseId;
-    }
 
-    public void setAmount(BigDecimal amount) 
-    {
-        this.amount = amount;
-    }
-
-    public BigDecimal getAmount() 
-    {
-        return amount;
-    }
-
-    public void setTradeType(Long tradeType) 
-    {
-        this.tradeType = tradeType;
-    }
-
-    public Long getTradeType() 
-    {
-        return tradeType;
-    }
-
-    public void setRelatedId(Long relatedId) 
-    {
-        this.relatedId = relatedId;
-    }
-
-    public Long getRelatedId() 
-    {
-        return relatedId;
-    }
-
-    public void setTradeStatus(Long tradeStatus) 
-    {
-        this.tradeStatus = tradeStatus;
-    }
-
-    public Long getTradeStatus() 
-    {
-        return tradeStatus;
-    }
-
-    public void setTradeTime(Date tradeTime) 
-    {
-        this.tradeTime = tradeTime;
-    }
-
-    public Date getTradeTime() 
-    {
-        return tradeTime;
-    }
 
     @Override
     public String toString() {
@@ -141,6 +81,11 @@ public class UserWalletRecord extends BaseEntity
             .append("relatedId", getRelatedId())
             .append("tradeStatus", getTradeStatus())
             .append("tradeTime", getTradeTime())
+            .append("requestId", getRequestId())
+            .append("payChannel", getPayChannel())
+            .append("outTradeNo", getOutTradeNo())
+            .append("channelTradeNo", getChannelTradeNo())
+            .append("notifyTime", getNotifyTime())
             .append("remark", getRemark())
             .toString();
     }
