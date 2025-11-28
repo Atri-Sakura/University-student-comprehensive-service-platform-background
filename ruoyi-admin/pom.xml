@@ -66,6 +66,12 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- Alipay SDK -->
+        <dependency>
+            <groupId>com.alipay.sdk</groupId>
+            <artifactId>alipay-easysdk</artifactId>
+            <version>2.2.3</version>
+        </dependency>
     </dependencies>
 
     <build>

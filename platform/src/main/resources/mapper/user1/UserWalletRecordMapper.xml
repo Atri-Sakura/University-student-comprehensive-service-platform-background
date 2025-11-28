@@ -3,17 +3,23 @@
 PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.ruoyi.platform.mapper.UserWalletRecordMapper">
-    
+
+    <!-- 1. resultMap 补上新字段 -->
     <resultMap type="UserWalletRecord" id="UserWalletRecordResult">
-        <result property="userWalletRecordId"    column="user_wallet_record_id"    />
-        <result property="userWalletId"    column="user_wallet_id"    />
-        <result property="userBaseId"    column="user_base_id"    />
-        <result property="amount"    column="amount"    />
-        <result property="tradeType"    column="trade_type"    />
-        <result property="relatedId"    column="related_id"    />
-        <result property="tradeStatus"    column="trade_status"    />
-        <result property="tradeTime"    column="trade_time"    />
-        <result property="remark"    column="remark"    />
+        <result property="userWalletRecordId" column="user_wallet_record_id"/>
+        <result property="userWalletId"        column="user_wallet_id"/>
+        <result property="userBaseId"          column="user_base_id"/>
+        <result property="amount"              column="amount"/>
+        <result property="tradeType"           column="trade_type"/>
+        <result property="relatedId"           column="related_id"/>
+        <result property="tradeStatus"         column="trade_status"/>
+        <result property="tradeTime"           column="trade_time"/>
+        <result property="remark"              column="remark"/>
+        <result property="requestId"           column="request_id"/>
+        <result property="payChannel"          column="pay_channel"/>
+        <result property="outTradeNo"          column="out_trade_no"/>
+        <result property="channelTradeNo"      column="channel_trade_no"/>
+        <result property="notifyTime"          column="notify_time"/>
     </resultMap>
 
     <sql id="selectUserWalletRecordVo">
@@ -89,4 +95,65 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             #{userWalletRecordId}
         </foreach>
     </delete>
+
+    <!-- 专门给支付链路用的插入，字段一次性插全 -->
+    <insert id="insertForPay" parameterType="UserWalletRecord">
+        insert into user_wallet_record (
+            user_wallet_record_id,
+            user_wallet_id,
+            user_base_id,
+            amount,
+            trade_type,
+            related_id,
+            trade_status,
+            trade_time,
+            remark,
+            request_id,
+            pay_channel,
+            out_trade_no,
+            channel_trade_no,
+            notify_time
+        ) values (
+                     #{userWalletRecordId},
+                     #{userWalletId},
+                     #{userBaseId},
+                     #{amount},
+                     #{tradeType},
+                     #{relatedId},
+                     #{tradeStatus},
+                     #{tradeTime},
+                     #{remark},
+                     #{requestId},
+                     #{payChannel},
+                     #{outTradeNo},
+                     #{channelTradeNo},
+                     #{notifyTime}
+                 )
+    </insert>
+
+
+
+    <update id="updateTradeStatusByRelatedId">
+        update user_wallet_record
+        set trade_status = #{tradeStatus}
+        where related_id = #{relatedId}
+    </update>
+
+    <update id="updateTradeStatusByOutTradeNo">
+        update user_wallet_record
+        set trade_status = #{tradeStatus},
+            notify_time  = now()
+        where out_trade_no = #{outTradeNo}
+    </update>
+
+    <!-- 提现成功时，顺便写入 channel_trade_no -->
+    <update id="updateOnWithdrawSuccess">
+        update user_wallet_record
+        set trade_status    = #{tradeStatus},
+            channel_trade_no = #{channelTradeNo},
+            notify_time     = now()
+        where out_trade_no  = #{outTradeNo}
+    </update>
+
+
 </mapper>

@@ -89,4 +89,24 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             #{riderWalletRecordId}
         </foreach>
     </delete>
+
+    <update id="updateStatusOnRechargeSuccessByRelatedId">
+        update rider_wallet_record
+        set trade_status = #{tradeStatus}
+        where related_id = #{relatedId}
+    </update>
+
+    <update id="updateStatusByRelatedId">
+        update rider_wallet_record
+        set trade_status = #{tradeStatus}
+        where related_id = #{relatedId}
+    </update>
+
+    <update id="updateTradeStatusByRelatedId">
+        update rider_wallet_record
+        set trade_status = #{tradeStatus}
+        where related_id = #{relatedId}
+    </update>
+
+
 </mapper>
