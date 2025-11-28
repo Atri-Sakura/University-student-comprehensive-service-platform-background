@@ -125,4 +125,12 @@ public interface IRiderBaseService
      */
     String getNicknameByPhone(String phone);
 
+    /**
+     * 根据用户ID查询骑手信息
+     *
+     * @param userId sys_user 表的用户ID
+     * @return 骑手基础信息
+     */
+    RiderBase selectRiderBaseByUserId(Long userId);
+
 }

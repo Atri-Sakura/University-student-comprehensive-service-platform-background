@@ -402,4 +402,9 @@ public class RiderBaseServiceImpl implements IRiderBaseService
         return riderBase != null ? riderBase.getNickname() : null;
     }
 
+    @Override
+    public RiderBase selectRiderBaseByUserId(Long userId) {
+        return riderBaseMapper.selectRiderBaseByUserId(userId);
+    }
+
 }

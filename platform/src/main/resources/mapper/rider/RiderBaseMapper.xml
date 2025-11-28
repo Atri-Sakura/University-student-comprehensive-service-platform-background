@@ -281,4 +281,30 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             #{riderBaseId}
         </foreach>
     </delete>
+
+    <!-- 根据用户ID查询骑手信息 -->
+    <select id="selectRiderBaseByUserId" parameterType="Long" resultMap="RiderBaseResult">
+        SELECT
+            rider_base_id,
+            user_id,
+            username,
+            password,
+            nickname,
+            avatar,
+            real_name,
+            id_card,
+            id_card_front,
+            id_card_back,
+            phone,
+            audit_status,
+            work_status,
+            credit_score,
+            account_status,
+            create_time,
+            update_time,
+            pay_password
+        FROM rider_base
+        WHERE user_id = #{userId}
+            LIMIT 1
+    </select>
 </mapper>
