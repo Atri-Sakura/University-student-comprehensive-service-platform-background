@@ -22,7 +22,7 @@ import java.util.Objects;
 import java.util.Random;
 
 @Service
-public class SecondhandOrderServiceImpl implements ISecondhandOrderService {
+public class  SecondhandOrderServiceImpl implements ISecondhandOrderService {
 
     @Autowired
     private SecondhandGoodsMapper secondhandGoodsMapper;

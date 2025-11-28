@@ -2,6 +2,7 @@ package com.ruoyi.platform.service;
 
 import java.util.List;
 import com.ruoyi.platform.domain.UserWalletRecord;
+import io.lettuce.core.dynamic.annotation.Param;
 
 /**
  * 用户钱包流水Service接口
@@ -11,6 +12,7 @@ import com.ruoyi.platform.domain.UserWalletRecord;
  */
 public interface IUserWalletRecordService 
 {
+
     /**
      * 查询用户钱包流水
      * 

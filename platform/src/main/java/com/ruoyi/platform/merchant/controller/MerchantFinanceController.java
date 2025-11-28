@@ -10,12 +10,16 @@ import com.ruoyi.platform.domain.MerchantDailySummary;
 import com.ruoyi.platform.domain.MerchantWallet;
 import com.ruoyi.platform.domain.MerchantWithdrawAccount;
 import com.ruoyi.platform.domain.MerchantWithdrawRecord;
+import com.ruoyi.platform.domain.dto.MerchantRechargeRequest;
 import com.ruoyi.platform.domain.dto.MerchantWithdrawAccountAddDTO;
+import com.ruoyi.platform.domain.dto.MerchantWithdrawRequest;
 import com.ruoyi.platform.domain.dto.WithdrawApplyDTO;
 import com.ruoyi.platform.domain.vo.*;
 import com.ruoyi.platform.merchant.payment.PaymentGatewayClient;
+import com.ruoyi.platform.merchant.service.IMerchantDailySummaryService;
 import com.ruoyi.platform.merchant.service.IMerchantWithdrawAccountService;
 import com.ruoyi.platform.merchant.service.IMerchantWithdrawRecordService;
+import com.ruoyi.platform.service.IMerchantFinanceService;
 import com.ruoyi.platform.service.IMerchantWalletService;
 import com.ruoyi.platform.service.IOrderMainService;
 import org.checkerframework.checker.units.qual.A;
@@ -50,6 +54,9 @@ public class MerchantFinanceController extends BaseController {
 
     @Autowired
     private IMerchantWithdrawAccountService merchantWithdrawAccountService;
+
+    @Autowired
+    private IMerchantFinanceService merchantFinanceService;
     /**
      * 查询商家今日收入统计
      */
@@ -277,5 +284,33 @@ public class MerchantFinanceController extends BaseController {
         List<MerchantWithdrawRecordVO> list = merchantWithdrawRecordService.selectWithdrawRecordVOList(merchantId, status);
         return getDataTable(list);
     }
+
+    /**
+     * 商家余额充值（支付宝页面支付）
+     */
+    @PostMapping("/recharge/alipay")
+    public AjaxResult rechargeByAlipay(@RequestBody MerchantRechargeRequest req) throws Exception {
+
+        Long merchantBaseId = SecurityUtils.getMerchantBaseId();
+
+        String payPageHtml = merchantFinanceService.rechargeByAlipay(merchantBaseId, req);
+
+        AjaxResult result = AjaxResult.success();
+        result.put("payPageHtml", payPageHtml);
+        return result;
+    }
+
+    /**
+     * 商家余额提现到支付宝（后端直连转账）
+     */
+    @PostMapping("/withdraw/alipay")
+    public AjaxResult withdrawByAlipay(@RequestBody MerchantWithdrawRequest req) throws Exception {
+
+        Long merchantBaseId = SecurityUtils.getMerchantBaseId();
+
+        merchantFinanceService.withdrawByAlipay(merchantBaseId, req);
+        return AjaxResult.success("提现请求已提交");
+    }
+
 }
 

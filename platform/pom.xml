@@ -53,7 +53,20 @@
             <artifactId>spring-boot-starter-data-redis</artifactId>
         </dependency>
 
-<!--        &lt;!&ndash; HanLP（中文处理） &ndash;&gt;-->
+        <!-- Alipay Easy SDK -->
+        <dependency>
+            <groupId>com.alipay.sdk</groupId>
+            <artifactId>alipay-easysdk</artifactId>
+            <version>2.2.3</version>
+        </dependency>
+        <!-- used for withdraw-->
+        <dependency>
+            <groupId>com.alipay.sdk</groupId>
+            <artifactId>alipay-sdk-java</artifactId>
+            <version>4.9.124.ALL</version>
+        </dependency>
+
+        <!--        &lt;!&ndash; HanLP（中文处理） &ndash;&gt;-->
 <!--        <dependency>-->
 <!--            <groupId>com.hankcs</groupId>-->
 <!--            <artifactId>hanlp</artifactId>-->
