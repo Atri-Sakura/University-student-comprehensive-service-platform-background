@@ -206,6 +206,10 @@ public class OrderMain extends BaseEntity
 
     private List<OrderTakeoutDetail> orderTakeoutDetailList;
 
+    private List<OrderErrandDetail> orderErrandDetailList;
+
+    private List<OrderSecondhandDetail> orderSecondhandDetailList;
+
     // ==================== Getter/Setter ====================
 
     public List<OrderTakeoutDetail> getOrderTakeoutDetailList() {
@@ -622,6 +626,21 @@ public class OrderMain extends BaseEntity
 
     public void setRiderIncome(BigDecimal riderIncome) {
         this.riderIncome = riderIncome;
+    }
+
+    public List<OrderErrandDetail> getOrderErrandDetailList() {
+        return orderErrandDetailList;
+    }
+
+    public void setOrderErrandDetailList(List<OrderErrandDetail> orderErrandDetailList) {
+        this.orderErrandDetailList = orderErrandDetailList;
+    }
+
+    public List<OrderSecondhandDetail> getOrderSecondhandDetailList() {
+        return orderSecondhandDetailList;
+    }
+    public void setOrderSecondhandDetailList(List<OrderSecondhandDetail> orderSecondhandDetailList) {
+        this.orderSecondhandDetailList = orderSecondhandDetailList;
     }
 
     @Override
