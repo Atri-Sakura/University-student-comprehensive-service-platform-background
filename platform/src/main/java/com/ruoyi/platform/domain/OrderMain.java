@@ -12,7 +12,7 @@ import com.ruoyi.common.core.domain.BaseEntity;
 
 /**
  * 订单主（整合地址与定位信息）对象 order_main
- * 
+ *
  * @author ruoyi
  * @date 2025-10-20
  */
@@ -80,7 +80,7 @@ public class OrderMain extends BaseEntity
     @Excel(name = "取货地址ID", readConverterExp = "外=卖关联merchant_db.merchant_address.merchant_address_id；其他关联user_db.user_address.user_address_id")
     private Long pickAddressId;
 
-    /** 取货地址文本（冗余，如“XX食堂3楼奶茶店”“XX宿舍2栋101”） */
+    /** 取货地址文本（冗余，如"XX食堂3楼奶茶店""XX宿舍2栋101"） */
     @Excel(name = "取货地址文本", readConverterExp = "冗=余，如“XX食堂3楼奶茶店”“XX宿舍2栋101”")
     private String pickAddress;
 
@@ -145,7 +145,68 @@ public class OrderMain extends BaseEntity
     @Excel(name = "配送费金额")
     private BigDecimal deliveryFeeAmount;
 
+    // ==================== 新增：骑手相关信息字段 ====================
+
+    /** 骑手ID（来自 order_delivery. rider_id） */
+    @Excel(name = "骑手ID")
+    private Long riderId;
+
+    /** 骑手昵称（来自 rider_base.nickname） */
+    @Excel(name = "骑手昵称")
+    private String riderNickname;
+
+    /** 骑手手机号（来自 rider_base.phone） */
+    @Excel(name = "骑手手机号")
+    private String riderPhone;
+
+    /** 骑手头像（来自 rider_base.avatar） */
+    @Excel(name = "骑手头像")
+    private String riderAvatar;
+
+    /** 骑手真实姓名（来自 rider_base.real_name） */
+    @Excel(name = "骑手真实姓名")
+    private String riderRealName;
+
+    /** 骑手工作状态（来自 rider_base.work_status：0-下线 1-上线 2-忙碌） */
+    @Excel(name = "骑手工作状态")
+    private Long riderWorkStatus;
+
+    /** 骑手信用分（来自 rider_base.credit_score） */
+    @Excel(name = "骑手信用分")
+    private Long riderCreditScore;
+
+    /** 配送状态（来自 order_delivery.delivery_status：0-待分配 1-已接单 2-已取货 3-已送达） */
+    @Excel(name = "配送状态")
+    private Long deliveryStatus;
+
+    /** 接单时间（来自 order_delivery.receive_time） */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @Excel(name = "接单时间", width = 30, dateFormat = "yyyy-MM-dd HH:mm:ss")
+    private Date receiveTime;
+
+    /** 取货时间（来自 order_delivery.pick_time） */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @Excel(name = "取货时间", width = 30, dateFormat = "yyyy-MM-dd HH:mm:ss")
+    private Date pickTime;
+
+    /** 送达时间（来自 order_delivery.deliver_time） */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @Excel(name = "送达时间", width = 30, dateFormat = "yyyy-MM-dd HH:mm:ss")
+    private Date deliverTime;
+
+    /** 配送费（来自 order_delivery. delivery_fee） */
+    @Excel(name = "配送费")
+    private BigDecimal deliveryFee;
+
+    /** 骑手收入（来自 order_delivery.rider_income） */
+    @Excel(name = "骑手收入")
+    private BigDecimal riderIncome;
+
+    // ==================== 关联列表 ====================
+
     private List<OrderTakeoutDetail> orderTakeoutDetailList;
+
+    // ==================== Getter/Setter ====================
 
     public List<OrderTakeoutDetail> getOrderTakeoutDetailList() {
         return orderTakeoutDetailList;
@@ -155,272 +216,272 @@ public class OrderMain extends BaseEntity
         this.orderTakeoutDetailList = orderTakeoutDetailList;
     }
 
-    public void setOrderMainId(Long orderMainId) 
+    public void setOrderMainId(Long orderMainId)
     {
         this.orderMainId = orderMainId;
     }
 
-    public Long getOrderMainId() 
+    public Long getOrderMainId()
     {
         return orderMainId;
     }
 
-    public void setOrderNo(String orderNo) 
+    public void setOrderNo(String orderNo)
     {
         this.orderNo = orderNo;
     }
 
-    public String getOrderNo() 
+    public String getOrderNo()
     {
         return orderNo;
     }
 
-    public void setUserId(Long userId) 
+    public void setUserId(Long userId)
     {
         this.userId = userId;
     }
 
-    public Long getUserId() 
+    public Long getUserId()
     {
         return userId;
     }
 
-    public void setUserNickname(String userNickname) 
+    public void setUserNickname(String userNickname)
     {
         this.userNickname = userNickname;
     }
 
-    public String getUserNickname() 
+    public String getUserNickname()
     {
         return userNickname;
     }
 
-    public void setOrderType(Long orderType) 
+    public void setOrderType(Long orderType)
     {
         this.orderType = orderType;
     }
 
-    public Long getOrderType() 
+    public Long getOrderType()
     {
         return orderType;
     }
 
-    public void setTotalAmount(BigDecimal totalAmount) 
+    public void setTotalAmount(BigDecimal totalAmount)
     {
         this.totalAmount = totalAmount;
     }
 
-    public BigDecimal getTotalAmount() 
+    public BigDecimal getTotalAmount()
     {
         return totalAmount;
     }
 
-    public void setPayAmount(BigDecimal payAmount) 
+    public void setPayAmount(BigDecimal payAmount)
     {
         this.payAmount = payAmount;
     }
 
-    public BigDecimal getPayAmount() 
+    public BigDecimal getPayAmount()
     {
         return payAmount;
     }
 
-    public void setDiscountAmount(BigDecimal discountAmount) 
+    public void setDiscountAmount(BigDecimal discountAmount)
     {
         this.discountAmount = discountAmount;
     }
 
-    public BigDecimal getDiscountAmount() 
+    public BigDecimal getDiscountAmount()
     {
         return discountAmount;
     }
 
-    public void setPayStatus(Long payStatus) 
+    public void setPayStatus(Long payStatus)
     {
         this.payStatus = payStatus;
     }
 
-    public Long getPayStatus() 
+    public Long getPayStatus()
     {
         return payStatus;
     }
 
-    public void setPayTime(Date payTime) 
+    public void setPayTime(Date payTime)
     {
         this.payTime = payTime;
     }
 
-    public Date getPayTime() 
+    public Date getPayTime()
     {
         return payTime;
     }
 
-    public void setPayType(Long payType) 
+    public void setPayType(Long payType)
     {
-        this.payType = payType;
+        this. payType = payType;
     }
 
-    public Long getPayType() 
+    public Long getPayType()
     {
         return payType;
     }
 
-    public void setOrderStatus(Long orderStatus) 
+    public void setOrderStatus(Long orderStatus)
     {
         this.orderStatus = orderStatus;
     }
 
-    public Long getOrderStatus() 
+    public Long getOrderStatus()
     {
         return orderStatus;
     }
 
-    public void setCancelReason(String cancelReason) 
+    public void setCancelReason(String cancelReason)
     {
         this.cancelReason = cancelReason;
     }
 
-    public String getCancelReason() 
+    public String getCancelReason()
     {
         return cancelReason;
     }
 
-    public void setCancelOperator(String cancelOperator) 
+    public void setCancelOperator(String cancelOperator)
     {
         this.cancelOperator = cancelOperator;
     }
 
-    public String getCancelOperator() 
+    public String getCancelOperator()
     {
         return cancelOperator;
     }
 
-    public void setPickAddressId(Long pickAddressId) 
+    public void setPickAddressId(Long pickAddressId)
     {
         this.pickAddressId = pickAddressId;
     }
 
-    public Long getPickAddressId() 
+    public Long getPickAddressId()
     {
         return pickAddressId;
     }
 
-    public void setPickAddress(String pickAddress) 
+    public void setPickAddress(String pickAddress)
     {
         this.pickAddress = pickAddress;
     }
 
-    public String getPickAddress() 
+    public String getPickAddress()
     {
         return pickAddress;
     }
 
-    public void setPickContact(String pickContact) 
+    public void setPickContact(String pickContact)
     {
         this.pickContact = pickContact;
     }
 
-    public String getPickContact() 
+    public String getPickContact()
     {
         return pickContact;
     }
 
-    public void setPickPhone(String pickPhone) 
+    public void setPickPhone(String pickPhone)
     {
         this.pickPhone = pickPhone;
     }
 
-    public String getPickPhone() 
+    public String getPickPhone()
     {
         return pickPhone;
     }
 
-    public void setPickLongitude(BigDecimal pickLongitude) 
+    public void setPickLongitude(BigDecimal pickLongitude)
     {
         this.pickLongitude = pickLongitude;
     }
 
-    public BigDecimal getPickLongitude() 
+    public BigDecimal getPickLongitude()
     {
         return pickLongitude;
     }
 
-    public void setPickLatitude(BigDecimal pickLatitude) 
+    public void setPickLatitude(BigDecimal pickLatitude)
     {
         this.pickLatitude = pickLatitude;
     }
 
-    public BigDecimal getPickLatitude() 
+    public BigDecimal getPickLatitude()
     {
         return pickLatitude;
     }
 
-    public void setDeliverAddressId(Long deliverAddressId) 
+    public void setDeliverAddressId(Long deliverAddressId)
     {
-        this.deliverAddressId = deliverAddressId;
+        this. deliverAddressId = deliverAddressId;
     }
 
-    public Long getDeliverAddressId() 
+    public Long getDeliverAddressId()
     {
         return deliverAddressId;
     }
 
-    public void setDeliverAddress(String deliverAddress) 
+    public void setDeliverAddress(String deliverAddress)
     {
         this.deliverAddress = deliverAddress;
     }
 
-    public String getDeliverAddress() 
+    public String getDeliverAddress()
     {
         return deliverAddress;
     }
 
-    public void setDeliverContact(String deliverContact) 
+    public void setDeliverContact(String deliverContact)
     {
         this.deliverContact = deliverContact;
     }
 
-    public String getDeliverContact() 
+    public String getDeliverContact()
     {
         return deliverContact;
     }
 
-    public void setDeliverPhone(String deliverPhone) 
+    public void setDeliverPhone(String deliverPhone)
     {
         this.deliverPhone = deliverPhone;
     }
 
-    public String getDeliverPhone() 
+    public String getDeliverPhone()
     {
         return deliverPhone;
     }
 
-    public void setDeliverLongitude(BigDecimal deliverLongitude) 
+    public void setDeliverLongitude(BigDecimal deliverLongitude)
     {
         this.deliverLongitude = deliverLongitude;
     }
 
-    public BigDecimal getDeliverLongitude() 
+    public BigDecimal getDeliverLongitude()
     {
         return deliverLongitude;
     }
 
-    public void setDeliverLatitude(BigDecimal deliverLatitude) 
+    public void setDeliverLatitude(BigDecimal deliverLatitude)
     {
         this.deliverLatitude = deliverLatitude;
     }
 
-    public BigDecimal getDeliverLatitude() 
+    public BigDecimal getDeliverLatitude()
     {
         return deliverLatitude;
     }
 
-    public void setCompleteTime(Date completeTime) 
+    public void setCompleteTime(Date completeTime)
     {
         this.completeTime = completeTime;
     }
 
-    public Date getCompleteTime() 
+    public Date getCompleteTime()
     {
         return completeTime;
     }
@@ -455,6 +516,112 @@ public class OrderMain extends BaseEntity
 
     public BigDecimal getDeliveryFeeAmount() {
         return deliveryFeeAmount;
+    }
+
+    // ==================== 新增字段的 Getter/Setter ====================
+
+    public Long getRiderId() {
+        return riderId;
+    }
+
+    public void setRiderId(Long riderId) {
+        this.riderId = riderId;
+    }
+
+    public String getRiderNickname() {
+        return riderNickname;
+    }
+
+    public void setRiderNickname(String riderNickname) {
+        this.riderNickname = riderNickname;
+    }
+
+    public String getRiderPhone() {
+        return riderPhone;
+    }
+
+    public void setRiderPhone(String riderPhone) {
+        this.riderPhone = riderPhone;
+    }
+
+    public String getRiderAvatar() {
+        return riderAvatar;
+    }
+
+    public void setRiderAvatar(String riderAvatar) {
+        this.riderAvatar = riderAvatar;
+    }
+
+    public String getRiderRealName() {
+        return riderRealName;
+    }
+
+    public void setRiderRealName(String riderRealName) {
+        this.riderRealName = riderRealName;
+    }
+
+    public Long getRiderWorkStatus() {
+        return riderWorkStatus;
+    }
+
+    public void setRiderWorkStatus(Long riderWorkStatus) {
+        this.riderWorkStatus = riderWorkStatus;
+    }
+
+    public Long getRiderCreditScore() {
+        return riderCreditScore;
+    }
+
+    public void setRiderCreditScore(Long riderCreditScore) {
+        this.riderCreditScore = riderCreditScore;
+    }
+
+    public Long getDeliveryStatus() {
+        return deliveryStatus;
+    }
+
+    public void setDeliveryStatus(Long deliveryStatus) {
+        this.deliveryStatus = deliveryStatus;
+    }
+
+    public Date getReceiveTime() {
+        return receiveTime;
+    }
+
+    public void setReceiveTime(Date receiveTime) {
+        this.receiveTime = receiveTime;
+    }
+
+    public Date getPickTime() {
+        return pickTime;
+    }
+
+    public void setPickTime(Date pickTime) {
+        this.pickTime = pickTime;
+    }
+
+    public Date getDeliverTime() {
+        return deliverTime;
+    }
+
+    public void setDeliverTime(Date deliverTime) {
+        this.deliverTime = deliverTime;
+    }
+
+    public BigDecimal getDeliveryFee() {
+        return deliveryFee;
+    }
+
+    public void setDeliveryFee(BigDecimal deliveryFee) {
+        this.deliveryFee = deliveryFee;
+    }
+
+    public BigDecimal getRiderIncome() {
+        return riderIncome;
+    }
+
+    public void setRiderIncome(BigDecimal riderIncome) {
+        this.riderIncome = riderIncome;
     }
 
     @Override
@@ -493,6 +660,20 @@ public class OrderMain extends BaseEntity
                 .append("createTime", getCreateTime())
                 .append("updateTime", getUpdateTime())
                 .append("completeTime", getCompleteTime())
+                // 新增字段
+                .append("riderId", getRiderId())
+                .append("riderNickname", getRiderNickname())
+                .append("riderPhone", getRiderPhone())
+                .append("riderAvatar", getRiderAvatar())
+                .append("riderRealName", getRiderRealName())
+                .append("riderWorkStatus", getRiderWorkStatus())
+                .append("riderCreditScore", getRiderCreditScore())
+                .append("deliveryStatus", getDeliveryStatus())
+                .append("receiveTime", getReceiveTime())
+                .append("pickTime", getPickTime())
+                .append("deliverTime", getDeliverTime())
+                .append("deliveryFee", getDeliveryFee())
+                .append("riderIncome", getRiderIncome())
                 .toString();
     }
 }
