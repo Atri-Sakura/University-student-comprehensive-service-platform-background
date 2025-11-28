@@ -6,11 +6,18 @@ import com.ruoyi.common. enums.BusinessType;
 import com.ruoyi.common.utils.SecurityUtils;
 import com. ruoyi.platform.domain.MerchantBase;
 import com.ruoyi.platform.domain.MerchantAddress;
+import com.ruoyi.platform.domain.MerchantWallet;
+import com.ruoyi.platform.mapper.MerchantWalletMapper;
 import com.ruoyi.platform.merchant.service.IMerchantInfoService;
 import com.ruoyi.platform.merchant.service. IMerchantAddressInfoService;
+import com.ruoyi.platform.service.IMerchantWalletService;
+import org.aspectj.weaver.loadtime.Aj;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind. annotation.*;
+
+import java.math.BigDecimal;
+import java.util.Date;
 
 /**
  * 商家基础信息控制器
@@ -25,6 +32,9 @@ public class MerchantInfoController {
 
     @Autowired
     private IMerchantAddressInfoService merchantAddressInfoService;
+
+    @Autowired
+    private IMerchantWalletService merchantWalletService;
 
     /**
      * 查询商家基础信息
@@ -118,4 +128,39 @@ public class MerchantInfoController {
         }
         return AjaxResult.error("商家地址修改失败");
     }
+
+    /**
+     * 初始化钱包
+     * @return
+     */
+    @PostMapping("initWallet")
+    public AjaxResult initMerchantWallet(@RequestParam(required = false) Long merchantWalletId) {
+        // 从Security上下文获取商家ID（更安全）
+        Long merchantBaseId = SecurityUtils.getMerchantBaseId();
+        if(merchantBaseId == null){
+            return AjaxResult.error("商家ID不能为空");
+        }
+
+        // 检查钱包是否已存在，避免重复创建
+        MerchantWallet existingWallet = merchantWalletService.getWalletByMerchantId(merchantBaseId);
+        if(existingWallet != null){
+            return AjaxResult.error("该商家钱包已存在，无需重复创建");
+        }
+
+        // 创建钱包对象
+        MerchantWallet merchantWallet = new MerchantWallet();
+        merchantWallet.setMerchantWalletId(merchantWalletId); // 可选，若使用自增主键可不用设置
+        merchantWallet.setMerchantBaseId(merchantBaseId);
+        merchantWallet.setBalance(BigDecimal.ZERO); // 初始余额设为0
+        merchantWallet.setFreezeAmount(BigDecimal.ZERO); // 初始冻结金额设为0
+        merchantWallet.setCreateTime(new Date()); // 设置创建时间
+        merchantWallet.setUpdateTime(new Date()); // 设置更新时间
+
+        // 插入数据库
+        merchantWalletService.insertMerchantWallet(merchantWallet);
+
+        return AjaxResult.success("钱包初始化成功");
+    }
+
+
 }
