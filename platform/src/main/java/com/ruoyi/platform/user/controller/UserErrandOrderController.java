@@ -138,7 +138,7 @@ public class UserErrandOrderController extends BaseController {
     @GetMapping("/{orderMainId}")
     public AjaxResult getOrderDetail(@PathVariable("orderMainId") Long orderMainId) {
         Long userId = SecurityUtils.getUserBaseId();
-        OrderMain order = orderMainMapper.selectOrderMainWithDetailsByOrderMainId(orderMainId);
+        OrderMain order = orderMainMapper.selectErrandOrderMainWithDetailsByOrderMainId(orderMainId);
 
         // 权限校验
         if (order == null || !order.getUserId().equals(userId)) {
@@ -147,4 +147,6 @@ public class UserErrandOrderController extends BaseController {
 
         return AjaxResult.success(order);
     }
+
+
 }
