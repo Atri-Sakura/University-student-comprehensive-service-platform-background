@@ -287,7 +287,7 @@
 </select>
 
     <!-- 新增/修改方法：查询跑腿订单详情(包含明细列表 + 骑手信息) -->
-<select id="selectErrandOrderMainWithDetailsByOrderMainId" parameterType="Long" resultMap="ErrandOrderMainResultWithDetails">
+<select id="selectErrandOrderMainWithDetailsByOrderNo" parameterType="String" resultMap="ErrandOrderMainResultWithDetails">
         SELECT
         om.*,
         -- 跑腿订单明细字段
@@ -318,7 +318,7 @@
         LEFT JOIN order_errand_detail oed ON om.order_main_id = oed.order_main_id
         LEFT JOIN order_delivery od ON om.order_main_id = od.order_main_id
         LEFT JOIN rider_base rb ON od.rider_id = rb.rider_base_id
-        WHERE om.order_main_id = #{orderMainId}
+        WHERE om.order_no = #{orderNo}
         AND om.order_type = 2  <!-- 2表示跑腿订单类型，可根据实际业务调整 -->
 </select>
 
@@ -379,7 +379,7 @@
         ORDER BY om.create_time DESC
 </select>
     <!-- 根据订单ID查询二手订单详情(包含明细列表 + 骑手信息) -->
-    <select id="selectSecondHandOrderMainWithDetailsByOrderMainId" parameterType="Long" resultMap="SecondhandOrderMainResultWithDetails">
+    <select id="selectSecondHandOrderMainWithDetailsByOrderNo" parameterType="String" resultMap="SecondhandOrderMainResultWithDetails">
         SELECT
         om.*,
         -- 二手订单明细字段
@@ -412,12 +412,12 @@
         LEFT JOIN order_secondhand_detail oshd ON om.order_main_id = oshd.order_main_id
         LEFT JOIN order_delivery od ON om.order_main_id = od.order_main_id
         LEFT JOIN rider_base rb ON od.rider_id = rb.rider_base_id
-        WHERE om.order_main_id = #{orderMainId}
+        WHERE om.order_no = #{orderNo}
         AND om.order_type = 3  <!-- 3表示二手交易单（与OrderMain的orderType枚举一致） -->
     </select>
 
 <!-- 新增/修改方法：查询订单详情(包含明细列表 + 骑手信息) -->
-<select id="selectOrderMainWithDetailsByOrderMainId" parameterType="Long" resultMap="OrderMainResultWithDetails">
+<select id="selectOrderMainWithDetailsByOrderNo" parameterType="String" resultMap="OrderMainResultWithDetails">
     SELECT
     om.*,
     -- 订单明细字段
@@ -451,7 +451,7 @@
     LEFT JOIN order_takeout_detail otd ON om.order_main_id = otd.order_main_id
     LEFT JOIN order_delivery od ON om.order_main_id = od.order_main_id
     LEFT JOIN rider_base rb ON od.rider_id = rb.rider_base_id
-    WHERE om.order_main_id = #{orderMainId}
+    WHERE om.order_no = #{orderNo}
 </select>
 
 <insert id="insertOrderMain" parameterType="OrderMain">
