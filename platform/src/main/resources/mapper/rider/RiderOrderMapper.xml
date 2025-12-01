@@ -27,6 +27,7 @@
         <result property="createTime" column="create_time"/>
         <result property="updateTime" column="update_time"/>
         <result property="completeTime" column="complete_time"/>
+        <result property="remark" column="remark"/>
     </resultMap>
 
     <!-- 查询可接单的订单列表（待取货状态且未被接单） -->
@@ -41,22 +42,34 @@
             <if test="orderNo != null and orderNo != ''">
                 AND om.order_no LIKE CONCAT('%', #{orderNo}, '%')
             </if>
+            <if test="orderType != null">
+                AND om.order_type = #{orderType}
+            </if>
         </where>
         ORDER BY om.create_time DESC
     </select>
 
     <!-- 查询骑手自己的订单列表 -->
-    <select id="selectRiderOrderList" parameterType="OrderMain" resultMap="OrderMainResult">
+    <select id="selectRiderOrderList" resultMap="OrderMainResult">
         SELECT DISTINCT om.*
         FROM order_main om
-        INNER JOIN order_delivery od ON om.order_main_id = od.order_main_id
+        INNER JOIN order_delivery od ON om. order_main_id = od. order_main_id
         <where>
-            od.rider_id = #{params.riderId}
-            <if test="orderStatus != null">
-                AND om.order_status = #{orderStatus}
+            <!-- 核心条件：必须是该骑手的订单 -->
+            od.rider_id = #{riderId}
+
+            <!-- 动态查询条件 -->
+            <if test="orderMain != null and orderMain.orderStatus != null">
+                AND om. order_status = #{orderMain. orderStatus}
             </if>
-            <if test="orderNo != null and orderNo != ''">
-                AND om.order_no LIKE CONCAT('%', #{orderNo}, '%')
+            <if test="orderMain != null and orderMain.orderNo != null and orderMain.orderNo != ''">
+                AND om.order_no LIKE CONCAT('%', #{orderMain.orderNo}, '%')
+            </if>
+            <if test="orderMain != null and orderMain.orderType != null">
+                AND om.order_type = #{orderMain.orderType}
+            </if>
+            <if test="orderMain != null and orderMain.payStatus != null">
+                AND om.pay_status = #{orderMain.payStatus}
             </if>
         </where>
         ORDER BY om.create_time DESC
