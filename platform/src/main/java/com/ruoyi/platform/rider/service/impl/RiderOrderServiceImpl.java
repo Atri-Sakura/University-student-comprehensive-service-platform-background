@@ -1,15 +1,18 @@
 package com.ruoyi.platform.rider.service.impl;
 
 import com.ruoyi.common.exception.ServiceException;
-import com. ruoyi.platform.domain. OrderMain;
+import com.ruoyi.platform.domain.OrderMain;
+import com.ruoyi.platform.rider.domain.vo.RiderOrderListVO;
 import com.ruoyi.platform.rider.mapper.RiderOrderMapper;
-import com.ruoyi. platform.rider.service.IRiderOrderService;
-import org. slf4j.Logger;
+import com.ruoyi.platform.rider.service.IRiderOrderService;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 骑手订单服务实现类
@@ -25,58 +28,34 @@ public class RiderOrderServiceImpl implements IRiderOrderService {
     @Autowired
     private RiderOrderMapper riderOrderMapper;
 
-    /**
-     * 查询可接单的订单列表（待取货状态且未被接单）
-     *
-     * @param orderMain 查询条件
-     * @return 订单列表
-     */
     @Override
-    public List<OrderMain> selectAvailableOrderList(OrderMain orderMain) {
+    public List<RiderOrderListVO> selectAvailableOrderList(OrderMain orderMain) {
         return riderOrderMapper.selectAvailableOrderList(orderMain);
     }
 
-    /**
-     * 查询骑手自己的订单列表
-     *
-     * @param riderId 骑手ID
-     * @param orderMain 查询条件
-     * @return 订单列表
-     */
     @Override
-    public List<OrderMain> selectRiderOrderList(Long riderId, OrderMain orderMain) {
-        // 验证骑手ID不能为空
+    public List<RiderOrderListVO> selectRiderOrderList(Long riderId, OrderMain orderMain, String timeRange) {
         if (riderId == null) {
             log.error("查询骑手订单列表失败：骑手ID为空");
             throw new ServiceException("骑手ID不能为空");
         }
 
-        log.info("查询骑手订单列表 - 骑手ID: {}, 查询条件: {}", riderId, orderMain);
+        log.info("查询骑手订单列表 - 骑手ID: {}, 时间范围: {}", riderId, timeRange);
 
-        // 直接传递两个参数，不再使用 params
-        List<OrderMain> orders = riderOrderMapper.selectRiderOrderList(riderId, orderMain);
+        List<RiderOrderListVO> orders = riderOrderMapper.selectRiderOrderList(riderId, orderMain, timeRange);
 
-        log.info("查询骑手订单列表成功 - 骑手ID: {}, 结果数量: {}", riderId, orders.size());
+        log.info("查询骑手订单列表成功 - 结果数量: {}", orders. size());
 
         return orders;
     }
 
-    /**
-     * 查询骑手订单详情
-     *
-     * @param riderId 骑手ID
-     * @param orderMainId 订单ID
-     * @return 订单详情
-     */
     @Override
     public OrderMain selectRiderOrderById(Long riderId, Long orderMainId) {
         if (riderId == null) {
-            log.error("查询骑手订单详情失败：骑手ID为空");
             throw new ServiceException("骑手ID不能为空");
         }
 
         if (orderMainId == null) {
-            log.error("查询骑手订单详情失败：订单ID为空");
             throw new ServiceException("订单ID不能为空");
         }
 
@@ -85,12 +64,25 @@ public class RiderOrderServiceImpl implements IRiderOrderService {
         OrderMain order = riderOrderMapper.selectRiderOrderById(riderId, orderMainId);
 
         if (order == null) {
-            log.warn("订单不存在或无权查看 - 骑手ID: {}, 订单ID: {}", riderId, orderMainId);
             throw new ServiceException("订单不存在或无权查看");
         }
 
-        log.info("查询骑手订单详情成功 - 订单号: {}", order.getOrderNo());
-
         return order;
+    }
+
+    @Override
+    public Map<String, Object> getOrderStatistics(Long riderId) {
+        if (riderId == null) {
+            throw new ServiceException("骑手ID不能为空");
+        }
+
+        Map<String, Object> statistics = new HashMap<>();
+        statistics. put("todayCount", riderOrderMapper.countByTimeRange(riderId, "today"));
+        statistics.put("yesterdayCount", riderOrderMapper.countByTimeRange(riderId, "yesterday"));
+        statistics. put("weekCount", riderOrderMapper.countByTimeRange(riderId, "week"));
+        statistics.put("monthCount", riderOrderMapper.countByTimeRange(riderId, "month"));
+        statistics.put("totalCount", riderOrderMapper.countByTimeRange(riderId, null));
+
+        return statistics;
     }
 }
