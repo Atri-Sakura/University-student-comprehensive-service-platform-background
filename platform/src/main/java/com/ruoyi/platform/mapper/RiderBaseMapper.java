@@ -120,4 +120,12 @@ public interface RiderBaseMapper
     public RiderBase selectRiderBaseByPhone(String phone);
 
     int updateRiderBaseBasicInfo(RiderBase riderBase);
+
+    /**
+     * 根据用户ID查询骑手基础信息
+     *
+     * @param userId 用户ID
+     * @return 骑手基础信息
+     */
+    RiderBase selectRiderBaseByUserId(@Param("userId") Long userId);
 }

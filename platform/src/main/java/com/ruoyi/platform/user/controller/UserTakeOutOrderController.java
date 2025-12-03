@@ -128,20 +128,58 @@ public class UserTakeOutOrderController extends BaseController {
     /**
      * 查询订单详情
      *
-     * @param orderMainId 订单ID
+     * @param orderNo 订单ID
      * @return 订单详情
      */
-    @GetMapping("/{orderMainId}")
-    public AjaxResult getOrderDetail(@PathVariable("orderMainId") Long orderMainId) {
+    @GetMapping("/{orderNo}")
+    public AjaxResult getOrderDetail(@PathVariable("orderNo") String orderNo) {
         Long userId = SecurityUtils.getUserBaseId();
-        OrderMain order = orderMainMapper.selectOrderMainWithDetailsByOrderMainId(orderMainId);
+        OrderMain order = orderMainMapper.selectOrderMainWithDetailsByOrderNo(orderNo);
 
         // 权限校验
-        if (order == null || !order.getUserId().equals(userId)) {
-            return AjaxResult.error("订单不存在或无权查看");
-        }
+//        if (order == null || !order.getUserId().equals(userId)) {
+//            return AjaxResult.error("订单不存在或无权查看");
+//        }
 
         return AjaxResult.success(order);
     }
     // TODO 查看三种订单详情接口
+
+    /**
+     * 查询跑腿订单详情
+     *
+     * @param orderNo 订单ID
+     * @return 订单详情
+     */
+    @GetMapping("/errandOrder/{orderNo}")
+    public AjaxResult getErrandOrderDetail(@PathVariable("orderNo") String orderNo) {
+        Long userId = SecurityUtils.getUserBaseId();
+        OrderMain order = orderMainMapper.selectErrandOrderMainWithDetailsByOrderNo(orderNo);
+
+        // 权限校验
+//        if (order == null || !order.getUserId().equals(userId)) {
+//            return AjaxResult.error("订单不存在或无权查看");
+//        }
+
+        return AjaxResult.success("查询成功",order);
+    }
+
+    /**
+     * 查询二手订单详情
+     *
+     * @param orderNo 订单ID
+     * @return 订单详情
+     */
+    @GetMapping("/secondHandOrder/{orderNo}")
+    public AjaxResult getSecondHandOrderDetail(@PathVariable("orderNo") String orderNo) {
+        Long userId = SecurityUtils.getUserBaseId();
+        OrderMain order = orderMainMapper.selectSecondHandOrderMainWithDetailsByOrderNo(orderNo);
+
+        // 权限校验
+//        if (order == null || !order.getUserId().equals(userId)) {
+//            return AjaxResult.error("订单不存在或无权查看");
+//        }
+
+        return AjaxResult.success(order);
+    }
 }

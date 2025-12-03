@@ -129,22 +129,7 @@ public class UserErrandOrderController extends BaseController {
         return getDataTable(list);
     }
 
-    /**
-     * 查询订单详情
-     *
-     * @param orderMainId 订单ID
-     * @return 订单详情
-     */
-    @GetMapping("/{orderMainId}")
-    public AjaxResult getOrderDetail(@PathVariable("orderMainId") Long orderMainId) {
-        Long userId = SecurityUtils.getUserBaseId();
-        OrderMain order = orderMainMapper.selectOrderMainWithDetailsByOrderMainId(orderMainId);
 
-        // 权限校验
-        if (order == null || !order.getUserId().equals(userId)) {
-            return AjaxResult.error("订单不存在或无权查看");
-        }
 
-        return AjaxResult.success(order);
-    }
+
 }

@@ -4,6 +4,19 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.ruoyi.platform.rider.mapper.RiderOrderMapper">
 
+    <!-- 列表查询ResultMap（简化字段） -->
+    <resultMap type="com.ruoyi.platform.rider.domain.vo.RiderOrderListVO" id="OrderListResult">
+        <result property="orderMainId" column="order_main_id"/>
+        <result property="orderNo" column="order_no"/>
+        <result property="createTime" column="create_time"/>
+        <result property="pickAddress" column="pick_address"/>
+        <result property="deliverAddress" column="deliver_address"/>
+        <result property="totalAmount" column="total_amount"/>
+        <result property="orderStatus" column="order_status"/>
+        <result property="orderType" column="order_type"/>
+    </resultMap>
+
+    <!-- 详情查询ResultMap（完整字段） -->
     <resultMap type="OrderMain" id="OrderMainResult">
         <result property="orderMainId" column="order_main_id"/>
         <result property="orderNo" column="order_no"/>
@@ -14,61 +27,149 @@
         <result property="totalAmount" column="total_amount"/>
         <result property="payAmount" column="pay_amount"/>
         <result property="discountAmount" column="discount_amount"/>
+        <result property="goodsAmount" column="goods_amount"/>
+        <result property="deliveryFeeAmount" column="delivery_fee_amount"/>
         <result property="payStatus" column="pay_status"/>
         <result property="payTime" column="pay_time"/>
         <result property="payType" column="pay_type"/>
         <result property="orderStatus" column="order_status"/>
+        <result property="pickAddressId" column="pick_address_id"/>
         <result property="pickAddress" column="pick_address"/>
         <result property="pickContact" column="pick_contact"/>
         <result property="pickPhone" column="pick_phone"/>
+        <result property="pickLongitude" column="pick_longitude"/>
+        <result property="pickLatitude" column="pick_latitude"/>
+        <result property="deliverAddressId" column="deliver_address_id"/>
         <result property="deliverAddress" column="deliver_address"/>
         <result property="deliverContact" column="deliver_contact"/>
         <result property="deliverPhone" column="deliver_phone"/>
+        <result property="deliverLongitude" column="deliver_longitude"/>
+        <result property="deliverLatitude" column="deliver_latitude"/>
         <result property="createTime" column="create_time"/>
         <result property="updateTime" column="update_time"/>
         <result property="completeTime" column="complete_time"/>
+        <result property="remark" column="remark"/>
     </resultMap>
 
-    <!-- 查询可接单的订单列表（待取货状态且未被接单） -->
-    <select id="selectAvailableOrderList" parameterType="OrderMain" resultMap="OrderMainResult">
-        SELECT DISTINCT om.*
+    <!-- 查询可接单的订单列表 -->
+    <select id="selectAvailableOrderList" parameterType="OrderMain" resultMap="OrderListResult">
+        SELECT
+        om.order_main_id,
+        om.order_no,
+        om.create_time,
+        om.pick_address,
+        om.deliver_address,
+        om.total_amount,
+        om.order_status,
+        om.order_type
         FROM order_main om
         INNER JOIN order_delivery od ON om.order_main_id = od.order_main_id
         <where>
-            om.order_status = 2  <!-- 2-待取货 -->
-            AND om.pay_status = 1  <!-- 1-已支付 -->
-            AND od.rider_id IS NULL  <!-- 未被骑手接单 -->
+            om.order_status = 2
+            AND om.pay_status = 1
+            AND od.rider_id IS NULL
             <if test="orderNo != null and orderNo != ''">
                 AND om.order_no LIKE CONCAT('%', #{orderNo}, '%')
+            </if>
+            <if test="orderType != null">
+                AND om. order_type = #{orderType}
+            </if>
+        </where>
+        ORDER BY om. create_time DESC
+    </select>
+
+    <!-- 查询骑手自己的订单列表（简化字段） -->
+    <select id="selectRiderOrderList" resultMap="OrderListResult">
+        SELECT
+        om.order_main_id,
+        om.order_no,
+        om.create_time,
+        om.pick_address,
+        om.deliver_address,
+        om.total_amount,
+        om.order_status,
+        om.order_type
+        FROM order_main om
+        INNER JOIN order_delivery od ON om.order_main_id = od.order_main_id
+        <where>
+            od.rider_id = #{riderId}
+
+            <!-- 时间范围筛选 -->
+            <if test="timeRange != null and timeRange != ''">
+                <choose>
+                    <when test="timeRange == 'today'">
+                        AND om.create_time &gt;= DATE_FORMAT(CURDATE(), '%Y-%m-%d 00:00:00')
+                        AND om.create_time &lt;= NOW()
+                    </when>
+                    <when test="timeRange == 'yesterday'">
+                        AND om.create_time &gt;= DATE_SUB(CURDATE(), INTERVAL 1 DAY)
+                        AND om.create_time &lt; DATE_FORMAT(CURDATE(), '%Y-%m-%d 00:00:00')
+                    </when>
+                    <when test="timeRange == 'week'">
+                        AND om. create_time &gt;= DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY)
+                        AND om. create_time &lt;= NOW()
+                    </when>
+                    <when test="timeRange == 'month'">
+                        AND om.create_time &gt;= DATE_FORMAT(CURDATE(), '%Y-%m-01 00:00:00')
+                        AND om.create_time &lt;= NOW()
+                    </when>
+                </choose>
+            </if>
+
+            <if test="orderMain != null and orderMain.orderStatus != null">
+                AND om. order_status = #{orderMain. orderStatus}
+            </if>
+            <if test="orderMain != null and orderMain.orderNo != null and orderMain.orderNo != ''">
+                AND om.order_no LIKE CONCAT('%', #{orderMain.orderNo}, '%')
+            </if>
+            <if test="orderMain != null and orderMain.orderType != null">
+                AND om.order_type = #{orderMain.orderType}
+            </if>
+            <if test="orderMain != null and orderMain.payStatus != null">
+                AND om.pay_status = #{orderMain.payStatus}
             </if>
         </where>
         ORDER BY om.create_time DESC
     </select>
 
-    <!-- 查询骑手自己的订单列表 -->
-    <select id="selectRiderOrderList" parameterType="OrderMain" resultMap="OrderMainResult">
-        SELECT DISTINCT om.*
-        FROM order_main om
-        INNER JOIN order_delivery od ON om.order_main_id = od.order_main_id
-        <where>
-            od.rider_id = #{params.riderId}
-            <if test="orderStatus != null">
-                AND om.order_status = #{orderStatus}
-            </if>
-            <if test="orderNo != null and orderNo != ''">
-                AND om.order_no LIKE CONCAT('%', #{orderNo}, '%')
-            </if>
-        </where>
-        ORDER BY om.create_time DESC
-    </select>
-
-    <!-- 查询骑手订单详情 -->
+    <!-- 查询骑手订单详情（完整字段） -->
     <select id="selectRiderOrderById" resultMap="OrderMainResult">
         SELECT om.*
         FROM order_main om
                  INNER JOIN order_delivery od ON om.order_main_id = od.order_main_id
         WHERE om.order_main_id = #{orderMainId}
           AND od.rider_id = #{riderId}
+    </select>
+
+    <!-- 按时间范围统计订单数量 -->
+    <select id="countByTimeRange" resultType="int">
+        SELECT COUNT(DISTINCT om.order_main_id)
+        FROM order_main om
+        INNER JOIN order_delivery od ON om.order_main_id = od.order_main_id
+        <where>
+            od.rider_id = #{riderId}
+
+            <if test="timeRange != null and timeRange != ''">
+                <choose>
+                    <when test="timeRange == 'today'">
+                        AND om.create_time &gt;= DATE_FORMAT(CURDATE(), '%Y-%m-%d 00:00:00')
+                        AND om.create_time &lt;= NOW()
+                    </when>
+                    <when test="timeRange == 'yesterday'">
+                        AND om.create_time &gt;= DATE_SUB(CURDATE(), INTERVAL 1 DAY)
+                        AND om.create_time &lt; DATE_FORMAT(CURDATE(), '%Y-%m-%d 00:00:00')
+                    </when>
+                    <when test="timeRange == 'week'">
+                        AND om.create_time &gt;= DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY)
+                        AND om.create_time &lt;= NOW()
+                    </when>
+                    <when test="timeRange == 'month'">
+                        AND om. create_time &gt;= DATE_FORMAT(CURDATE(), '%Y-%m-01 00:00:00')
+                        AND om.create_time &lt;= NOW()
+                    </when>
+                </choose>
+            </if>
+        </where>
     </select>
 
 </mapper>

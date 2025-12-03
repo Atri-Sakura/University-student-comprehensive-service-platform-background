@@ -7,9 +7,10 @@ import com.ruoyi.platform.domain.RiderWallet;
 import com.ruoyi.platform.domain.vo.RiderWalletBalanceVO;
 import com.ruoyi.platform.service.IRiderWalletService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.math.BigDecimal;
+import java.util.Random;
 
 @RestController
 @RequestMapping("api/rider/wallet")
@@ -38,6 +39,35 @@ public class RiderWalletRiderController {
 
         RiderWalletBalanceVO vo = new RiderWalletBalanceVO(wallet.getBalance());
         return AjaxResult.success("查询成功",vo);
+    }
+
+    /**
+     * 初始化骑手钱包
+     * @return
+     */
+    @PostMapping("init")
+    public AjaxResult addRiderWallet() {
+        Long riderId = SecurityUtils.getUserBaseId();
+        if (riderId == null) {
+            return AjaxResult.error("用户Id为空");
+        }
+        if(riderWalletService.selectRiderWalletByRiderBaseId(riderId) != null) {
+            return AjaxResult.error("钱包已存在,请勿重复创建。");
+        }
+        try {
+            Random random = new Random();
+            int randomId = random.nextInt(90000000) + 10000000;
+            Long riderWalletId = Long.valueOf(randomId);
+            RiderWallet wallet = new RiderWallet();
+            wallet.setRiderBaseId(riderId);
+            wallet.setRiderWalletId(riderWalletId);
+            wallet.setFreezeAmount(new BigDecimal(0.00));
+            wallet.setBalance(new BigDecimal(0.00));
+            riderWalletService.insertRiderWallet(wallet);
+            return AjaxResult.success("初始化钱包成功");
+        }catch (Exception e){
+            return AjaxResult.error(e.getMessage());
+        }
     }
 
 }

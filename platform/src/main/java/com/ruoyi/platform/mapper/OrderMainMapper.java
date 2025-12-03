@@ -81,7 +81,30 @@ public interface OrderMainMapper {
      */
     public List<OrderMain> selectOrderMainList(OrderMain orderMain);
 
-    public OrderMain selectOrderMainWithDetailsByOrderMainId(Long orderMainId);
+    public OrderMain selectOrderMainWithDetailsByOrderNo(String orderNo);
+
+    /**
+     * 根据订单ID查询跑腿订单详情（包含明细和骑手信息）
+     * @param orderNo 订单ID
+     * @return 跑腿订单信息
+     */
+    OrderMain selectErrandOrderMainWithDetailsByOrderNo(String orderNo);
+
+    /**
+     * 查询跑腿订单列表（包含明细和骑手信息）
+     * @param orderMain 跑腿订单信息
+     * @return 跑腿订单集合
+     */
+    List<OrderMain> selectErrandOrderMainListWithDetails(OrderMain orderMain);
+
+    /**
+     * 根据订单ID查询二手订单订单详情（包含明细和骑手信息）
+     * @param orderNo 订单ID
+     * @return 跑腿订单信息
+     */
+    OrderMain selectSecondHandOrderMainWithDetailsByOrderNo(String orderNo);
+
+
 
     /**
      * 新增订单主（整合地址与定位信息）

@@ -108,6 +108,140 @@
         <result property="settleStatus"         column="settle_status"      />
     </collection>
 </resultMap>
+    <!-- 包含二手订单明细和骑手信息的ResultMap -->
+    <resultMap type="OrderMain" id="SecondhandOrderMainResultWithDetails">
+        <!-- 主表字段映射（与ErrandOrderMainResultWithDetails一致） -->
+        <id     property="orderMainId"      column="order_main_id"      />
+        <result property="orderNo"          column="order_no"           />
+        <result property="userId"           column="user_id"            />
+        <result property="userNickname"     column="user_nickname"      />
+        <result property="orderType"        column="order_type"         />
+        <result property="totalAmount"      column="total_amount"       />
+        <result property="payAmount"        column="pay_amount"         />
+        <result property="discountAmount"   column="discount_amount"    />
+        <result property="payStatus"        column="pay_status"         />
+        <result property="payTime"          column="pay_time"           />
+        <result property="payType"          column="pay_type"           />
+        <result property="orderStatus"      column="order_status"       />
+        <result property="cancelReason"     column="cancel_reason"      />
+        <result property="cancelOperator"   column="cancel_operator"    />
+        <result property="pickAddressId"    column="pick_address_id"    />
+        <result property="pickAddress"      column="pick_address"       />
+        <result property="pickContact"      column="pick_contact"       />
+        <result property="pickPhone"        column="pick_phone"         />
+        <result property="pickLongitude"    column="pick_longitude"     />
+        <result property="pickLatitude"     column="pick_latitude"      />
+        <result property="deliverAddressId" column="deliver_address_id" />
+        <result property="deliverAddress"   column="deliver_address"    />
+        <result property="deliverContact"   column="deliver_contact"    />
+        <result property="deliverPhone"     column="deliver_phone"      />
+        <result property="deliverLongitude" column="deliver_longitude"  />
+        <result property="deliverLatitude"  column="deliver_latitude"   />
+        <result property="createTime"       column="create_time"        />
+        <result property="updateTime"       column="update_time"        />
+        <result property="completeTime"     column="complete_time"      />
+        <result property="merchantId"       column="merchant_id"        />
+        <result property="platformHoldAmount" column="platform_hold_amount" />
+        <result property="goodsAmount"      column="goods_amount"       />
+        <result property="deliveryFeeAmount" column="delivery_fee_amount" />
+
+        <!-- 骑手信息字段（与ErrandOrderMainResultWithDetails一致） -->
+        <result property="riderId"          column="rider_id"           />
+        <result property="riderNickname"    column="rider_nickname"     />
+        <result property="riderPhone"       column="rider_phone"        />
+        <result property="riderAvatar"      column="rider_avatar"       />
+        <result property="riderRealName"    column="rider_real_name"    />
+        <result property="riderWorkStatus"  column="rider_work_status"  />
+        <result property="riderCreditScore" column="rider_credit_score" />
+        <result property="deliveryStatus"   column="delivery_status"    />
+        <result property="receiveTime"      column="receive_time"       />
+        <result property="pickTime"         column="pick_time"          />
+        <result property="deliverTime"      column="deliver_time"       />
+        <result property="deliveryFee"      column="delivery_fee"       />
+        <result property="riderIncome"      column="rider_income"       />
+
+        <!-- 一对多关联：二手订单明细列表 -->
+        <collection property="orderSecondhandDetailList" ofType="OrderSecondhandDetail" javaType="java.util.List">
+            <id     property="orderSecondhandDetailId" column="order_secondhand_detail_id" />
+            <result property="orderMainId"              column="order_main_id"              />
+            <result property="goodsId"                  column="goods_id"                   />
+            <result property="goodsName"                column="goods_name"                 />
+            <result property="sellerId"                 column="seller_id"                  />
+            <result property="sellWay"                  column="sell_way"                   />
+            <result property="sellerNickname"           column="seller_nickname"            />
+            <result property="depositAmount"            column="deposit_amount"             />
+            <result property="confirmTime"              column="confirm_time"               />
+            <result property="evaluateStatus"           column="evaluate_status"            />
+            <!-- 继承BaseEntity的时间字段（若表中存在） -->
+            <result property="createTime"               column="secondhand_create_time"     />
+            <result property="updateTime"               column="secondhand_update_time"     />
+        </collection>
+    </resultMap>
+
+    <resultMap type="OrderMain" id="ErrandOrderMainResultWithDetails">
+        <id     property="orderMainId"      column="order_main_id"      />
+        <result property="orderNo"          column="order_no"           />
+        <result property="userId"           column="user_id"            />
+        <result property="userNickname"     column="user_nickname"      />
+        <result property="orderType"        column="order_type"         />
+        <result property="totalAmount"      column="total_amount"       />
+        <result property="payAmount"        column="pay_amount"         />
+        <result property="discountAmount"   column="discount_amount"    />
+        <result property="payStatus"        column="pay_status"         />
+        <result property="payTime"          column="pay_time"           />
+        <result property="payType"          column="pay_type"           />
+        <result property="orderStatus"      column="order_status"       />
+        <result property="cancelReason"     column="cancel_reason"      />
+        <result property="cancelOperator"   column="cancel_operator"    />
+        <result property="pickAddressId"    column="pick_address_id"    />
+        <result property="pickAddress"      column="pick_address"       />
+        <result property="pickContact"      column="pick_contact"       />
+        <result property="pickPhone"        column="pick_phone"         />
+        <result property="pickLongitude"    column="pick_longitude"     />
+        <result property="pickLatitude"     column="pick_latitude"      />
+        <result property="deliverAddressId" column="deliver_address_id" />
+        <result property="deliverAddress"   column="deliver_address"    />
+        <result property="deliverContact"   column="deliver_contact"    />
+        <result property="deliverPhone"     column="deliver_phone"      />
+        <result property="deliverLongitude" column="deliver_longitude"  />
+        <result property="deliverLatitude"  column="deliver_latitude"   />
+        <result property="createTime"       column="create_time"        />
+        <result property="updateTime"       column="update_time"        />
+        <result property="completeTime"     column="complete_time"      />
+        <result property="merchantId"       column="merchant_id"        />
+        <result property="platformHoldAmount" column="platform_hold_amount" />
+        <result property="goodsAmount"      column="goods_amount"       />
+        <result property="deliveryFeeAmount" column="delivery_fee_amount" />
+
+        <!-- 新增：骑手信息字段 -->
+        <result property="riderId"          column="rider_id"           />
+        <result property="riderNickname"    column="rider_nickname"     />
+        <result property="riderPhone"       column="rider_phone"        />
+        <result property="riderAvatar"      column="rider_avatar"       />
+        <result property="riderRealName"    column="rider_real_name"    />
+        <result property="riderWorkStatus"  column="rider_work_status"  />
+        <result property="riderCreditScore" column="rider_credit_score" />
+        <result property="deliveryStatus"   column="delivery_status"    />
+        <result property="receiveTime"      column="receive_time"       />
+        <result property="pickTime"         column="pick_time"          />
+        <result property="deliverTime"      column="deliver_time"       />
+        <result property="deliveryFee"      column="delivery_fee"       />
+        <result property="riderIncome"      column="rider_income"       />
+
+        <!-- 一对一关联：跑腿订单明细列表 -->
+        <collection property="orderErrandDetailList" ofType="OrderErrandDetail" javaType="java.util.List">
+            <id     property="orderErrandDetailId" column="order_errand_detail_id" />
+            <result property="orderMainId"          column="order_main_id"          />
+            <result property="errandType"           column="errand_type"            />
+            <result property="goodsDesc"            column="goods_desc"             />
+            <result property="expectedTime"         column="expected_time"          />
+            <result property="advanceAmount"        column="advance_amount"         />
+            <result property="tipAmount"            column="tip_amount"             />
+            <result property="buyPhotoUrl"          column="buy_photo_url"          />
+            <result property="createTime"           column="detail_create_time"     />
+            <result property="updateTime"           column="detail_update_time"     />
+        </collection>
+    </resultMap>
 
 <sql id="selectOrderMainVo">
     select order_main_id, order_no, user_id, user_nickname, order_type, total_amount, pay_amount, discount_amount, pay_status, pay_time, pay_type, order_status, cancel_reason, cancel_operator, pick_address_id, pick_address, pick_contact, pick_phone, pick_longitude, pick_latitude, deliver_address_id, deliver_address, deliver_contact, deliver_phone, deliver_longitude, deliver_latitude, create_time, update_time, complete_time, merchant_id, platform_hold_amount, goods_amount, delivery_fee_amount from order_main
@@ -152,8 +286,138 @@
     where order_main_id = #{orderMainId}
 </select>
 
+    <!-- 新增/修改方法：查询跑腿订单详情(包含明细列表 + 骑手信息) -->
+<select id="selectErrandOrderMainWithDetailsByOrderNo" parameterType="String" resultMap="ErrandOrderMainResultWithDetails">
+        SELECT
+        om.*,
+        -- 跑腿订单明细字段
+        oed.order_errand_detail_id,
+        oed.errand_type,
+        oed.goods_desc,
+        oed.expected_time,
+        oed.advance_amount,
+        oed.tip_amount,
+        oed.buy_photo_url,
+
+        -- 配送信息字段
+        od.rider_id,
+        od.delivery_status,
+        od.receive_time,
+        od.pick_time,
+        od.deliver_time,
+        od.delivery_fee,
+        od.rider_income,
+        -- 骑手信息字段
+        rb.nickname AS rider_nickname,
+        rb.phone AS rider_phone,
+        rb.avatar AS rider_avatar,
+        rb.real_name AS rider_real_name,
+        rb.work_status AS rider_work_status,
+        rb.credit_score AS rider_credit_score
+        FROM order_main om
+        LEFT JOIN order_errand_detail oed ON om.order_main_id = oed.order_main_id
+        LEFT JOIN order_delivery od ON om.order_main_id = od.order_main_id
+        LEFT JOIN rider_base rb ON od.rider_id = rb.rider_base_id
+        WHERE om.order_no = #{orderNo}
+        AND om.order_type = 2  <!-- 2表示跑腿订单类型，可根据实际业务调整 -->
+</select>
+
+    <!-- 批量查询跑腿订单列表(包含明细和骑手信息) -->
+<select id="selectErrandOrderMainListWithDetails" parameterType="OrderMain" resultMap="ErrandOrderMainResultWithDetails">
+        SELECT
+        om.*,
+        -- 跑腿订单明细字段
+        oed.order_errand_detail_id,
+        oed.errand_type,
+        oed.goods_desc,
+        oed.expected_time,
+        oed.advance_amount,
+        oed.tip_amount,
+        oed.buy_photo_url,
+
+        -- 配送信息字段
+        od.rider_id,
+        od.delivery_status,
+        od.receive_time,
+        od.pick_time,
+        od.deliver_time,
+        od.delivery_fee,
+        od.rider_income,
+        -- 骑手信息字段
+        rb.nickname AS rider_nickname,
+        rb.phone AS rider_phone,
+        rb.avatar AS rider_avatar,
+        rb.real_name AS rider_real_name,
+        rb.work_status AS rider_work_status,
+        rb.credit_score AS rider_credit_score
+        FROM order_main om
+        LEFT JOIN order_errand_detail oed ON om.order_main_id = oed.order_main_id
+        LEFT JOIN order_delivery od ON om.order_main_id = od.order_main_id
+        LEFT JOIN rider_base rb ON od.rider_id = rb.rider_base_id
+        WHERE om.order_type = 2  <!-- 跑腿订单类型 -->
+        <if test="orderNo != null and orderNo != ''">
+            AND om.order_no LIKE CONCAT('%', #{orderNo}, '%')
+        </if>
+        <if test="userId != null">
+            AND om.user_id = #{userId}
+        </if>
+        <if test="orderStatus != null">
+            AND om.order_status = #{orderStatus}
+        </if>
+        <if test="merchantId != null">
+            AND om.merchant_id = #{merchantId}
+        </if>
+        <if test="riderId != null">
+            AND od.rider_id = #{riderId}
+        </if>
+        <if test="beginTime != null and beginTime != ''">
+            AND om.create_time >= #{beginTime}
+        </if>
+<!--        <if test="endTime != null and endTime != ''">-->
+<!--            AND om.create_time <= #{endTime}-->
+<!--        </if>-->
+        ORDER BY om.create_time DESC
+</select>
+    <!-- 根据订单ID查询二手订单详情(包含明细列表 + 骑手信息) -->
+    <select id="selectSecondHandOrderMainWithDetailsByOrderNo" parameterType="String" resultMap="SecondhandOrderMainResultWithDetails">
+        SELECT
+        om.*,
+        -- 二手订单明细字段
+        oshd.order_secondhand_detail_id,
+        oshd.goods_id,
+        oshd.goods_name,
+        oshd.seller_id,
+        oshd.sell_way,
+        oshd.seller_nickname,
+        oshd.deposit_amount,
+        oshd.confirm_time,
+        oshd.evaluate_status,
+
+        -- 配送信息字段
+        od.rider_id,
+        od.delivery_status,
+        od.receive_time,
+        od.pick_time,
+        od.deliver_time,
+        od.delivery_fee,
+        od.rider_income,
+        -- 骑手信息字段
+        rb.nickname AS rider_nickname,
+        rb.phone AS rider_phone,
+        rb.avatar AS rider_avatar,
+        rb.real_name AS rider_real_name,
+        rb.work_status AS rider_work_status,
+        rb.credit_score AS rider_credit_score
+        FROM order_main om
+        LEFT JOIN order_secondhand_detail oshd ON om.order_main_id = oshd.order_main_id
+        LEFT JOIN order_delivery od ON om.order_main_id = od.order_main_id
+        LEFT JOIN rider_base rb ON od.rider_id = rb.rider_base_id
+        WHERE om.order_no = #{orderNo}
+        AND om.order_type = 3  <!-- 3表示二手交易单（与OrderMain的orderType枚举一致） -->
+    </select>
+
 <!-- 新增/修改方法：查询订单详情(包含明细列表 + 骑手信息) -->
-<select id="selectOrderMainWithDetailsByOrderMainId" parameterType="Long" resultMap="OrderMainResultWithDetails">
+<select id="selectOrderMainWithDetailsByOrderNo" parameterType="String" resultMap="OrderMainResultWithDetails">
     SELECT
     om.*,
     -- 订单明细字段
@@ -187,7 +451,7 @@
     LEFT JOIN order_takeout_detail otd ON om.order_main_id = otd.order_main_id
     LEFT JOIN order_delivery od ON om.order_main_id = od.order_main_id
     LEFT JOIN rider_base rb ON od.rider_id = rb.rider_base_id
-    WHERE om.order_main_id = #{orderMainId}
+    WHERE om.order_no = #{orderNo}
 </select>
 
 <insert id="insertOrderMain" parameterType="OrderMain">

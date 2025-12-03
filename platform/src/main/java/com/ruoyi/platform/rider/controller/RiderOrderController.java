@@ -5,6 +5,7 @@ import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.platform.domain.OrderMain;
+import com.ruoyi.platform.rider.domain.vo.RiderOrderListVO;
 import com.ruoyi.platform.rider.service.IRiderOrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -33,7 +34,8 @@ public class RiderOrderController extends BaseController {
     @GetMapping("/available")
     public TableDataInfo listAvailableOrders(OrderMain orderMain) {
         startPage();
-        List<OrderMain> list = riderOrderService.selectAvailableOrderList(orderMain);
+        // 修改为 RiderOrderListVO
+        List<RiderOrderListVO> list = riderOrderService.selectAvailableOrderList(orderMain);
         return getDataTable(list);
     }
 
@@ -41,15 +43,17 @@ public class RiderOrderController extends BaseController {
      * 查询骑手自己的订单列表
      *
      * @param orderMain 查询条件
+     * @param timeRange 时间范围: today-今日, yesterday-昨日, week-本周, month-本月
      * @return 订单列表
      */
     @GetMapping("/myOrders")
-    public TableDataInfo listMyOrders(OrderMain orderMain) {
+    public TableDataInfo listMyOrders(OrderMain orderMain,
+                                      @RequestParam(required = false) String timeRange) {
         startPage();
         // 从SecurityUtils获取当前登录的骑手ID
         Long riderId = SecurityUtils.getRiderBaseId();
 
-        List<OrderMain> list = riderOrderService.selectRiderOrderList(riderId, orderMain);
+        List<RiderOrderListVO> list = riderOrderService.selectRiderOrderList(riderId, orderMain, timeRange);
         return getDataTable(list);
     }
 
@@ -64,7 +68,19 @@ public class RiderOrderController extends BaseController {
         // 从SecurityUtils获取当前登录的骑手ID
         Long riderId = SecurityUtils.getRiderBaseId();
 
+        // 详情接口返回完整的 OrderMain
         OrderMain order = riderOrderService.selectRiderOrderById(riderId, orderMainId);
         return AjaxResult.success(order);
+    }
+
+    /**
+     * 按时间范围统计订单数量
+     *
+     * @return 统计结果
+     */
+    @GetMapping("/statistics")
+    public AjaxResult getOrderStatistics() {
+        Long riderId = SecurityUtils.getRiderBaseId();
+        return AjaxResult.success(riderOrderService.getOrderStatistics(riderId));
     }
 }
