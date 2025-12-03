@@ -4,6 +4,7 @@ import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.platform.domain.dto.UserRechargeRequest;
 import com.ruoyi.platform.domain.dto.UserWithdrawRequest;
+import com.ruoyi.platform.domain.vo.AlipayPagePayResult;
 import com.ruoyi.platform.service.IUserFinanceService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +28,8 @@ public class UserFinanceController1 {
         String payPageHtml = userFinanceService.rechargeByAlipay(userId, req);
         return AjaxResult.success()
                 .put("payPageHtml", payPageHtml);
+                //.put("outTradeNo", result.getOutTradeNo());
+
 
     }
 

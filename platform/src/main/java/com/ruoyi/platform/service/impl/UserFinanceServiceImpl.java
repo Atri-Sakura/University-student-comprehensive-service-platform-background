@@ -17,6 +17,7 @@ import com.ruoyi.platform.domain.UserWallet;
 import com.ruoyi.platform.domain.UserWalletRecord;
 import com.ruoyi.platform.domain.dto.UserRechargeRequest;
 import com.ruoyi.platform.domain.dto.UserWithdrawRequest;
+import com.ruoyi.platform.domain.vo.AlipayPagePayResult;
 import com.ruoyi.platform.mapper.PayOrderMapper;
 import com.ruoyi.platform.mapper.UserWalletMapper;
 import com.ruoyi.platform.mapper.UserWalletRecordMapper;
@@ -319,6 +320,9 @@ public class UserFinanceServiceImpl implements IUserFinanceService {
                     .pay(subject, outTradeNo, totalAmount, returnUrl);
 
             // 能跑到这里，说明请求已经成功发给支付宝，返回的是一整页 HTML 表单
+//            AlipayPagePayResult result = new AlipayPagePayResult();
+//            result.setOutTradeNo(outTradeNo);
+//            result.setPayPageHtml(response.getBody());
             return response.getBody();
         } catch (Exception e) {
             // 调用支付宝失败：把 pay_order 标成失败即可（钱包流水保持 “处理中” 也行）

@@ -2,6 +2,7 @@ package com.ruoyi.platform.service;
 
 import com.ruoyi.platform.domain.dto.UserRechargeRequest;
 import com.ruoyi.platform.domain.dto.UserWithdrawRequest;
+import com.ruoyi.platform.domain.vo.AlipayPagePayResult;
 
 public interface IUserFinanceService {
 

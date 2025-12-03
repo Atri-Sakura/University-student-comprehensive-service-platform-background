@@ -1,5 +1,6 @@
 package com.ruoyi.platform.service;
 
+import java.math.BigDecimal;
 import java.util.List;
 import com.ruoyi.platform.domain.RiderWallet;
 
@@ -9,8 +10,9 @@ import com.ruoyi.platform.domain.RiderWallet;
  * @author ruoyi
  * @date 2025-10-20
  */
-public interface IRiderWalletService 
-{
+public interface IRiderWalletService {
+
+    public BigDecimal getWalletBalance(Long riderBaseId);
     /**
      * 查询骑手钱包
      * 
