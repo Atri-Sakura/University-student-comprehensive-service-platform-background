@@ -136,4 +136,10 @@
             #{orderDeliveryId}
         </foreach>
     </delete>
+
+    <select id="selectOrderDeliveryByOrderMainId">
+        SELECT * FROM order_delivery WHERE order_main_id = #{orderMainId}
+    </select>
+
+
 </mapper>
