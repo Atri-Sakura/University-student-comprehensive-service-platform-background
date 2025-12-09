@@ -4,6 +4,7 @@ import com.ruoyi.platform.domain.MerchantWalletFlow;
 import com.ruoyi.platform.domain.MerchantWithdrawRecord;
 import io.lettuce.core.dynamic.annotation.Param;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -81,4 +82,14 @@ public interface MerchantWalletFlowMapper {
      * @return 插入条数
      */
     int insertWithdrawFailFlow(@Param("record") MerchantWithdrawRecord record);
+
+    /**
+     * 按类型汇总金额
+     *
+     * @param merchantBaseId 商家ID
+     * @param flowType 流水类型
+     * @return 汇总金额
+     */
+    BigDecimal sumAmountByType(@Param("merchantBaseId") Long merchantBaseId,
+                               @Param("flowType") String flowType);
 }

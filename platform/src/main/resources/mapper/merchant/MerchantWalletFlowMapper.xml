@@ -155,5 +155,11 @@
         WHERE merchant_base_id = #{record.merchantBaseId}
     </insert>
 
+    <select id="sumAmountByType" resultType="java.math.BigDecimal">
+        SELECT COALESCE(SUM(flow_amount), 0)
+        FROM merchant_wallet_flow
+        WHERE merchant_base_id = #{merchantBaseId}
+          AND flow_type = #{flowType}
+    </select>
 
 </mapper>

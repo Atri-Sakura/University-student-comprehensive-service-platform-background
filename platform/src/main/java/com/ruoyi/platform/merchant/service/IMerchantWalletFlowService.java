@@ -1,10 +1,10 @@
 package com.ruoyi.platform.merchant.service;
 
-
 import com.ruoyi.platform.domain.MerchantWalletFlow;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 商家钱包流水 Service 接口
@@ -23,6 +23,7 @@ public interface IMerchantWalletFlowService {
      * @param totalAmount 冻结金额（含手续费）
      */
     void insertWithdrawFreezeFlow(Long merchantBaseId, Long withdrawId, BigDecimal totalAmount);
+
     /**
      * 查询商家钱包流水
      *
@@ -70,4 +71,12 @@ public interface IMerchantWalletFlowService {
      * @return 结果
      */
     int deleteMerchantWalletFlowById(Long flowId);
+
+    /**
+     * 获取商家流水汇总信息
+     *
+     * @param merchantBaseId 商家ID
+     * @return 汇总数据 (包含totalIncome, totalWithdraw, totalRefund等)
+     */
+    Map<String, Object> getFlowSummary(Long merchantBaseId);
 }
