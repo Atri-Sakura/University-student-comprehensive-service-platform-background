@@ -1,11 +1,11 @@
-package com.ruoyi.platform.rider.service.impl;
+package com.ruoyi.platform.rider.service. impl;
 
 import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.platform.domain.OrderMain;
 import com.ruoyi.platform.rider.domain.vo.RiderOrderListVO;
 import com.ruoyi.platform.rider.mapper.RiderOrderMapper;
-import com.ruoyi.platform.rider.service.IRiderOrderService;
-import org.slf4j.Logger;
+import com.ruoyi.platform. rider.service.IRiderOrderService;
+import org. slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -44,7 +44,7 @@ public class RiderOrderServiceImpl implements IRiderOrderService {
 
         List<RiderOrderListVO> orders = riderOrderMapper.selectRiderOrderList(riderId, orderMain, timeRange);
 
-        log.info("查询骑手订单列表成功 - 结果数量: {}", orders. size());
+        log.info("查询骑手订单列表成功 - 结果数量: {}", orders.size());
 
         return orders;
     }
@@ -59,13 +59,23 @@ public class RiderOrderServiceImpl implements IRiderOrderService {
             throw new ServiceException("订单ID不能为空");
         }
 
-        log.info("查询骑手订单详情 - 骑手ID: {}, 订单ID: {}", riderId, orderMainId);
+        log.info("查询骑手订单详情 - 骑手ID: {}, 订单ID:  {}", riderId, orderMainId);
 
+        // 查询订单（不再在 SQL 层面限制骑手ID）
         OrderMain order = riderOrderMapper.selectRiderOrderById(riderId, orderMainId);
 
         if (order == null) {
+            log.warn("订单不存在 - 订单ID: {}", orderMainId);
             throw new ServiceException("订单不存在或无权查看");
         }
+
+        // 业务层权限校验：如果订单已被接单，必须是当前骑手
+        if (order.getRiderId() != null && !order.getRiderId().equals(riderId)) {
+            log.warn("权限不足 - 骑手 {} 尝试查看其他骑手的订单 {}", riderId, orderMainId);
+            throw new ServiceException("订单不存在或无权查看");
+        }
+
+        log.info("查询骑手订单详情成功 - 订单状态: {}, 骑手ID: {}", order. getOrderStatus(), order.getRiderId());
 
         return order;
     }
