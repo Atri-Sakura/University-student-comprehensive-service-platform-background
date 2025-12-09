@@ -118,7 +118,6 @@ public class UserTakeOutOrderController extends BaseController {
      */
     @GetMapping("/list")
     public TableDataInfo list(OrderMain orderMain) {
-        startPage();
         Long userId = SecurityUtils.getUserBaseId();
         orderMain.setUserId(userId);
         List<OrderMain> list = orderMainMapper.selectOrderMainList(orderMain);
