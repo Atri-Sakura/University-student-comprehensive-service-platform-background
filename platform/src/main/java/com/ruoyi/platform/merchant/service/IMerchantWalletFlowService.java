@@ -1,6 +1,7 @@
 package com.ruoyi.platform.merchant.service;
 
 import com.ruoyi.platform.domain.MerchantWalletFlow;
+import com.ruoyi.platform.domain.vo.MerchantWalletFlowVO;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -15,6 +16,32 @@ import java.util.Map;
  * @date 2025-10-24
  */
 public interface IMerchantWalletFlowService {
+
+    /**
+     * 查询流水列表（含订单详情）
+     *
+     * @param merchantBaseId 商家ID
+     * @param flowType 流水类型
+     * @param orderNo 订单编号
+     * @param startTime 开始时间
+     * @param endTime 结束时间
+     * @return 流水列表VO
+     */
+    List<MerchantWalletFlowVO> selectMerchantWalletFlowListWithOrder(Long merchantBaseId,
+                                                                     String flowType,
+                                                                     String orderNo,
+                                                                     String startTime,
+                                                                     String endTime);
+
+    /**
+     * 查询流水详情（含订单详情）
+     *
+     * @param flowId 流水ID
+     * @param merchantBaseId 商家ID
+     * @return 流水详情VO
+     */
+    MerchantWalletFlowVO selectMerchantWalletFlowWithOrderById(Long flowId, Long merchantBaseId);
+
     /**
      * 插入提现冻结流水
      *
