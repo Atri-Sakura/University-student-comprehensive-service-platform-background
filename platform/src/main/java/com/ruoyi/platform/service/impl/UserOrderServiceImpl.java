@@ -695,7 +695,7 @@ public class UserOrderServiceImpl implements IUserOrderService {
         orderMain.setDeliverPhone(createOrderDTO.getDeliverPhone());
         orderMain.setDeliverLongitude(createOrderDTO.getDeliverLongitude());
         orderMain.setDeliverLatitude(createOrderDTO.getDeliverLatitude());
-        orderMain.setOrderStatus(OrderStatusEnum.PENDING_PICKUP.getCode());
+        orderMain.setOrderStatus(OrderStatusEnum.PENDING_ACCEPT.getCode());
         orderMain.setRemark(createOrderDTO.getRemark());
         orderMain.setCreateTime(new Date());
         orderMain.setUpdateTime(new Date());
@@ -845,7 +845,7 @@ public class UserOrderServiceImpl implements IUserOrderService {
         goodsAmount = createOrderDTO.getGoodsPrice();
 
         // 2. 计算配送费
-        BigDecimal deliveryFee = new BigDecimal(5.00);
+        BigDecimal deliveryFee = createOrderDTO.getDeliverAmount();
 
         // 3. 计算优惠金额（暂时为0，后续可扩展）
         BigDecimal discountAmount = BigDecimal.ZERO;

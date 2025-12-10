@@ -209,6 +209,9 @@ public class OrderFlowServiceImpl implements IOrderFlowService {
             throw new ServiceException("订单状态不正确，无法接单");
         }
 
+        if(order.getOrderType().equals(2L)){
+            order.setOrderStatus(OrderStatusEnum.PENDING_PICKUP.getCode());
+        }
         // 3. 查询配送记录
         OrderDelivery queryDelivery = new OrderDelivery();
         queryDelivery.setOrderMainId(orderMainId);
@@ -297,7 +300,7 @@ public class OrderFlowServiceImpl implements IOrderFlowService {
         }
 
         // 2. 状态校验
-        if (!OrderStatusEnum.PENDING_PICKUP.getCode().equals(order.getOrderStatus())) {
+        if (!OrderStatusEnum.PENDING_PICKUP.getCode().equals(order.getOrderStatus())&&order.getOrderType().equals(1)) {
             throw new ServiceException("订单状态不正确，无法取货");
         }
 
