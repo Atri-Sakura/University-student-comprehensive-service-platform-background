@@ -39,6 +39,9 @@ public class CreateErrandOrderDto {
     /** 收货电话 */
     private String deliverPhone;
 
+    /** 运费 */
+    private BigDecimal deliverAmount;
+
     /** 送货经度 */
     private BigDecimal deliverLongitude;
 
