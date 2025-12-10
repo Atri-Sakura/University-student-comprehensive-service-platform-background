@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/pay/test")
 public class PayTestController {
+
     @GetMapping("/alipayPage")
     public String testAlipayPage() throws Exception {
 

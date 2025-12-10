@@ -49,6 +49,13 @@
         <result property="updateTime" column="update_time"/>
         <result property="completeTime" column="complete_time"/>
         <result property="remark" column="remark"/>
+
+        <!-- 新增：骑手相关字段映射 -->
+        <result property="riderId" column="rider_id"/>
+        <result property="deliveryStatus" column="delivery_status"/>
+        <result property="receiveTime" column="receive_time"/>
+        <result property="pickTime" column="pick_time"/>
+        <result property="deliverTime" column="deliver_time"/>
     </resultMap>
 
     <!-- 查询可接单的订单列表 -->
@@ -72,10 +79,10 @@
                 AND om.order_no LIKE CONCAT('%', #{orderNo}, '%')
             </if>
             <if test="orderType != null">
-                AND om. order_type = #{orderType}
+                AND om.order_type = #{orderType}
             </if>
         </where>
-        ORDER BY om. create_time DESC
+        ORDER BY om.create_time DESC
     </select>
 
     <!-- 查询骑手自己的订单列表（简化字段） -->
@@ -106,8 +113,8 @@
                         AND om.create_time &lt; DATE_FORMAT(CURDATE(), '%Y-%m-%d 00:00:00')
                     </when>
                     <when test="timeRange == 'week'">
-                        AND om. create_time &gt;= DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY)
-                        AND om. create_time &lt;= NOW()
+                        AND om.create_time &gt;= DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY)
+                        AND om.create_time &lt;= NOW()
                     </when>
                     <when test="timeRange == 'month'">
                         AND om.create_time &gt;= DATE_FORMAT(CURDATE(), '%Y-%m-01 00:00:00')
@@ -116,7 +123,7 @@
                 </choose>
             </if>
 
-            <if test="orderMain != null and orderMain.orderStatus != null">
+            <if test="orderMain != null and orderMain. orderStatus != null">
                 AND om. order_status = #{orderMain. orderStatus}
             </if>
             <if test="orderMain != null and orderMain.orderNo != null and orderMain.orderNo != ''">
@@ -132,13 +139,21 @@
         ORDER BY om.create_time DESC
     </select>
 
-    <!-- 查询骑手订单详情（完整字段） -->
+    <!-- 🔥 核心修改：查询骑手订单详情（完整字段） -->
     <select id="selectRiderOrderById" resultMap="OrderMainResult">
-        SELECT om.*
+        SELECT
+            om.*,
+            od.rider_id,
+            od.delivery_status,
+            od.receive_time,
+            od.pick_time,
+            od.deliver_time
         FROM order_main om
                  INNER JOIN order_delivery od ON om.order_main_id = od.order_main_id
         WHERE om.order_main_id = #{orderMainId}
-          AND od.rider_id = #{riderId}
+          AND om.order_status != 5  /* 排除已取消的订单 */
+        -- ✅ 关键修改：移除 rider_id 限制，改为查询所有订单
+        -- 权限校验放到 Service 层处理
     </select>
 
     <!-- 按时间范围统计订单数量 -->
@@ -153,18 +168,18 @@
                 <choose>
                     <when test="timeRange == 'today'">
                         AND om.create_time &gt;= DATE_FORMAT(CURDATE(), '%Y-%m-%d 00:00:00')
-                        AND om.create_time &lt;= NOW()
+                        AND om. create_time &lt;= NOW()
                     </when>
                     <when test="timeRange == 'yesterday'">
                         AND om.create_time &gt;= DATE_SUB(CURDATE(), INTERVAL 1 DAY)
                         AND om.create_time &lt; DATE_FORMAT(CURDATE(), '%Y-%m-%d 00:00:00')
                     </when>
                     <when test="timeRange == 'week'">
-                        AND om.create_time &gt;= DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY)
+                        AND om. create_time &gt;= DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY)
                         AND om.create_time &lt;= NOW()
                     </when>
                     <when test="timeRange == 'month'">
-                        AND om. create_time &gt;= DATE_FORMAT(CURDATE(), '%Y-%m-01 00:00:00')
+                        AND om.create_time &gt;= DATE_FORMAT(CURDATE(), '%Y-%m-01 00:00:00')
                         AND om.create_time &lt;= NOW()
                     </when>
                 </choose>

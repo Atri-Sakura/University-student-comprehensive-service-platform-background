@@ -45,9 +45,26 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         新增骑手钱包
         参数：riderWallet
     -->
-    <insert id="insertRiderWallet" parameterType="com.ruoyi.platform.domain.RiderWallet"  keyProperty="riderWalletId">
-        INSERT INTO rider_wallet (rider_base_id,rider_wallet_id ,balance, freeze_amount, create_time)
-        VALUES (#{riderBaseId},#{riderWalletId}, #{balance}, #{freezeAmount}, NOW())
+<!--    <insert id="insertRiderWallet" parameterType="com.ruoyi.platform.domain.RiderWallet" useGeneratedKeys="true" keyProperty="riderWalletId">-->
+<!--        INSERT INTO rider_wallet (rider_base_id, balance, freeze_amount, create_time)-->
+<!--        VALUES (#{riderBaseId}, #{balance}, #{freezeAmount}, NOW())-->
+<!--    </insert>-->
+    <insert id="insertRiderWallet"
+            parameterType="com.ruoyi.platform.domain.RiderWallet">
+        INSERT INTO rider_wallet (
+            rider_wallet_id,
+            rider_base_id,
+            balance,
+            freeze_amount,
+            create_time
+        )
+        VALUES (
+                   #{riderWalletId},
+                   #{riderBaseId},
+                   #{balance},
+                   #{freezeAmount},
+                   NOW()
+               )
     </insert>
 
     <!--

@@ -21,6 +21,7 @@ public class RiderWalletRiderController {
 
     /**
      * 获取当前骑手钱包余额
+     * this is a bug interface stop used
      */
     @GetMapping("/balance")
     public AjaxResult getRiderWalletBalance(){
