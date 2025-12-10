@@ -14,6 +14,10 @@ import io.lettuce.core.dynamic.annotation.Param;
 public interface SecondhandGoodsImageMapper
 {
     /**
+     * 根据二手商品ID查询主图（如果没有 is_main=1，则取排序最靠前的一张）
+     */
+    SecondhandGoodsImage selectMainImageByGoodsId(@Param("goodsId") Long goodsId);
+    /**
      * 查询图片列表
      * @param goodsId
      * @return

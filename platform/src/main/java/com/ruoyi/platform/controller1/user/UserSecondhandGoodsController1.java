@@ -10,6 +10,7 @@ import com.ruoyi.platform.domain.dto.SecondhandGoodsSearchDTO;
 import com.ruoyi.platform.domain.dto.SecondhandOrderCreatDTO;
 import com.ruoyi.platform.domain.vo.SecondhandGoodDetailVO;
 import com.ruoyi.platform.domain.vo.SecondhandGoodsListVO;
+import com.ruoyi.platform.domain.vo.SecondhandOrderContactDetailVO;
 import com.ruoyi.platform.service.IOrderMainService;
 import com.ruoyi.platform.service.ISecondhandGoodsImageService;
 import com.ruoyi.platform.service.ISecondhandGoodsService;
@@ -30,6 +31,27 @@ import static com.ruoyi.common.utils.PageUtils.startPage;
 @RequestMapping("/api/user/secondhandGoods")
 @RequiredArgsConstructor
 public class UserSecondhandGoodsController1 extends BaseController {
+    /**
+     * 获取二手交易订单详情（包含联系方式）
+     * @param orderNo 订单号
+     * @return 订单详情
+     */
+    @GetMapping("/order/detail/{orderNo}")
+    public AjaxResult getSecondhandOrderDetail(@PathVariable String orderNo) {
+        Long currentUserBaseId = SecurityUtils.getUserBaseId();
+        if (currentUserBaseId == null) {
+            return AjaxResult.error("未检测到登录用户信息");
+        }
+
+        SecondhandOrderContactDetailVO detailVO =
+                secondhandOrderService.getSecondhandOrderDetail(orderNo, currentUserBaseId);
+
+        if (detailVO == null) {
+            return AjaxResult.error("订单不存在或无权查看");
+        }
+        return AjaxResult.success("获取成功", detailVO);
+    }
+
 
     /**
      * 商品发布服务

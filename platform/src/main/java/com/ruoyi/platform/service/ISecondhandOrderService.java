@@ -1,6 +1,7 @@
 package com.ruoyi.platform.service;
 
 import com.ruoyi.platform.domain.dto.SecondhandOrderCreatDTO;
+import com.ruoyi.platform.domain.vo.SecondhandOrderContactDetailVO;
 
 /**
  * 二手商品订单Service接口
@@ -14,4 +15,9 @@ public interface ISecondhandOrderService {
     boolean payOrder(String orderNo);
 
     boolean confirmOrder(String orderNo);
+    /**
+     * 根据订单号查询二手订单详情（含对方联系方式 + 商品信息）
+     */
+    SecondhandOrderContactDetailVO getSecondhandOrderDetail(String orderNo, Long currentUserBaseId);
+
 }

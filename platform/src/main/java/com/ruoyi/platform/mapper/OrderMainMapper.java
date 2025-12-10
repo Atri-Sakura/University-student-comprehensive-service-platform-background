@@ -18,7 +18,10 @@ import io.lettuce.core.dynamic.annotation.Param;
  */
 public interface OrderMainMapper {
 
-
+    /**
+     * 根据订单号查询订单主表
+     */
+    OrderMain selectByOrderNo(@Param("orderNo") String orderNo);
     /**
      * 插入二手交易订单
      */

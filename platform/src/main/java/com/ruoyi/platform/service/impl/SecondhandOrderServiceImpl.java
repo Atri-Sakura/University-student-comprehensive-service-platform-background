@@ -3,13 +3,10 @@ package com.ruoyi.platform.service.impl;
 import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.platform.chat.utils.SnowflakeIdGenerator;
-import com.ruoyi.platform.domain.OrderMain;
-import com.ruoyi.platform.domain.OrderSecondhandDetail;
-import com.ruoyi.platform.domain.SecondhandGoods;
+import com.ruoyi.platform.domain.*;
 import com.ruoyi.platform.domain.dto.SecondhandOrderCreatDTO;
-import com.ruoyi.platform.mapper.OrderMainMapper;
-import com.ruoyi.platform.mapper.OrderSecondhandDetailMapper;
-import com.ruoyi.platform.mapper.SecondhandGoodsMapper;
+import com.ruoyi.platform.domain.vo.SecondhandOrderContactDetailVO;
+import com.ruoyi.platform.mapper.*;
 import com.ruoyi.platform.service.ISecondhandOrderService;
 import com.ruoyi.platform.utils.OrderNoUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +29,102 @@ public class  SecondhandOrderServiceImpl implements ISecondhandOrderService {
 
     @Autowired
     private OrderSecondhandDetailMapper orderSecondhandDetailMapper;
+
+    @Autowired
+    private SecondhandGoodsImageMapper secondhandGoodsImageMapper;
+
+    @Autowired
+    private UserBaseMapper userBaseMapper;
+
+
+    @Override
+    public SecondhandOrderContactDetailVO getSecondhandOrderDetail(String orderNo, Long currentUserBaseId) {
+        // 1. 查订单主表
+        OrderMain order = orderMainMapper.selectByOrderNo(orderNo);
+        if (order == null) {
+            return null;
+        }
+
+        // 2. 校验订单类型是否是二手交易单（order_type = 3）
+        // 你 createSecondhandOrder 里用的是 3L，所以这里用 3L 对比
+        if (!Objects.equals(order.getOrderType(), 3L)) {
+            return null;
+        }
+
+        Long orderMainId = order.getOrderMainId();
+
+        // 3. 查二手订单明细
+        OrderSecondhandDetail detail = orderSecondhandDetailMapper.selectByOrderMainId(orderMainId);
+        if (detail == null) {
+            return null;
+        }
+
+        Long goodsId = detail.getGoodsId();
+        Long sellerId = detail.getSellerId();
+        Long buyerId = order.getUserId();  // 下单人 = 买家
+
+        // 4. 当前用户是否有权限（必须是买家或卖家）
+        boolean isBuyer = Objects.equals(currentUserBaseId, buyerId);
+        boolean isSeller = Objects.equals(currentUserBaseId, sellerId);
+        if (!isBuyer && !isSeller) {
+            // 非买家非卖家，禁止查看对方联系方式
+            return null;
+        }
+
+        // 5. 查商品信息
+        SecondhandGoods goods = secondhandGoodsMapper.selectSecondhandGoodsBySecondhandGoodsId(goodsId);
+        if (goods == null) {
+            return null;
+        }
+
+        // （可选）校验二手明细中的 sellerId 与商品发布者一致
+        // if (!Objects.equals(sellerId, goods.getUserBaseId())) {
+        //     log.warn("二手订单数据不一致，orderMainId={}, sellerId={}, goods.userBaseId={}",
+        //             orderMainId, sellerId, goods.getUserBaseId());
+        // }
+
+        // 6. 决定“对方”的 user_base_id
+        Long counterpartUserBaseId = isBuyer ? sellerId : buyerId;
+
+        // 7. 查对方用户信息
+        UserBase counterpart = userBaseMapper.selectUserBaseByUserBaseId(counterpartUserBaseId);
+        if (counterpart == null) {
+            return null;
+        }
+
+        // 8. 查商品主图
+        String mainImageUrl = null;
+        SecondhandGoodsImage mainImage = secondhandGoodsImageMapper.selectMainImageByGoodsId(goodsId);
+        if (mainImage != null) {
+            mainImageUrl = mainImage.getImageUrl();
+        }
+
+        // 9. 组装 VO
+        SecondhandOrderContactDetailVO vo = new SecondhandOrderContactDetailVO();
+
+        vo.setOrderNo(order.getOrderNo());
+        // tinyint 在实体一般用 Long/Integer，这里统一转成 Integer 给前端用枚举
+        vo.setOrderStatus(order.getOrderStatus() == null ? null : order.getOrderStatus().intValue());
+        vo.setPayStatus(order.getPayStatus() == null ? null : order.getPayStatus().intValue());
+        vo.setTotalAmount(order.getTotalAmount());
+        vo.setPayAmount(order.getPayAmount());
+        vo.setCreateTime(order.getCreateTime());
+        vo.setPayTime(order.getPayTime());
+
+        vo.setGoodsId(goods.getSecondhandGoodsId());
+        vo.setGoodsName(goods.getGoodsName());
+        vo.setCategory(goods.getCategory());
+        vo.setGoodsPrice(goods.getPrice());
+        vo.setDescription(goods.getDescription());
+        vo.setMainImageUrl(mainImageUrl);
+
+        vo.setCounterpartUserBaseId(counterpart.getUserBaseId());
+        vo.setCounterpartUsername(counterpart.getNickname());
+        vo.setCounterpartAvatar(counterpart.getAvatar());
+        vo.setCounterpartPhone(counterpart.getPhone());
+
+        return vo;
+    }
 
     /**
      * 确认订单
