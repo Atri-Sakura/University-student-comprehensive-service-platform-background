@@ -207,7 +207,6 @@ public class WalletFlowServiceImpl implements IWalletFlowService {
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = Exception.class)
     public void settleRider(Long riderId, Long orderMainId, BigDecimal deliveryFee) {
-        // 原有业务逻辑保持不变...
         // 1. 查询平台钱包（加行锁）
         PlatformWallet platformWallet = platformWalletMapper.selectPlatformWalletForUpdate(PLATFORM_WALLET_ID);
         if (platformWallet == null) {

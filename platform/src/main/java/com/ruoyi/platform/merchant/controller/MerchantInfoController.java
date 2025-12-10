@@ -18,6 +18,8 @@ import org.springframework.web.bind. annotation.*;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 商家基础信息控制器
@@ -127,6 +129,55 @@ public class MerchantInfoController {
             return AjaxResult.success("商家地址修改成功");
         }
         return AjaxResult.error("商家地址修改失败");
+    }
+
+    /**
+     * 查询当前商家钱包信息
+     * @return 钱包信息
+     */
+    @GetMapping("/wallet")
+    public AjaxResult getMerchantWallet() {
+        Long merchantBaseId = SecurityUtils.getMerchantBaseId();
+        if (merchantBaseId == null) {
+            return AjaxResult. error("获取商家信息失败");
+        }
+
+        MerchantWallet wallet = merchantWalletService.getWalletByMerchantId(merchantBaseId);
+        if (wallet == null) {
+            return AjaxResult.error("未找到钱包信息，请先初始化钱包");
+        }
+
+        return AjaxResult.success(wallet);
+    }
+
+    /**
+     * 查询当前商家钱包详细信息（包含统计数据）
+     * @return 钱包详细信息
+     */
+    @GetMapping("/wallet/detail")
+    public AjaxResult getMerchantWalletDetail() {
+        Long merchantBaseId = SecurityUtils.getMerchantBaseId();
+        if (merchantBaseId == null) {
+            return AjaxResult.error("获取商家信息失败");
+        }
+
+        MerchantWallet wallet = merchantWalletService.getWalletByMerchantId(merchantBaseId);
+        if (wallet == null) {
+            return AjaxResult.error("未找到钱包信息，请先初始化钱包");
+        }
+
+        // 构建详细信息（可选：添加额外统计数据）
+        Map<String, Object> detail = new HashMap<>();
+        detail.put("merchantWalletId", wallet.getMerchantWalletId());
+        detail.put("merchantBaseId", wallet.getMerchantBaseId());
+        detail.put("balance", wallet.getBalance());
+        detail.put("freezeAmount", wallet.getFreezeAmount());
+        detail.put("availableAmount", wallet.getBalance()); // 可用金额 = 余额
+        detail.put("totalAmount", wallet.getBalance().add(wallet.getFreezeAmount())); // 总金额 = 余额 + 冻结
+        detail.put("createTime", wallet.getCreateTime());
+        detail.put("updateTime", wallet.getUpdateTime());
+
+        return AjaxResult.success(detail);
     }
 
     /**

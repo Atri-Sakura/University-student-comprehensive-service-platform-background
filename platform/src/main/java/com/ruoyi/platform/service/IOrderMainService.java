@@ -72,4 +72,21 @@ public interface IOrderMainService
      * 查询商家今日退款金额
      */
     BigDecimal selectMerchantTodayRefund(Long merchantId, Date startTime, Date endTime);
+
+    /**
+     * 订单完成处理(含钱包流水记录)
+     *
+     * @param orderMainId 订单ID
+     * @return 结果
+     */
+    int handleOrderComplete(Long orderMainId);
+
+    /**
+     * 订单退款处理(含钱包流水记录)
+     *
+     * @param orderMainId 订单ID
+     * @param refundReason 退款原因
+     * @return 结果
+     */
+    int handleOrderRefund(Long orderMainId, String refundReason);
 }

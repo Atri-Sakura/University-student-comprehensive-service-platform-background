@@ -1,10 +1,11 @@
 package com.ruoyi.platform.merchant.service;
 
-
 import com.ruoyi.platform.domain.MerchantWalletFlow;
+import com.ruoyi.platform.domain.vo.MerchantWalletFlowVO;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 商家钱包流水 Service 接口
@@ -15,6 +16,32 @@ import java.util.List;
  * @date 2025-10-24
  */
 public interface IMerchantWalletFlowService {
+
+    /**
+     * 查询流水列表（含订单详情）
+     *
+     * @param merchantBaseId 商家ID
+     * @param flowType 流水类型
+     * @param orderNo 订单编号
+     * @param startTime 开始时间
+     * @param endTime 结束时间
+     * @return 流水列表VO
+     */
+    List<MerchantWalletFlowVO> selectMerchantWalletFlowListWithOrder(Long merchantBaseId,
+                                                                     String flowType,
+                                                                     String orderNo,
+                                                                     String startTime,
+                                                                     String endTime);
+
+    /**
+     * 查询流水详情（含订单详情）
+     *
+     * @param flowId 流水ID
+     * @param merchantBaseId 商家ID
+     * @return 流水详情VO
+     */
+    MerchantWalletFlowVO selectMerchantWalletFlowWithOrderById(Long flowId, Long merchantBaseId);
+
     /**
      * 插入提现冻结流水
      *
@@ -23,6 +50,7 @@ public interface IMerchantWalletFlowService {
      * @param totalAmount 冻结金额（含手续费）
      */
     void insertWithdrawFreezeFlow(Long merchantBaseId, Long withdrawId, BigDecimal totalAmount);
+
     /**
      * 查询商家钱包流水
      *
@@ -70,4 +98,12 @@ public interface IMerchantWalletFlowService {
      * @return 结果
      */
     int deleteMerchantWalletFlowById(Long flowId);
+
+    /**
+     * 获取商家流水汇总信息
+     *
+     * @param merchantBaseId 商家ID
+     * @return 汇总数据 (包含totalIncome, totalWithdraw, totalRefund等)
+     */
+    Map<String, Object> getFlowSummary(Long merchantBaseId);
 }

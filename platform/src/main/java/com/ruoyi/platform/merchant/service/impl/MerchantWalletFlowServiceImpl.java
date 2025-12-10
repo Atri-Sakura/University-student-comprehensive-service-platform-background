@@ -1,107 +1,151 @@
 package com.ruoyi.platform.merchant.service.impl;
 
 import com.ruoyi.platform.domain.MerchantWalletFlow;
+import com.ruoyi.platform.domain.vo.MerchantWalletFlowVO;
 import com.ruoyi.platform.merchant.mapper.MerchantWalletFlowMapper;
 import com.ruoyi.platform.merchant.service.IMerchantWalletFlowService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
- * 商家钱包流水 Service 业务层实现
- *
- * 封装商家钱包流水的增删改查业务逻辑。
+ * 商家钱包流水Service业务层处理
  *
  * @author Jinx
  * @date 2025-10-24
  */
 @Service
 public class MerchantWalletFlowServiceImpl implements IMerchantWalletFlowService {
+
     @Autowired
     private MerchantWalletFlowMapper merchantWalletFlowMapper;
 
-    /**
-     * 插入提现冻结流水
-     *
-     * @param merchantBaseId 商家ID
-     * @param withdrawId 提现ID
-     * @param totalAmount 提现金额
-     */
+    @Override
+    public List<MerchantWalletFlowVO> selectMerchantWalletFlowListWithOrder(Long merchantBaseId,
+                                                                            String flowType,
+                                                                            String orderNo,
+                                                                            String startTime,
+                                                                            String endTime) {
+        List<MerchantWalletFlowVO> list = merchantWalletFlowMapper.selectMerchantWalletFlowListWithOrder(
+                merchantBaseId, flowType, orderNo, startTime, endTime
+        );
+
+        // 补充类型描述
+        for (MerchantWalletFlowVO vo : list) {
+            vo.setFlowTypeDesc(getFlowTypeDesc(vo.getFlowType()));
+            if (vo.getOrderType() != null) {
+                vo.setOrderTypeDesc(getOrderTypeDesc(vo.getOrderType()));
+            }
+            if (vo.getOrderStatus() != null) {
+                vo. setOrderStatusDesc(getOrderStatusDesc(vo.getOrderStatus()));
+            }
+        }
+
+        return list;
+    }
+
+    @Override
+    public MerchantWalletFlowVO selectMerchantWalletFlowWithOrderById(Long flowId, Long merchantBaseId) {
+        MerchantWalletFlowVO vo = merchantWalletFlowMapper.selectMerchantWalletFlowWithOrderById(flowId, merchantBaseId);
+        if (vo != null) {
+            vo.setFlowTypeDesc(getFlowTypeDesc(vo.getFlowType()));
+            if (vo. getOrderType() != null) {
+                vo.setOrderTypeDesc(getOrderTypeDesc(vo. getOrderType()));
+            }
+            if (vo.getOrderStatus() != null) {
+                vo.setOrderStatusDesc(getOrderStatusDesc(vo.getOrderStatus()));
+            }
+        }
+        return vo;
+    }
+
     @Override
     public void insertWithdrawFreezeFlow(Long merchantBaseId, Long withdrawId, BigDecimal totalAmount) {
         merchantWalletFlowMapper.insertWithdrawFreezeFlow(merchantBaseId, withdrawId, totalAmount);
     }
-    /**
-     * 查询商家钱包流水
-     *
-     * @param flowId 流水记录ID
-     * @return 商家钱包流水
-     */
+
     @Override
-    public MerchantWalletFlow selectMerchantWalletFlowById(Long flowId)
-    {
+    public MerchantWalletFlow selectMerchantWalletFlowById(Long flowId) {
         return merchantWalletFlowMapper.selectMerchantWalletFlowById(flowId);
     }
 
-    /**
-     * 查询商家钱包流水列表
-     *
-     * @param flow 查询条件
-     * @return 商家钱包流水集合
-     */
     @Override
-    public List<MerchantWalletFlow> selectMerchantWalletFlowList(MerchantWalletFlow flow)
-    {
+    public List<MerchantWalletFlow> selectMerchantWalletFlowList(MerchantWalletFlow flow) {
         return merchantWalletFlowMapper.selectMerchantWalletFlowList(flow);
     }
 
-    /**
-     * 新增商家钱包流水
-     *
-     * @param flow 商家钱包流水对象
-     * @return 结果
-     */
     @Override
-    public int insertMerchantWalletFlow(MerchantWalletFlow flow)
-    {
+    public int insertMerchantWalletFlow(MerchantWalletFlow flow) {
         return merchantWalletFlowMapper.insertMerchantWalletFlow(flow);
     }
 
-    /**
-     * 修改商家钱包流水
-     *
-     * @param flow 商家钱包流水对象
-     * @return 结果
-     */
     @Override
-    public int updateMerchantWalletFlow(MerchantWalletFlow flow)
-    {
+    public int updateMerchantWalletFlow(MerchantWalletFlow flow) {
         return merchantWalletFlowMapper.updateMerchantWalletFlow(flow);
     }
 
-    /**
-     * 批量删除商家钱包流水
-     *
-     * @param flowIds 要删除的ID数组
-     * @return 结果
-     */
     @Override
-    public int deleteMerchantWalletFlowByIds(Long[] flowIds)
-    {
+    public int deleteMerchantWalletFlowByIds(Long[] flowIds) {
         return merchantWalletFlowMapper.deleteMerchantWalletFlowByIds(flowIds);
     }
 
-    /**
-     * 删除单个商家钱包流水
-     *
-     * @param flowId 流水记录ID
-     * @return 结果
-     */
     @Override
-    public int deleteMerchantWalletFlowById(Long flowId)
-    {
+    public int deleteMerchantWalletFlowById(Long flowId) {
         return merchantWalletFlowMapper.deleteMerchantWalletFlowById(flowId);
+    }
+
+    @Override
+    public Map<String, Object> getFlowSummary(Long merchantBaseId) {
+        Map<String, Object> summary = new HashMap<>();
+
+        BigDecimal totalIncome = merchantWalletFlowMapper.sumAmountByType(merchantBaseId, "INCOME");
+        BigDecimal totalWithdraw = merchantWalletFlowMapper.sumAmountByType(merchantBaseId, "WITHDRAW_SUCCESS");
+        BigDecimal totalRefund = merchantWalletFlowMapper.sumAmountByType(merchantBaseId, "REFUND");
+
+        summary.put("totalIncome", totalIncome != null ? totalIncome :  BigDecimal.ZERO);
+        summary.put("totalWithdraw", totalWithdraw != null ?  totalWithdraw. abs() : BigDecimal.ZERO);
+        summary.put("totalRefund", totalRefund != null ? totalRefund.abs() : BigDecimal.ZERO);
+
+        return summary;
+    }
+
+    // ==================== 辅助方法 ====================
+
+    private String getFlowTypeDesc(String flowType) {
+        if (flowType == null) return "";
+        switch (flowType) {
+            case "INCOME":  return "订单收入";
+            case "WITHDRAW_FREEZE": return "提现冻结";
+            case "WITHDRAW_SUCCESS": return "提现成功";
+            case "WITHDRAW_ROLLBACK": return "提现失败退款";
+            case "REFUND": return "订单退款";
+            default:  return flowType;
+        }
+    }
+
+    private String getOrderTypeDesc(Long orderType) {
+        if (orderType == null) return "";
+        switch (orderType. intValue()) {
+            case 1: return "外卖订单";
+            case 2: return "跑腿订单";
+            case 3: return "二手交易";
+            default: return "未知";
+        }
+    }
+
+    private String getOrderStatusDesc(Long orderStatus) {
+        if (orderStatus == null) return "";
+        switch (orderStatus.intValue()) {
+            case 1: return "待接单";
+            case 2: return "待取货";
+            case 3: return "配送中";
+            case 4: return "已完成";
+            case 5: return "已取消";
+            default: return "未知";
+        }
     }
 }

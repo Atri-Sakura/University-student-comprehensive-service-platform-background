@@ -29,6 +29,7 @@ import java.math.RoundingMode;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -695,7 +696,7 @@ public class UserOrderServiceImpl implements IUserOrderService {
         orderMain.setDeliverPhone(createOrderDTO.getDeliverPhone());
         orderMain.setDeliverLongitude(createOrderDTO.getDeliverLongitude());
         orderMain.setDeliverLatitude(createOrderDTO.getDeliverLatitude());
-        orderMain.setOrderStatus(OrderStatusEnum.PENDING_PICKUP.getCode());
+        orderMain.setOrderStatus(OrderStatusEnum.PENDING_ACCEPT.getCode());
         orderMain.setRemark(createOrderDTO.getRemark());
         orderMain.setCreateTime(new Date());
         orderMain.setUpdateTime(new Date());
@@ -840,22 +841,35 @@ public class UserOrderServiceImpl implements IUserOrderService {
     private OrderAmountInfo calculateErrandOrderAmount(CreateErrandOrderDto createOrderDTO) {
         OrderAmountInfo info = new OrderAmountInfo();
 
-        // 1. 计算商品总金额
-        BigDecimal goodsAmount = BigDecimal.ZERO;
-        goodsAmount = createOrderDTO.getGoodsPrice();
+        // 1. 商品金额：null 时兜底为 0（避免 NPE，同时符合金额计算逻辑）
+        BigDecimal goodsAmount = Optional.ofNullable(createOrderDTO.getGoodsPrice())
+                .orElse(BigDecimal.ZERO);
+        // 校验商品金额合法性（非负，避免负数金额）
+        if (goodsAmount.compareTo(BigDecimal.ZERO) < 0) {
+            throw new RuntimeException("商品金额不能为负数");
+        }
 
-        // 2. 计算配送费
-        BigDecimal deliveryFee = new BigDecimal(5.00);
+        // 2. 配送费：null 时兜底为 0，同时校验合法性
+        BigDecimal deliveryFee = Optional.ofNullable(createOrderDTO.getDeliverAmount())
+                .orElse(BigDecimal.ZERO);
+        if (deliveryFee.compareTo(BigDecimal.ZERO) < 0) {
+            throw new RuntimeException("配送费不能为负数");
+        }
 
-        // 3. 计算优惠金额（暂时为0，后续可扩展）
+        // 3. 优惠金额（暂时为0，后续扩展时同样需判空）
         BigDecimal discountAmount = BigDecimal.ZERO;
 
-        // 4. 计算总金额 = 商品金额 + 配送费
+        // 4. 总金额 = 商品金额 + 配送费（此时已确保两个值非 null）
         BigDecimal totalAmount = goodsAmount.add(deliveryFee);
 
-        // 5. 计算实付金额 = 总金额 - 优惠金额
+        // 5. 实付金额 = 总金额 - 优惠金额（优惠金额不能超过总金额）
         BigDecimal payAmount = totalAmount.subtract(discountAmount);
+        // 兜底：实付金额不能为负数
+        if (payAmount.compareTo(BigDecimal.ZERO) < 0) {
+            payAmount = BigDecimal.ZERO;
+        }
 
+        // 赋值返回
         info.setGoodsAmount(goodsAmount);
         info.setDeliveryFee(deliveryFee);
         info.setDiscountAmount(discountAmount);
