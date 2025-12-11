@@ -13,6 +13,10 @@ import io.lettuce.core.dynamic.annotation.Param;
 public interface OrderSecondhandDetailMapper 
 {
     /**
+     * 根据主订单ID查询二手订单明细
+     */
+    OrderSecondhandDetail selectByOrderMainId(@Param("orderMainId") Long orderMainId);
+    /**
      * 根据订单主表ID查询对应的二手商品ID
      */
     Long selectGoodsIdByOrderMainId(@Param("orderMainId") Long orderMainId);

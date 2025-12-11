@@ -52,4 +52,14 @@ public class SysUserIndexService implements ISysUserIndexService {
     public List<UserTimetable> getUserCourses(Long userBaseId) {
         return sysUserIndexMapper.getUserCourses(userBaseId);
     }
+
+    @Override
+    public int userCoursesAdd(UserTimetable userTimetable) {
+        return sysUserIndexMapper.userCoursesAdd(userTimetable);
+    }
+
+    @Override
+    public int userCoursesDelete(Long userTimetableId) {
+        return sysUserIndexMapper.userCoursesDelete(userTimetableId);
+    }
 }

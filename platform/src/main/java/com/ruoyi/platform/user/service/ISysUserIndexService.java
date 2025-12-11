@@ -18,4 +18,8 @@ public interface ISysUserIndexService {
     List<IndexImgUrl> getIndexImgUrls();
 
     List<UserTimetable> getUserCourses(Long userBaseId);
+
+    int userCoursesAdd(UserTimetable userTimetable);
+
+    int userCoursesDelete(Long userTimetableId);
 }

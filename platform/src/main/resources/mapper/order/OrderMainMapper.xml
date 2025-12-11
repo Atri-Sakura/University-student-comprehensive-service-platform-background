@@ -682,4 +682,45 @@
     WHERE order_no = #{orderNo}
 </update>
 
+
+    <!-- 根据订单号查询主订单 -->
+    <select id="selectByOrderNo" resultMap="OrderMainResult">
+        SELECT
+            order_main_id,
+            order_no,
+            user_id,
+            user_nickname,
+            order_type,
+            total_amount,
+            pay_amount,
+            discount_amount,
+            pay_status,
+            pay_time,
+            pay_type,
+            order_status,
+            cancel_reason,
+            cancel_operator,
+            pick_address_id,
+            pick_address,
+            pick_contact,
+            pick_phone,
+            pick_longitude,
+            pick_latitude,
+            deliver_address_id,
+            deliver_address,
+            deliver_contact,
+            deliver_phone,
+            deliver_longitude,
+            deliver_latitude,
+            create_time,
+            update_time,
+            complete_time,
+            merchant_id,
+            platform_hold_amount,
+            goods_amount,
+            delivery_fee_amount
+        FROM order_main
+        WHERE order_no = #{orderNo}
+    </select>
+
 </mapper>

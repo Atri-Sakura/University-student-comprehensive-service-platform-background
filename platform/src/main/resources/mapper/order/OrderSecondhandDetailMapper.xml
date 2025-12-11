@@ -104,4 +104,21 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         WHERE order_main_id = #{orderMainId}
             LIMIT 1
     </select>
+
+    <!-- 根据主订单ID查询二手订单明细 -->
+    <select id="selectByOrderMainId" resultMap="OrderSecondhandDetailResult">
+        SELECT
+            order_secondhand_detail_id,
+            order_main_id,
+            goods_id,
+            goods_name,
+            seller_id,
+            sell_way,
+            seller_nickname,
+            deposit_amount,
+            confirm_time,
+            evaluate_status
+        FROM order_secondhand_detail
+        WHERE order_main_id = #{orderMainId}
+    </select>
 </mapper>

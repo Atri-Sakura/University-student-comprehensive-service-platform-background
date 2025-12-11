@@ -5,6 +5,8 @@ import com.ruoyi.platform.domain.UserTimetable;
 import com.ruoyi.platform.domain.vo.SecondhandGoodDetailVO;
 import com.ruoyi.platform.merchant.vo.MerchantGoodsVO;
 import com.ruoyi.platform.user.vo.SecondhandGoodVO;
+import org.apache.ibatis.annotations.Delete;
+import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 
@@ -24,4 +26,10 @@ public interface SysUserIndexMapper {
 
     @Select("SELECT * FROM user_timetable WHERE user_base_id = #{userBaseId}")
     List<UserTimetable> getUserCourses(Long userBaseId);
+
+    @Insert("INSERT INTO user_timetable (user_base_id, course_name, teacher_name, class_room , week_day, start_period, end_period, start_time, end_time, start_date,end_date, create_time,import_source) VALUES (#{userBaseId}, #{courseName}, #{teacherName},#{classRoom},#{weekDay},#{startPeriod},#{endPeriod},#{startTime},#{endTime},#{startDate},#{endDate},#{NOW()},#{importSource})")
+    int userCoursesAdd(UserTimetable userTimetable);
+
+    @Delete("DELETE FROM user_timetable WHERE user_timetable_id = #{userTimetableId}")
+    int userCoursesDelete(Long userTimetableId);
 }

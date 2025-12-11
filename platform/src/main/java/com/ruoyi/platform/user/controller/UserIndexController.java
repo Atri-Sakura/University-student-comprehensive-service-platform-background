@@ -9,9 +9,7 @@ import com.ruoyi.platform.merchant.vo.MerchantGoodsVO;
 import com.ruoyi.platform.user.service.ISysUserIndexService;
 import com.ruoyi.platform.user.vo.SecondhandGoodVO;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -60,6 +58,28 @@ public class UserIndexController {
         List<UserTimetable> userCourses = sysUserIndexService.getUserCourses(userBaseId);
         return userCourses !=null ? AjaxResult.success("获取成功",userCourses) : AjaxResult.error("获取失败");
     }
+
+    //用户课程添加
+    @PostMapping("/userCoursesAdd")
+    public AjaxResult userCoursesAdd(@RequestBody UserTimetable userTimetable) {
+        Long userBaseId = SecurityUtils.getUserBaseId();
+        if (userBaseId == null) {
+            return AjaxResult.error("用户未登录");
+        }
+        int result = sysUserIndexService.userCoursesAdd(userTimetable);
+        return result > 0 ? AjaxResult.success("添加成功") : AjaxResult.error("添加失败");
+    }
+    //用户课程删除
+    @DeleteMapping("/userCoursesDelete/{userTimetableId}")
+    public AjaxResult userCoursesDelete(@PathVariable Long userTimetableId) {
+        Long userBaseId = SecurityUtils.getUserBaseId();
+        if (userBaseId == null) {
+            return AjaxResult.error("用户未登录");
+        }
+        int result = sysUserIndexService.userCoursesDelete(userTimetableId);
+        return result > 0 ? AjaxResult.success("删除成功") : AjaxResult.error("删除失败");
+    }
+
     //首页轮播图
     @GetMapping("/carousel")
     public AjaxResult getCarousel() {
