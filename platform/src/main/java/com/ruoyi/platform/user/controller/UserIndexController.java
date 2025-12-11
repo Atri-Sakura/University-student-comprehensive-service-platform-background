@@ -69,6 +69,16 @@ public class UserIndexController {
         int result = sysUserIndexService.userCoursesAdd(userTimetable);
         return result > 0 ? AjaxResult.success("添加成功") : AjaxResult.error("添加失败");
     }
+    //用户课程删除
+    @DeleteMapping("/userCoursesDelete/{userTimetableId}")
+    public AjaxResult userCoursesDelete(@PathVariable Long userTimetableId) {
+        Long userBaseId = SecurityUtils.getUserBaseId();
+        if (userBaseId == null) {
+            return AjaxResult.error("用户未登录");
+        }
+        int result = sysUserIndexService.userCoursesDelete(userTimetableId);
+        return result > 0 ? AjaxResult.success("删除成功") : AjaxResult.error("删除失败");
+    }
 
     //首页轮播图
     @GetMapping("/carousel")

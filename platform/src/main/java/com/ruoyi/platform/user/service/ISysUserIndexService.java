@@ -20,4 +20,6 @@ public interface ISysUserIndexService {
     List<UserTimetable> getUserCourses(Long userBaseId);
 
     int userCoursesAdd(UserTimetable userTimetable);
+
+    int userCoursesDelete(Long userTimetableId);
 }

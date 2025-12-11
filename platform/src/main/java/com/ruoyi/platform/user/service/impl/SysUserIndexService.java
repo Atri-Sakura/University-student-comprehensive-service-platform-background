@@ -57,4 +57,9 @@ public class SysUserIndexService implements ISysUserIndexService {
     public int userCoursesAdd(UserTimetable userTimetable) {
         return sysUserIndexMapper.userCoursesAdd(userTimetable);
     }
+
+    @Override
+    public int userCoursesDelete(Long userTimetableId) {
+        return sysUserIndexMapper.userCoursesDelete(userTimetableId);
+    }
 }
