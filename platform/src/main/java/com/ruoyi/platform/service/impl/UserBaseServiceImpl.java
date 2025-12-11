@@ -108,10 +108,30 @@ public class UserBaseServiceImpl implements IUserBaseService
     @Override
     public String updateAvatar(MultipartFile file, Long userBaseId){
         try{
-            String avatar = minioFileUtils.upload(file, "user", userBaseId);
+            // 1. 查询用户当前信息
             UserBase userBase = userBaseMapper.selectUserBaseByUserBaseId(userBaseId);
-            userBase.setAvatar(avatar);
-            return avatar;
+            if (userBase == null) {
+                return "error";
+            }
+
+            // 2. 保存旧头像URL(用于后续删除)
+            String oldAvatar = userBase.getAvatar();
+
+            // 3. 上传新头像到MinIO
+            String newAvatarUrl = minioFileUtils.upload(file, "user", userBaseId);
+
+            // 4. 更新数据库中的头像字段
+            userBase.setAvatar(newAvatarUrl);
+            int rows = userBaseMapper.updateUserBase(userBase);
+
+            // 5. 如果更新成功且存在旧头像，删除MinIO中的旧头像文件
+            if (rows > 0 && oldAvatar != null && !oldAvatar.isEmpty()) {
+                // 使用安全删除，即使删除失败也不影响主流程
+                minioFileUtils. safeDeleteByUrl(oldAvatar);
+            }
+
+            return newAvatarUrl;
+
         }catch (Exception e){
             e.printStackTrace();
             return "error";
