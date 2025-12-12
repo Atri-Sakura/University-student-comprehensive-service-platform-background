@@ -33,7 +33,6 @@ public class RiderOrderController extends BaseController {
      */
     @GetMapping("/available")
     public TableDataInfo listAvailableOrders(OrderMain orderMain) {
-        startPage();
         // 修改为 RiderOrderListVO
         List<RiderOrderListVO> list = riderOrderService.selectAvailableOrderList(orderMain);
         return getDataTable(list);
@@ -49,8 +48,6 @@ public class RiderOrderController extends BaseController {
     @GetMapping("/myOrders")
     public TableDataInfo listMyOrders(OrderMain orderMain,
                                       @RequestParam(required = false) String timeRange) {
-        startPage();
-        // 从SecurityUtils获取当前登录的骑手ID
         Long riderId = SecurityUtils.getRiderBaseId();
 
         List<RiderOrderListVO> list = riderOrderService.selectRiderOrderList(riderId, orderMain, timeRange);
@@ -65,10 +62,8 @@ public class RiderOrderController extends BaseController {
      */
     @GetMapping("/{orderMainId}")
     public AjaxResult getOrderDetail(@PathVariable("orderMainId") Long orderMainId) {
-        // 从SecurityUtils获取当前登录的骑手ID
         Long riderId = SecurityUtils.getRiderBaseId();
 
-        // 详情接口返回完整的 OrderMain
         OrderMain order = riderOrderService.selectRiderOrderById(riderId, orderMainId);
         return AjaxResult.success(order);
     }

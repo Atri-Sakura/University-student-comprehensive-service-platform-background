@@ -104,7 +104,7 @@ public class OrderMain extends BaseEntity
     @Excel(name = "送货地址ID", readConverterExp = "关=联user_db.user_address.user_address_id，线下二手单可空")
     private Long deliverAddressId;
 
-    /** 送货地址文本（冗余，如“XX教学楼503室”） */
+    /** 送货地址文本（冗余，如"XX教学楼503室"） */
     @Excel(name = "送货地址文本", readConverterExp = "冗=余，如“XX教学楼503室”")
     private String deliverAddress;
 
@@ -145,9 +145,27 @@ public class OrderMain extends BaseEntity
     @Excel(name = "配送费金额")
     private BigDecimal deliveryFeeAmount;
 
-    // ==================== 新增：骑手相关信息字段 ====================
+    /** 商家名称 */
+    @Excel(name = "商家名称")
+    private String merchantName;
 
-    /** 骑手ID（来自 order_delivery. rider_id） */
+    /** 商家Logo */
+    @Excel(name = "商家Logo")
+    private String merchantLogo;
+
+    /** 商家评分 */
+    @Excel(name = "商家评分")
+    private BigDecimal merchantRating;
+
+    /** 商家电话 */
+    @Excel(name = "商家电话")
+    private String merchantPhone;
+
+    /** 商家营业时间 */
+    @Excel(name = "商家营业时间")
+    private String merchantBusinessHours;
+
+    /** 骑手ID（来自 order_delivery.rider_id） */
     @Excel(name = "骑手ID")
     private Long riderId;
 
@@ -202,15 +220,11 @@ public class OrderMain extends BaseEntity
     @Excel(name = "骑手收入")
     private BigDecimal riderIncome;
 
-    // ==================== 关联列表 ====================
-
     private List<OrderTakeoutDetail> orderTakeoutDetailList;
 
     private List<OrderErrandDetail> orderErrandDetailList;
 
     private List<OrderSecondhandDetail> orderSecondhandDetailList;
-
-    // ==================== Getter/Setter ====================
 
     public List<OrderTakeoutDetail> getOrderTakeoutDetailList() {
         return orderTakeoutDetailList;
@@ -322,7 +336,7 @@ public class OrderMain extends BaseEntity
 
     public void setPayType(Long payType)
     {
-        this. payType = payType;
+        this.payType = payType;
     }
 
     public Long getPayType()
@@ -422,7 +436,7 @@ public class OrderMain extends BaseEntity
 
     public void setDeliverAddressId(Long deliverAddressId)
     {
-        this. deliverAddressId = deliverAddressId;
+        this.deliverAddressId = deliverAddressId;
     }
 
     public Long getDeliverAddressId()
@@ -522,7 +536,45 @@ public class OrderMain extends BaseEntity
         return deliveryFeeAmount;
     }
 
-    // ==================== 新增字段的 Getter/Setter ====================
+    public String getMerchantName() {
+        return merchantName;
+    }
+
+    public void setMerchantName(String merchantName) {
+        this.merchantName = merchantName;
+    }
+
+    public String getMerchantLogo() {
+        return merchantLogo;
+    }
+
+    public void setMerchantLogo(String merchantLogo) {
+        this.merchantLogo = merchantLogo;
+    }
+
+    public BigDecimal getMerchantRating() {
+        return merchantRating;
+    }
+
+    public void setMerchantRating(BigDecimal merchantRating) {
+        this.merchantRating = merchantRating;
+    }
+
+    public String getMerchantPhone() {
+        return merchantPhone;
+    }
+
+    public void setMerchantPhone(String merchantPhone) {
+        this.merchantPhone = merchantPhone;
+    }
+
+    public String getMerchantBusinessHours() {
+        return merchantBusinessHours;
+    }
+
+    public void setMerchantBusinessHours(String merchantBusinessHours) {
+        this.merchantBusinessHours = merchantBusinessHours;
+    }
 
     public Long getRiderId() {
         return riderId;
@@ -639,6 +691,7 @@ public class OrderMain extends BaseEntity
     public List<OrderSecondhandDetail> getOrderSecondhandDetailList() {
         return orderSecondhandDetailList;
     }
+
     public void setOrderSecondhandDetailList(List<OrderSecondhandDetail> orderSecondhandDetailList) {
         this.orderSecondhandDetailList = orderSecondhandDetailList;
     }
@@ -679,7 +732,11 @@ public class OrderMain extends BaseEntity
                 .append("createTime", getCreateTime())
                 .append("updateTime", getUpdateTime())
                 .append("completeTime", getCompleteTime())
-                // 新增字段
+                .append("merchantName", getMerchantName())
+                .append("merchantLogo", getMerchantLogo())
+                .append("merchantRating", getMerchantRating())
+                .append("merchantPhone", getMerchantPhone())
+                .append("merchantBusinessHours", getMerchantBusinessHours())
                 .append("riderId", getRiderId())
                 .append("riderNickname", getRiderNickname())
                 .append("riderPhone", getRiderPhone())
