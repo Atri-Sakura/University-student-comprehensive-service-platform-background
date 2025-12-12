@@ -191,4 +191,25 @@ public class UserTakeOutOrderController extends BaseController {
 
         return AjaxResult.success(order);
     }
+
+
+    /**
+     * 查询二手订单详情
+     * @param orderMainId 订单主要ID
+     * @return 订单详情
+     */
+    @GetMapping("/secondHandOrder/{orderMainId}")
+    public AjaxResult getSecondHandOrderDetailByOrderMainNo(@PathVariable("orderMainId") String orderMainId) {
+        Long userId = SecurityUtils.getUserBaseId();
+        OrderMain order = orderMainMapper.selectSecondHandOrderMainWithDetailsByOrderMainNo(orderMainId);
+
+        // 权限校验
+//        if (order == null || !order.getUserId().equals(userId)) {
+//            return AjaxResult.error("订单不存在或无权查看");
+//        }
+
+        return AjaxResult.success(order);
+    }
+
+
 }
