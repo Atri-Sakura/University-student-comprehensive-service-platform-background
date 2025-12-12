@@ -666,7 +666,7 @@ public class UserOrderServiceImpl implements IUserOrderService {
         orderMain.setPayType(1L); // 默认余额支付
 
         // 订单状态（待接单）
-        orderMain.setOrderStatus(OrderStatusEnum.PENDING_ACCEPT.getCode());
+        orderMain.setOrderStatus(2L);
 
         // 取货地址处理（支持帮我买订单：userAddressId 为 null）
         if (userAddressId != null) {
