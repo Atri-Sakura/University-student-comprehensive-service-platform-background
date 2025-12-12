@@ -69,10 +69,10 @@ public class SystemMessageHandler implements MessageHandler {
             chatMessageService.updateChatMessage(dbMsg);
             // 更新会话未读计数
             Long sessionId = chatSessionService.selectChatSessionIdByFromTo(
-                    (long) chatMessage.getToType(),
-                    chatMessage.getToId(),
                     (long) chatMessage.getFromType(),
-                    chatMessage.getFromId()
+                    chatMessage.getFromId(),
+                    (long) chatMessage.getToType(),
+                    chatMessage.getToId()
             );
             chatSessionService.increaseUnreadCount(sessionId);
         }else {
@@ -80,6 +80,7 @@ public class SystemMessageHandler implements MessageHandler {
             dbMsg.setDeliverTime(new Date());
             chatMessageService.updateChatMessage(dbMsg);
             chatSession.setLastMsgTime(dbMsg.getDeliverTime());
+            chatSessionService.updateChatSession(chatSession);
             chatSessionService.increaseUnreadCount(chatSession.getSessionId());
         }
     }
@@ -111,6 +112,13 @@ public class SystemMessageHandler implements MessageHandler {
         String receiverKey = msg.getToType() + ":" + msg.getToId();
         Channel receiverChannel = sessionManager.getChannel(receiverKey);
 
+        if (Objects.isNull(receiverChannel)) {
+            log.warn("接收方Channel不存在，Key：{}", receiverKey);
+        } else if (!receiverChannel.isActive()) {
+            log.warn("接收方Channel非活跃，Key：{}，Channel：{}", receiverKey, receiverChannel);
+        } else if (!receiverChannel.isWritable()) {
+            log.warn("接收方Channel不可写，Key：，写缓冲区剩余：");
+        }
         if (Objects.isNull(receiverChannel) || !receiverChannel.isActive() || !receiverChannel.isWritable()) {
             return false;
         }

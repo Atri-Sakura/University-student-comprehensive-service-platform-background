@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Objects;
 import com.ruoyi.common.constant.HttpStatus;
 import com.ruoyi.common.utils.StringUtils;
+import org.apache.poi.ss.formula.functions.T;
 
 /**
  * 操作消息提醒
@@ -57,6 +58,14 @@ public class AjaxResult extends HashMap<String, Object>
         {
             super.put(DATA_TAG, data);
         }
+    }
+
+    /**
+     * 获取返回数据（修复泛型错误，返回Object类型）
+     * @return 数据对象
+     */
+    public Object getData() {
+        return super.get(DATA_TAG);
     }
 
     /**
