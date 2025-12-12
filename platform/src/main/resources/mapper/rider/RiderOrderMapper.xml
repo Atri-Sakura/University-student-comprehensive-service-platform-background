@@ -14,6 +14,11 @@
         <result property="totalAmount" column="total_amount"/>
         <result property="orderStatus" column="order_status"/>
         <result property="orderType" column="order_type"/>
+        <result property="merchantId" column="merchant_id"/>
+        <result property="merchantName" column="merchant_name"/>
+        <result property="merchantLogo" column="merchant_logo"/>
+        <result property="merchantRating" column="merchant_rating"/>
+        <result property="merchantPhone" column="merchant_phone"/>
     </resultMap>
 
     <!-- 详情查询ResultMap（完整字段） -->
@@ -49,8 +54,11 @@
         <result property="updateTime" column="update_time"/>
         <result property="completeTime" column="complete_time"/>
         <result property="remark" column="remark"/>
-
-        <!-- 新增：骑手相关字段映射 -->
+        <result property="merchantName" column="merchant_name"/>
+        <result property="merchantLogo" column="merchant_logo"/>
+        <result property="merchantRating" column="merchant_rating"/>
+        <result property="merchantPhone" column="merchant_phone"/>
+        <result property="merchantBusinessHours" column="merchant_business_hours"/>
         <result property="riderId" column="rider_id"/>
         <result property="deliveryStatus" column="delivery_status"/>
         <result property="receiveTime" column="receive_time"/>
@@ -95,9 +103,15 @@
         om.deliver_address,
         om.total_amount,
         om.order_status,
-        om.order_type
+        om.order_type,
+        mb.merchant_base_id as merchant_id,
+        mb.merchant_name,
+        mb.logo as merchant_logo,
+        mb.rating as merchant_rating,
+        mb.phone as merchant_phone
         FROM order_main om
         INNER JOIN order_delivery od ON om.order_main_id = od.order_main_id
+        LEFT JOIN merchant_base mb ON om.merchant_id = mb.merchant_base_id
         <where>
             od.rider_id = #{riderId}
 
@@ -123,8 +137,8 @@
                 </choose>
             </if>
 
-            <if test="orderMain != null and orderMain. orderStatus != null">
-                AND om. order_status = #{orderMain. orderStatus}
+            <if test="orderMain != null and orderMain.orderStatus != null">
+                AND om.order_status = #{orderMain.orderStatus}
             </if>
             <if test="orderMain != null and orderMain.orderNo != null and orderMain.orderNo != ''">
                 AND om.order_no LIKE CONCAT('%', #{orderMain.orderNo}, '%')
@@ -139,7 +153,7 @@
         ORDER BY om.create_time DESC
     </select>
 
-    <!-- 🔥 核心修改：查询骑手订单详情（完整字段） -->
+    <!-- 询骑手订单详情（完整字段） -->
     <select id="selectRiderOrderById" resultMap="OrderMainResult">
         SELECT
             om.*,
@@ -147,13 +161,18 @@
             od.delivery_status,
             od.receive_time,
             od.pick_time,
-            od.deliver_time
+            od.deliver_time,
+            mb.merchant_base_id,
+            mb.merchant_name,
+            mb.logo as merchant_logo,
+            mb.rating as merchant_rating,
+            mb.phone as merchant_phone,
+            mb.business_hours as merchant_business_hours
         FROM order_main om
                  INNER JOIN order_delivery od ON om.order_main_id = od.order_main_id
+                 LEFT JOIN merchant_base mb ON om.merchant_id = mb.merchant_base_id
         WHERE om.order_main_id = #{orderMainId}
           AND om.order_status != 5  /* 排除已取消的订单 */
-        -- ✅ 关键修改：移除 rider_id 限制，改为查询所有订单
-        -- 权限校验放到 Service 层处理
     </select>
 
     <!-- 按时间范围统计订单数量 -->
