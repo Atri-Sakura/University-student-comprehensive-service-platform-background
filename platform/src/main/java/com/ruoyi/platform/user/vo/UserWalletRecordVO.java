@@ -31,7 +31,7 @@ public class UserWalletRecordVO {
     private Long tradeStatus;
 
     /** 交易时间 */
-    @JsonFormat(pattern = "yyyy-MM-dd")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date tradeTime;
 
     /** 备注 */
