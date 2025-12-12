@@ -165,11 +165,11 @@ public class TextMessageHandler implements MessageHandler {
      * 参数校验：过滤无效请求
      */
     private boolean validateParams(ChatMessageProto.ChatMessage chatMessage) {
-        if (chatMessage.getMessageId() <= 0) {
+        if (chatMessage.getMessageId() < 0) {
             log.warn("消息ID无效（<=0），忽略处理");
             return false;
         }
-        if (chatMessage.getFromId() <= 0 || chatMessage.getToId() <= 0) {
+        if (chatMessage.getFromId() < 0 || chatMessage.getToId() < 0) {
             log.warn("发送方ID（{}）或接收方ID（{}）无效，消息ID: {}",
                     chatMessage.getFromId(), chatMessage.getToId(), chatMessage.getMessageId());
             return false;

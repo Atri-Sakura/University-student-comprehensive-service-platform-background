@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.utils.DateUtils;
 import com.ruoyi.common.utils.StringUtils;
+import com.ruoyi.common.utils.uuid.IdUtils;
 import com.ruoyi.common.utils.file.MinioFileUtils;
 import com.ruoyi.platform.domain.OrderMain;
 import com.ruoyi.platform.domain.vo.MerchantEvaluationAddReq;
@@ -15,7 +16,7 @@ import com.ruoyi.platform.domain.vo.MerchantEvaluationUpdateReq;
 import com.ruoyi.platform.mapper.OrderMainMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation. Autowired;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.ruoyi.platform.mapper.MerchantEvaluationMapper;
 import com.ruoyi.platform.domain.MerchantEvaluation;
@@ -59,6 +60,25 @@ public class MerchantEvaluationServiceImpl implements IMerchantEvaluationService
     private static final long MAX_IMAGE_SIZE = 5 * 1024 * 1024;
 
     /**
+     * 生成Long类型的评价ID
+     *
+     * @return Long类型ID
+     */
+    private Long generateLongId()
+    {
+        String uuid = IdUtils.fastSimpleUUID();
+        String hexString = uuid.substring(0, 8); // 取前8位16进制
+        try {
+            // 将8位16进制字符串转换为Long（最大值为 4294967295，10位数字）
+            return Long.parseLong(hexString, 16);
+        } catch (NumberFormatException e) {
+            // 如果转换失败，使用时间戳作为备用方案
+            log.warn("ID生成失败，使用时间戳备用方案", e);
+            return System.currentTimeMillis();
+        }
+    }
+
+    /**
      * 用户新增评价（带完整业务逻辑校验 + 图片上传）
      */
     @Override
@@ -94,7 +114,7 @@ public class MerchantEvaluationServiceImpl implements IMerchantEvaluationService
         // 只查该用户的
         queryEval.setUserId(userBaseId);
         List<MerchantEvaluation> existingEvals = merchantEvaluationMapper.selectMerchantEvaluationList(queryEval);
-        if (existingEvals != null && ! existingEvals.isEmpty()) {
+        if (existingEvals != null && !existingEvals.isEmpty()) {
             throw new ServiceException("该订单已评价，请勿重复操作");
         }
 
@@ -107,18 +127,21 @@ public class MerchantEvaluationServiceImpl implements IMerchantEvaluationService
         // 8. 构建评价实体 (数据清洗与组装)
         MerchantEvaluation evaluation = new MerchantEvaluation();
 
+        // 【关键修改】生成评价ID
+        evaluation. setMerchantEvaluationId(generateLongId());
+
         // 自动从订单中获取商家ID，确保数据一致性，不信任前端传的商家ID
         evaluation.setMerchantBaseId(order.getMerchantId());
 
         evaluation.setUserId(userBaseId);
-        evaluation.setOrderId(req. getOrderId());
-        evaluation. setRating(req.getRating());
+        evaluation.setOrderId(req.getOrderId());
+        evaluation.setRating(req.getRating());
 
         // 可选评分
         evaluation.setTasteScore(req.getTasteScore() != null ? req.getTasteScore() : req.getRating());
-        evaluation. setPackageScore(req.getPackageScore() != null ? req.getPackageScore() : req.getRating());
+        evaluation.setPackageScore(req.getPackageScore() != null ? req.getPackageScore() : req.getRating());
 
-        evaluation.setContent(req. getContent());
+        evaluation.setContent(req.getContent());
         evaluation.setImgUrls(imgUrls); // 使用上传后的图片URL
         evaluation.setCreateTime(DateUtils.getNowDate());
         // 商家回复留空，replyTime留空
@@ -153,7 +176,7 @@ public class MerchantEvaluationServiceImpl implements IMerchantEvaluationService
         }
 
         // 5. 【安全校验】评价归属权验证：必须是当前登录用户的评价
-        if (!existingEval. getUserId().equals(userBaseId)) {
+        if (!existingEval.getUserId().equals(userBaseId)) {
             throw new ServiceException("无权修改他人的评价");
         }
 
@@ -302,7 +325,7 @@ public class MerchantEvaluationServiceImpl implements IMerchantEvaluationService
 
         } catch (Exception e) {
             // 上传失败，清理已上传的文件
-            for (String url :  uploadedUrls) {
+            for (String url : uploadedUrls) {
                 minioFileUtils.safeDeleteByUrl(url);
             }
             log.error("图片上传失败：{}", e.getMessage(), e);
@@ -337,7 +360,7 @@ public class MerchantEvaluationServiceImpl implements IMerchantEvaluationService
         }
 
         // 3. 校验总数量
-        if (finalUrls. size() > MAX_IMAGE_COUNT) {
+        if (finalUrls.size() > MAX_IMAGE_COUNT) {
             throw new ServiceException("图片总数不能超过" + MAX_IMAGE_COUNT + "张");
         }
 
@@ -371,8 +394,6 @@ public class MerchantEvaluationServiceImpl implements IMerchantEvaluationService
             minioFileUtils.safeDeleteByUrl(url. trim());
         }
     }
-
-    // ================= 以下为原有生成的CRUD代码（管理员使用）=================
 
     @Override
     public MerchantEvaluation selectMerchantEvaluationByMerchantEvaluationId(Long merchantEvaluationId)
