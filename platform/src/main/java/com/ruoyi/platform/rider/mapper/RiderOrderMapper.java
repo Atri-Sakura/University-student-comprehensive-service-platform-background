@@ -57,4 +57,7 @@ public interface RiderOrderMapper {
 
     @Update("update order_main set order_status = 7 and cancel_reason = #{cancelReason} and cancel_operator = '骑手' where order_main_id = #{orderMainId} and order_status = 3")
     int reportAbnormal(Long riderId, OrderMain orderMain);
+
+    @Update("update order_delivery set delivery_status = 4 where order_main_id = #{orderMainId} and rider_id = #{riderId}")
+    int reportAbnormal1(Long riderId, OrderMain orderMain);
 }
