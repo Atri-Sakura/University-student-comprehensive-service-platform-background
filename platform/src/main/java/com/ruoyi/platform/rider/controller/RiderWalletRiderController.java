@@ -1,20 +1,24 @@
 package com.ruoyi.platform.rider.controller;
 
 
+import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
+import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.platform.domain.RiderWallet;
+import com.ruoyi.platform.domain.RiderWalletRecord;
 import com.ruoyi.platform.domain.vo.RiderWalletBalanceVO;
 import com.ruoyi.platform.service.IRiderWalletService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Random;
 
 @RestController
 @RequestMapping("api/rider/wallet")
-public class RiderWalletRiderController {
+public class RiderWalletRiderController extends BaseController {
 
     @Autowired
     private IRiderWalletService riderWalletService;
@@ -69,5 +73,17 @@ public class RiderWalletRiderController {
             return AjaxResult.error(e.getMessage());
         }
     }
+
+    /**
+     * 骑手钱包流水查询
+     */
+    @GetMapping("/flow")
+    public TableDataInfo getRiderWalletFlow() {
+        Long riderId = SecurityUtils.getUserBaseId();
+        startPage();
+        List<RiderWalletRecord> riderWalletRecords = riderWalletService.selectRiderWalletRecordByRiderBaseId(riderId);
+        return getDataTable(riderWalletRecords);
+    }
+
 
 }

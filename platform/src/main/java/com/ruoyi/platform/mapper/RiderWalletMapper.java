@@ -3,7 +3,9 @@ package com.ruoyi.platform.mapper;
 import java.math.BigDecimal;
 import java.util.List;
 import com.ruoyi.platform.domain.RiderWallet;
+import com.ruoyi.platform.domain.RiderWalletRecord;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
 
 /**
  * 骑手钱包Mapper接口
@@ -67,4 +69,7 @@ public interface RiderWalletMapper
      */
     int increaseBalance(@Param("riderId") Long riderId,
                         @Param("amount") BigDecimal amount);
+
+    @Select("select * from rider_wallet_record where rider_base_id = #{riderId}")
+    List<RiderWalletRecord> selectRiderWalletRecordByRiderBaseId(Long riderId);
 }
