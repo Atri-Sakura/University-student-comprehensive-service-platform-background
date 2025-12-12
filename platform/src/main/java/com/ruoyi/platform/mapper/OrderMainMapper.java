@@ -8,7 +8,10 @@ import java.util.Map;
 
 import com.ruoyi.platform.domain.OrderDelivery;
 import com.ruoyi.platform.domain.OrderMain;
+import com.ruoyi.platform.domain.OrderSecondhandDetail;
 import io.lettuce.core.dynamic.annotation.Param;
+import org.apache.ibatis.annotations.Select;
+import org.springframework.stereotype.Service;
 
 /**
  * 订单主（整合地址与定位信息）Mapper接口
@@ -161,4 +164,7 @@ public interface OrderMainMapper {
      * @return 配送信息
      */
     OrderDelivery selectOrderDeliveryByOrderMainId(Long orderMainId);
+
+    @Select("select * from order_secondhand_detail where seller_id = #{userId}")
+    List<OrderSecondhandDetail> selectOrderSecondhandDetailListBySellerId(Long userId);
 }

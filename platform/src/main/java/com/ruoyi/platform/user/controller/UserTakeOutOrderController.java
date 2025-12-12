@@ -7,6 +7,7 @@ import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.platform.domain.OrderMain;
+import com.ruoyi.platform.domain.OrderSecondhandDetail;
 import com.ruoyi.platform.domain.dto.CreateOrderDTO;
 import com.ruoyi.platform.domain.dto.PayOrderDTO;
 import com.ruoyi.platform.mapper.OrderMainMapper;
@@ -125,6 +126,16 @@ public class UserTakeOutOrderController extends BaseController {
     }
 
     /**
+     * 查询用户作为卖家的订单详情
+     */
+    @GetMapping("/list/seller")
+    public TableDataInfo listAsSeller() {
+        Long userId = SecurityUtils.getUserBaseId();
+        List<OrderSecondhandDetail> list = orderMainMapper.selectOrderSecondhandDetailListBySellerId(userId);
+        return getDataTable(list);
+    }
+
+    /**
      * 查询订单详情
      *
      * @param orderNo 订单ID
@@ -165,7 +176,6 @@ public class UserTakeOutOrderController extends BaseController {
 
     /**
      * 查询二手订单详情
-     *
      * @param orderNo 订单ID
      * @return 订单详情
      */
