@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import com.ruoyi.common.utils.DateUtils;
 import com.ruoyi.platform.chat.utils.SnowflakeIdGenerator;
+import com.ruoyi.platform.domain.RiderWalletRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
@@ -129,6 +130,11 @@ public class RiderWalletServiceImpl implements IRiderWalletService {
     public int deleteRiderWalletByRiderWalletId(Long riderWalletId)
     {
         return riderWalletMapper.deleteRiderWalletByRiderWalletId(riderWalletId);
+    }
+
+    @Override
+    public List<RiderWalletRecord> selectRiderWalletRecordByRiderBaseId(Long riderId) {
+        return riderWalletMapper.selectRiderWalletRecordByRiderBaseId(riderId);
     }
 
 

@@ -42,7 +42,23 @@ public class RiderOrderListVO {
     /** 订单类型名称 */
     private String orderTypeName;
 
-    // Getter和Setter方法
+    /** 商家ID */
+    private Long merchantId;
+
+    /** 商家名称 */
+    private String merchantName;
+
+    /** 商家Logo */
+    private String merchantLogo;
+
+    /** 商家评分 */
+    private BigDecimal merchantRating;
+
+    /** 商家电话 */
+    private String merchantPhone;
+
+    // ==================== Getter和Setter方法 ====================
+
     public Long getOrderMainId() {
         return orderMainId;
     }
@@ -106,7 +122,7 @@ public class RiderOrderListVO {
     }
 
     public void setOrderStatusName(String orderStatusName) {
-        this. orderStatusName = orderStatusName;
+        this.orderStatusName = orderStatusName;
     }
 
     public Integer getOrderType() {
@@ -126,6 +142,48 @@ public class RiderOrderListVO {
     public void setOrderTypeName(String orderTypeName) {
         this.orderTypeName = orderTypeName;
     }
+
+    public Long getMerchantId() {
+        return merchantId;
+    }
+
+    public void setMerchantId(Long merchantId) {
+        this.merchantId = merchantId;
+    }
+
+    public String getMerchantName() {
+        return merchantName;
+    }
+
+    public void setMerchantName(String merchantName) {
+        this.merchantName = merchantName;
+    }
+
+    public String getMerchantLogo() {
+        return merchantLogo;
+    }
+
+    public void setMerchantLogo(String merchantLogo) {
+        this.merchantLogo = merchantLogo;
+    }
+
+    public BigDecimal getMerchantRating() {
+        return merchantRating;
+    }
+
+    public void setMerchantRating(BigDecimal merchantRating) {
+        this.merchantRating = merchantRating;
+    }
+
+    public String getMerchantPhone() {
+        return merchantPhone;
+    }
+
+    public void setMerchantPhone(String merchantPhone) {
+        this.merchantPhone = merchantPhone;
+    }
+
+    // ==================== 辅助方法 ====================
 
     /**
      * 获取订单状态名称

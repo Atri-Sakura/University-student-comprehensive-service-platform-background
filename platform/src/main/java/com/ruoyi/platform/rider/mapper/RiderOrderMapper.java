@@ -3,6 +3,8 @@ package com.ruoyi.platform.rider.mapper;
 import com.ruoyi.platform.domain.OrderMain;
 import com.ruoyi.platform.rider.domain.vo.RiderOrderListVO;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Update;
+
 import java.util.List;
 
 /**
@@ -52,4 +54,10 @@ public interface RiderOrderMapper {
      */
     int countByTimeRange(@Param("riderId") Long riderId,
                          @Param("timeRange") String timeRange);
+
+    @Update("update order_main set order_status = 7 and cancel_reason = #{cancelReason} and cancel_operator = '骑手' where order_main_id = #{orderMainId} and order_status = 3")
+    int reportAbnormal(Long riderId, OrderMain orderMain);
+
+    @Update("update order_delivery set delivery_status = 4 where order_main_id = #{orderMainId} and rider_id = #{riderId}")
+    int reportAbnormal1(Long riderId, OrderMain orderMain);
 }
