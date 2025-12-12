@@ -198,7 +198,7 @@ public class UserTakeOutOrderController extends BaseController {
      * @param orderMainId 订单主要ID
      * @return 订单详情
      */
-    @GetMapping("/secondHandOrder/{orderMainId}")
+    @GetMapping("/secondHandOrder1/{orderMainId}")
     public AjaxResult getSecondHandOrderDetailByOrderMainNo(@PathVariable("orderMainId") String orderMainId) {
         Long userId = SecurityUtils.getUserBaseId();
         OrderMain order = orderMainMapper.selectSecondHandOrderMainWithDetailsByOrderMainNo(orderMainId);
