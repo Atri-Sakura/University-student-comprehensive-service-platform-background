@@ -189,7 +189,7 @@ public class UserTakeOutOrderController extends BaseController {
 //            return AjaxResult.error("订单不存在或无权查看");
 //        }
 
-        return AjaxResult.success(order);
+        return AjaxResult.success("查询成功",order);
     }
 
 
