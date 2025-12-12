@@ -1,55 +1,391 @@
 package com.ruoyi.platform.service.impl;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
+
+import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.utils.DateUtils;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.ruoyi.common.utils.StringUtils;
+import com.ruoyi.common.utils.file.MinioFileUtils;
+import com.ruoyi.platform.domain.OrderMain;
+import com.ruoyi.platform.domain.vo.MerchantEvaluationAddReq;
+import com.ruoyi.platform.domain.vo.MerchantEvaluationUpdateReq;
+import com.ruoyi.platform.mapper.OrderMainMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation. Autowired;
 import org.springframework.stereotype.Service;
 import com.ruoyi.platform.mapper.MerchantEvaluationMapper;
 import com.ruoyi.platform.domain.MerchantEvaluation;
 import com.ruoyi.platform.service.IMerchantEvaluationService;
+import org.springframework.transaction.annotation. Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * 商家评价Service业务层处理
- * 
+ *
  * @author ruoyi
  * @date 2025-10-20
  */
 @Service
-public class MerchantEvaluationServiceImpl implements IMerchantEvaluationService 
+public class MerchantEvaluationServiceImpl implements IMerchantEvaluationService
 {
+    private static final Logger log = LoggerFactory.getLogger(MerchantEvaluationServiceImpl.class);
+
     @Autowired
     private MerchantEvaluationMapper merchantEvaluationMapper;
 
+    @Autowired
+    private OrderMainMapper orderMainMapper;
+
+    @Autowired
+    private MinioFileUtils minioFileUtils;
+
     /**
-     * 查询商家评价
-     * 
-     * @param merchantEvaluationId 商家评价主键
-     * @return 商家评价
+     * MinIO 存储桶名称（评价图片专用）
      */
+    private static final String BUCKET_NAME = "evaluation";
+
+    /**
+     * 最大上传图片数量
+     */
+    private static final int MAX_IMAGE_COUNT = 9;
+
+    /**
+     * 单张图片最大大小（5MB）
+     */
+    private static final long MAX_IMAGE_SIZE = 5 * 1024 * 1024;
+
+    /**
+     * 用户新增评价（带完整业务逻辑校验 + 图片上传）
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public int insertUserEvaluation(MerchantEvaluationAddReq req, Long userBaseId) {
+        // 1. 基础校验：用户ID必须存在
+        if (userBaseId == null) {
+            throw new ServiceException("用户身份异常，无法评价");
+        }
+
+        // 2. 查询订单完整信息
+        OrderMain order = orderMainMapper.selectOrderMainByOrderMainId(req.getOrderId());
+
+        // 3. 校验订单是否存在
+        if (order == null) {
+            throw new ServiceException("订单不存在");
+        }
+
+        // 4. 【安全校验】订单归属权验证：必须是当前登录用户的订单
+        if (!order.getUserId().equals(userBaseId)) {
+            throw new ServiceException("无权评价非本人的订单");
+        }
+
+        // 5. 【状态校验】订单状态验证：只有已完成(4)的订单可以评价
+        // 状态码对照：1-待接单 2-待取货 3-配送中 4-已完成 5-已取消
+        if (order.getOrderStatus() != 4L) {
+            throw new ServiceException("订单未完成，暂无法进行评价");
+        }
+
+        // 6. 【防刷校验】检查是否已评价，防止重复提交
+        MerchantEvaluation queryEval = new MerchantEvaluation();
+        queryEval.setOrderId(req.getOrderId());
+        // 只查该用户的
+        queryEval.setUserId(userBaseId);
+        List<MerchantEvaluation> existingEvals = merchantEvaluationMapper.selectMerchantEvaluationList(queryEval);
+        if (existingEvals != null && ! existingEvals.isEmpty()) {
+            throw new ServiceException("该订单已评价，请勿重复操作");
+        }
+
+        // 7. 【图片上传】处理评价图片
+        String imgUrls = null;
+        if (req.getImages() != null && !req.getImages().isEmpty()) {
+            imgUrls = uploadImages(req.getImages(), userBaseId);
+        }
+
+        // 8. 构建评价实体 (数据清洗与组装)
+        MerchantEvaluation evaluation = new MerchantEvaluation();
+
+        // 自动从订单中获取商家ID，确保数据一致性，不信任前端传的商家ID
+        evaluation.setMerchantBaseId(order.getMerchantId());
+
+        evaluation.setUserId(userBaseId);
+        evaluation.setOrderId(req. getOrderId());
+        evaluation. setRating(req.getRating());
+
+        // 可选评分
+        evaluation.setTasteScore(req.getTasteScore() != null ? req.getTasteScore() : req.getRating());
+        evaluation. setPackageScore(req.getPackageScore() != null ? req.getPackageScore() : req.getRating());
+
+        evaluation.setContent(req. getContent());
+        evaluation.setImgUrls(imgUrls); // 使用上传后的图片URL
+        evaluation.setCreateTime(DateUtils.getNowDate());
+        // 商家回复留空，replyTime留空
+
+        // 9. 执行插入
+        return merchantEvaluationMapper.insertMerchantEvaluation(evaluation);
+    }
+
+    /**
+     * 用户修改评价（带权限校验 + 图片处理）
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public int updateUserEvaluation(MerchantEvaluationUpdateReq req, Long userBaseId) {
+        // 1. 基础校验：用户ID必须存在
+        if (userBaseId == null) {
+            throw new ServiceException("用户身份异常，无法修改评价");
+        }
+
+        // 2. 校验评价ID是否存在
+        if (req.getMerchantEvaluationId() == null) {
+            throw new ServiceException("评价ID不能为空");
+        }
+
+        // 3. 查询原评价信息
+        MerchantEvaluation existingEval = merchantEvaluationMapper.selectMerchantEvaluationByMerchantEvaluationId(
+                req.getMerchantEvaluationId());
+
+        // 4. 校验评价是否存在
+        if (existingEval == null) {
+            throw new ServiceException("评价不存在");
+        }
+
+        // 5. 【安全校验】评价归属权验证：必须是当前登录用户的评价
+        if (!existingEval. getUserId().equals(userBaseId)) {
+            throw new ServiceException("无权修改他人的评价");
+        }
+
+        // 6. 【图片处理】处理修改时的图片
+        String finalImgUrls = processUpdateImages(
+                existingEval.getImgUrls(),
+                req.getKeepImgUrls(),
+                req.getNewImages(),
+                userBaseId
+        );
+
+        // 7. 只允许修改特定字段，防止篡改关键数据
+        MerchantEvaluation updateEval = new MerchantEvaluation();
+        updateEval.setMerchantEvaluationId(req.getMerchantEvaluationId());
+        updateEval.setRating(req.getRating());
+        updateEval.setTasteScore(req.getTasteScore());
+        updateEval.setPackageScore(req.getPackageScore());
+        updateEval. setContent(req.getContent());
+        updateEval.setImgUrls(finalImgUrls);
+        // 禁止修改：userId, merchantBaseId, orderId, createTime 等
+
+        // 8. 执行更新
+        return merchantEvaluationMapper.updateMerchantEvaluation(updateEval);
+    }
+
+    /**
+     * 用户删除单个评价（带权限校验 + 图片删除）
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public int deleteUserEvaluation(Long merchantEvaluationId, Long userBaseId) {
+        // 1. 基础校验：用户ID必须存在
+        if (userBaseId == null) {
+            throw new ServiceException("用户身份异常，无法删除评价");
+        }
+
+        // 2. 校验评价ID是否存在
+        if (merchantEvaluationId == null) {
+            throw new ServiceException("评价ID不能为空");
+        }
+
+        // 3. 查询评价信息
+        MerchantEvaluation existingEval = merchantEvaluationMapper. selectMerchantEvaluationByMerchantEvaluationId(merchantEvaluationId);
+
+        // 4. 校验评价是否存在
+        if (existingEval == null) {
+            throw new ServiceException("评价不存在");
+        }
+
+        // 5. 【安全校验】评价归属权验证：必须是当前登录用户的评价
+        if (!existingEval.getUserId().equals(userBaseId)) {
+            throw new ServiceException("无权删除他人的评价");
+        }
+
+        // 6. 【删除图片】先删除关联的图片文件
+        deleteEvaluationImages(existingEval.getImgUrls());
+
+        // 7. 执行删除
+        return merchantEvaluationMapper.deleteMerchantEvaluationByMerchantEvaluationId(merchantEvaluationId);
+    }
+
+    /**
+     * 用户批量删除评价（带权限校验 + 图片删除）
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public int deleteUserEvaluationBatch(Long[] merchantEvaluationIds, Long userBaseId) {
+        // 1. 基础校验：用户ID必须存在
+        if (userBaseId == null) {
+            throw new ServiceException("用户身份异常，无法删除评价");
+        }
+
+        // 2. 校验评价ID数组
+        if (merchantEvaluationIds == null || merchantEvaluationIds.length == 0) {
+            throw new ServiceException("评价ID不能为空");
+        }
+
+        // 3. 逐个校验权限（确保每个评价都属于当前用户）
+        int successCount = 0;
+        StringBuilder errorMsg = new StringBuilder();
+
+        for (Long evalId : merchantEvaluationIds) {
+            try {
+                // 复用单个删除的逻辑
+                deleteUserEvaluation(evalId, userBaseId);
+                successCount++;
+            } catch (ServiceException e) {
+                errorMsg.append("评价ID[").append(evalId).append("]:  ").append(e.getMessage()).append("; ");
+            }
+        }
+
+        // 4. 如果有失败的，抛出异常（事务回滚）
+        if (successCount < merchantEvaluationIds.length) {
+            throw new ServiceException("批量删除失败：" + errorMsg.toString());
+        }
+
+        return successCount;
+    }
+
+    // ================= 图片处理辅助方法 =================
+
+    /**
+     * 上传多张图片到MinIO
+     *
+     * @param images 图片文件列表
+     * @param userId 用户ID
+     * @return 图片URL字符串（逗号分隔）
+     */
+    private String uploadImages(List<MultipartFile> images, Long userId) {
+        if (images == null || images.isEmpty()) {
+            return null;
+        }
+
+        // 校验图片数量
+        if (images.size() > MAX_IMAGE_COUNT) {
+            throw new ServiceException("最多只能上传" + MAX_IMAGE_COUNT + "张图片");
+        }
+
+        List<String> uploadedUrls = new ArrayList<>();
+
+        try {
+            for (MultipartFile image : images) {
+                // 跳过空文件
+                if (image. isEmpty()) {
+                    continue;
+                }
+
+                // 校验文件大小
+                if (image.getSize() > MAX_IMAGE_SIZE) {
+                    throw new ServiceException("图片大小不能超过5MB");
+                }
+
+                // 校验文件类型
+                String contentType = image.getContentType();
+                if (contentType == null || !contentType.startsWith("image/")) {
+                    throw new ServiceException("只能上传图片文件");
+                }
+
+                // 上传到MinIO
+                String imageUrl = minioFileUtils.upload(image, BUCKET_NAME, userId);
+                uploadedUrls.add(imageUrl);
+            }
+
+            // 返回逗号分隔的URL字符串
+            return uploadedUrls.isEmpty() ? null : String.join(",", uploadedUrls);
+
+        } catch (Exception e) {
+            // 上传失败，清理已上传的文件
+            for (String url :  uploadedUrls) {
+                minioFileUtils.safeDeleteByUrl(url);
+            }
+            log.error("图片上传失败：{}", e.getMessage(), e);
+            throw new ServiceException("图片上传失败：" + e.getMessage());
+        }
+    }
+
+    /**
+     * 处理修改时的图片（删除旧图 + 上传新图）
+     *
+     * @param oldImgUrls 原有图片URL
+     * @param keepImgUrls 保留的图片URL
+     * @param newImages 新增的图片文件
+     * @param userId 用户ID
+     * @return 最终的图片URL字符串
+     */
+    private String processUpdateImages(String oldImgUrls, String keepImgUrls,
+                                       List<MultipartFile> newImages, Long userId) {
+        List<String> finalUrls = new ArrayList<>();
+
+        // 1. 处理保留的图片
+        if (StringUtils.isNotEmpty(keepImgUrls)) {
+            finalUrls.addAll(Arrays. asList(keepImgUrls.split(",")));
+        }
+
+        // 2. 上传新图片
+        if (newImages != null && !newImages.isEmpty()) {
+            String newUrls = uploadImages(newImages, userId);
+            if (StringUtils.isNotEmpty(newUrls)) {
+                finalUrls. addAll(Arrays.asList(newUrls.split(",")));
+            }
+        }
+
+        // 3. 校验总数量
+        if (finalUrls. size() > MAX_IMAGE_COUNT) {
+            throw new ServiceException("图片总数不能超过" + MAX_IMAGE_COUNT + "张");
+        }
+
+        // 4. 删除被移除的旧图片
+        if (StringUtils.isNotEmpty(oldImgUrls)) {
+            List<String> oldUrlList = Arrays.asList(oldImgUrls.split(","));
+            List<String> toDelete = oldUrlList.stream()
+                    .filter(url -> !finalUrls.contains(url))
+                    .collect(Collectors.toList());
+
+            for (String url : toDelete) {
+                minioFileUtils.safeDeleteByUrl(url);
+            }
+        }
+
+        return finalUrls.isEmpty() ? null : String.join(",", finalUrls);
+    }
+
+    /**
+     * 删除评价相关的图片
+     *
+     * @param imgUrls 图片URL字符串（逗号分隔）
+     */
+    private void deleteEvaluationImages(String imgUrls) {
+        if (StringUtils.isEmpty(imgUrls)) {
+            return;
+        }
+
+        List<String> urlList = Arrays. asList(imgUrls.split(","));
+        for (String url : urlList) {
+            minioFileUtils.safeDeleteByUrl(url. trim());
+        }
+    }
+
+    // ================= 以下为原有生成的CRUD代码（管理员使用）=================
+
     @Override
     public MerchantEvaluation selectMerchantEvaluationByMerchantEvaluationId(Long merchantEvaluationId)
     {
         return merchantEvaluationMapper.selectMerchantEvaluationByMerchantEvaluationId(merchantEvaluationId);
     }
 
-    /**
-     * 查询商家评价列表
-     * 
-     * @param merchantEvaluation 商家评价
-     * @return 商家评价
-     */
     @Override
     public List<MerchantEvaluation> selectMerchantEvaluationList(MerchantEvaluation merchantEvaluation)
     {
         return merchantEvaluationMapper.selectMerchantEvaluationList(merchantEvaluation);
     }
 
-    /**
-     * 新增商家评价
-     * 
-     * @param merchantEvaluation 商家评价
-     * @return 结果
-     */
     @Override
     public int insertMerchantEvaluation(MerchantEvaluation merchantEvaluation)
     {
@@ -57,36 +393,18 @@ public class MerchantEvaluationServiceImpl implements IMerchantEvaluationService
         return merchantEvaluationMapper.insertMerchantEvaluation(merchantEvaluation);
     }
 
-    /**
-     * 修改商家评价
-     * 
-     * @param merchantEvaluation 商家评价
-     * @return 结果
-     */
     @Override
     public int updateMerchantEvaluation(MerchantEvaluation merchantEvaluation)
     {
         return merchantEvaluationMapper.updateMerchantEvaluation(merchantEvaluation);
     }
 
-    /**
-     * 批量删除商家评价
-     * 
-     * @param merchantEvaluationIds 需要删除的商家评价主键
-     * @return 结果
-     */
     @Override
     public int deleteMerchantEvaluationByMerchantEvaluationIds(Long[] merchantEvaluationIds)
     {
         return merchantEvaluationMapper.deleteMerchantEvaluationByMerchantEvaluationIds(merchantEvaluationIds);
     }
 
-    /**
-     * 删除商家评价信息
-     * 
-     * @param merchantEvaluationId 商家评价主键
-     * @return 结果
-     */
     @Override
     public int deleteMerchantEvaluationByMerchantEvaluationId(Long merchantEvaluationId)
     {
