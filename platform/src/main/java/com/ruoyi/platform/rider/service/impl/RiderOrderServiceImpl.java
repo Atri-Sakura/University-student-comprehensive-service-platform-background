@@ -95,4 +95,16 @@ public class RiderOrderServiceImpl implements IRiderOrderService {
 
         return statistics;
     }
+
+    @Override
+    public Boolean reportAbnormal(Long riderId, OrderMain orderMain) {
+        if (riderId == null) {
+            throw new ServiceException("骑手ID不能为空");
+        }
+        if (orderMain == null) {
+            throw new ServiceException("订单不能为空");
+        }
+        int result = riderOrderMapper.reportAbnormal(riderId, orderMain);
+        return result > 0 ? true : false;
+    }
 }

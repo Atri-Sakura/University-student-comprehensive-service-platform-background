@@ -47,4 +47,6 @@ public interface IRiderOrderService {
      * @return 统计结果
      */
     Map<String, Object> getOrderStatistics(Long riderId);
+
+    Boolean reportAbnormal(Long riderId, OrderMain orderMain);
 }
