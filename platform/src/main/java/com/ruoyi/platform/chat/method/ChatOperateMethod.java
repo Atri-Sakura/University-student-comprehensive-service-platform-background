@@ -295,4 +295,34 @@ public class ChatOperateMethod {
         return session;
     }
 
+    /**
+     * 校验会话是否存在，不存在则初始化
+     * @param chatMessage 聊天消息
+     * @return 会话实体
+     */
+    public ChatSession ensureSystemSessionExists(ChatMessage chatMessage) {
+        ChatSession session;
+        Long sessionId = chatSessionService.selectChatSessionIdByFromTo(
+                chatMessage.getFromType(), chatMessage.getFromId(),
+                chatMessage.getToType(), chatMessage.getToId()
+        );
+
+
+        if (sessionId == null) {
+            // 初始化并插入新会话
+            session = initSession(chatMessage);
+            chatSessionService.insertChatSession(session);
+            // 关键修复：将新生成的会话ID赋值给sessionId
+            sessionId = session.getSessionId();
+            // 更新消息关联的会话ID
+            chatMessage.setSessionId(sessionId);
+            chatMessageService.updateChatMessage(chatMessage);
+            log.info("初始化新会话，会话ID: {}", sessionId);
+        }
+
+        // 此时sessionId已确保不为null（要么原本存在，要么新生成）
+        session = chatSessionService.selectChatSessionBySessionId(sessionId);
+        return session;
+    }
+
 }

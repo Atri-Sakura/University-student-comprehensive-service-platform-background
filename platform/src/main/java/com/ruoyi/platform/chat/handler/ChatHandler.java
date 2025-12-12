@@ -73,6 +73,9 @@ public class ChatHandler extends SimpleChannelInboundHandler<ChatMessageProto.Ch
                 case 3:
                     messageHandler.handler(channelSessionManager, ctx, chatMessage);
                     break;
+                case 4:
+                    messageHandler.handler(channelSessionManager, ctx, chatMessage);
+                    break;
                 case 5:
                     messageHandler.handler(channelSessionManager, ctx, chatMessage);
                     break;
