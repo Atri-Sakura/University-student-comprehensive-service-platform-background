@@ -78,4 +78,16 @@ public class RiderOrderController extends BaseController {
         Long riderId = SecurityUtils.getRiderBaseId();
         return AjaxResult.success(riderOrderService.getOrderStatistics(riderId));
     }
+
+    /**
+     * 骑手异常报备
+     */
+    @PutMapping("/report")
+    public AjaxResult reportAbnormal(@RequestBody OrderMain orderMain) {
+        Long riderId = SecurityUtils.getRiderBaseId();
+        boolean isSuccess = riderOrderService.reportAbnormal(riderId, orderMain);
+        return isSuccess ? AjaxResult.success("报备成功") : AjaxResult.error("报备失败");
+    }
+
+
 }

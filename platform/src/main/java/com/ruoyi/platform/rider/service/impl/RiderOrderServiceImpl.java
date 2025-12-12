@@ -9,6 +9,7 @@ import org. slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 import java.util.List;
@@ -94,5 +95,19 @@ public class RiderOrderServiceImpl implements IRiderOrderService {
         statistics.put("totalCount", riderOrderMapper.countByTimeRange(riderId, null));
 
         return statistics;
+    }
+
+    @Override
+    @Transactional
+    public Boolean reportAbnormal(Long riderId, OrderMain orderMain) {
+        if (riderId == null) {
+            throw new ServiceException("骑手ID不能为空");
+        }
+        if (orderMain == null) {
+            throw new ServiceException("订单不能为空");
+        }
+        int result = riderOrderMapper.reportAbnormal(riderId, orderMain);
+        int result1 = riderOrderMapper.reportAbnormal1(riderId,orderMain);
+        return result + result1 > 1 ? true : false;
     }
 }
