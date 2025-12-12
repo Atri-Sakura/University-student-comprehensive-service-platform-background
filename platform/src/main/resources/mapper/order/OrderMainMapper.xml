@@ -416,6 +416,45 @@
         AND om.order_type = 3  <!-- 3表示二手交易单（与OrderMain的orderType枚举一致） -->
     </select>
 
+
+    <!-- 根据订单ID查询二手订单详情(包含明细列表 + 骑手信息) -->
+    <select id="selectSecondHandOrderMainWithDetailsByOrderMainNo" parameterType="String" resultMap="SecondhandOrderMainResultWithDetails">
+        SELECT
+        om.*,
+        -- 二手订单明细字段
+        oshd.order_secondhand_detail_id,
+        oshd.goods_id,
+        oshd.goods_name,
+        oshd.seller_id,
+        oshd.sell_way,
+        oshd.seller_nickname,
+        oshd.deposit_amount,
+        oshd.confirm_time,
+        oshd.evaluate_status,
+
+        -- 配送信息字段
+        od.rider_id,
+        od.delivery_status,
+        od.receive_time,
+        od.pick_time,
+        od.deliver_time,
+        od.delivery_fee,
+        od.rider_income,
+        -- 骑手信息字段
+        rb.nickname AS rider_nickname,
+        rb.phone AS rider_phone,
+        rb.avatar AS rider_avatar,
+        rb.real_name AS rider_real_name,
+        rb.work_status AS rider_work_status,
+        rb.credit_score AS rider_credit_score
+        FROM order_main om
+        LEFT JOIN order_secondhand_detail oshd ON om.order_main_id = oshd.order_main_id
+        LEFT JOIN order_delivery od ON om.order_main_id = od.order_main_id
+        LEFT JOIN rider_base rb ON od.rider_id = rb.rider_base_id
+        WHERE om.order_main_id = #{orderMainId}
+        AND om.order_type = 3  <!-- 3表示二手交易单（与OrderMain的orderType枚举一致） -->
+    </select>
+
 <!-- 新增/修改方法：查询订单详情(包含明细列表 + 骑手信息) -->
 <select id="selectOrderMainWithDetailsByOrderNo" parameterType="String" resultMap="OrderMainResultWithDetails">
     SELECT

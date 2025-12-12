@@ -167,4 +167,6 @@ public interface OrderMainMapper {
 
     @Select("select * from order_secondhand_detail where seller_id = #{userId}")
     List<OrderSecondhandDetail> selectOrderSecondhandDetailListBySellerId(Long userId);
+
+    OrderMain selectSecondHandOrderMainWithDetailsByOrderMainNo(String orderMainId);
 }
