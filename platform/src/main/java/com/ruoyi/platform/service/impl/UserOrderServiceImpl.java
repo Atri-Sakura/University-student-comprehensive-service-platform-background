@@ -105,6 +105,9 @@ public class UserOrderServiceImpl implements IUserOrderService {
             // 以数据库价格为准，覆盖前端传来的价格
             item.setGoodsPrice(goods.getPrice());
             item.setGoodsName(goods.getGoodsName());
+            goods.setStock(goods.getStock() - item.getQuantity());
+            goods.setSalesCount(goods.getSalesCount() + item.getQuantity());
+            merchantGoodsMapper.updateMerchantGoods(goods);
         }
 
         // 3. 计算订单金额（包含配送费）

@@ -1,11 +1,11 @@
 package com.ruoyi.platform.merchant.service.impl;
 
 import com.ruoyi.common.utils.DateUtils;
+import com.ruoyi.platform.domain.MerchantBase;
+import com.ruoyi.platform.merchant.mapper.MerchantInfoMapper;
+import com.ruoyi.platform.merchant.service.IMerchantInfoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import com.ruoyi.platform.merchant.mapper.MerchantInfoMapper;
-import com.ruoyi.platform.domain.MerchantBase;
-import com.ruoyi.platform.merchant.service.IMerchantInfoService;
 
 /**
  * 商家基础信息Service实现类

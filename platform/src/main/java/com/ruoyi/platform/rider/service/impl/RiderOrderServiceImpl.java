@@ -106,8 +106,8 @@ public class RiderOrderServiceImpl implements IRiderOrderService {
         if (orderMain == null) {
             throw new ServiceException("订单不能为空");
         }
-        int result = riderOrderMapper.reportAbnormal(riderId, orderMain);
-        int result1 = riderOrderMapper.reportAbnormal1(riderId,orderMain);
+        int result = riderOrderMapper.reportAbnormal(riderId, orderMain.getOrderMainId(),orderMain.getCancelReason());
+        int result1 = riderOrderMapper.reportAbnormal1(riderId,orderMain.getOrderMainId());
         return result + result1 > 1 ? true : false;
     }
 }
