@@ -564,7 +564,7 @@ public class UserOrderServiceImpl implements IUserOrderService {
         orderMain.setGoodsAmount(amountInfo.getGoodsAmount());
         orderMain.setDeliveryFeeAmount(amountInfo.getDeliveryFee());
 
-        // ⭐ 设置订单缩略图
+        // 设置订单缩略图
         orderMain.setOrderThumbnail(orderThumbnail);
 
         // 支付状态（已支付）
@@ -657,7 +657,7 @@ public class UserOrderServiceImpl implements IUserOrderService {
     }
 
     /**
-     * ⭐ 内部方法：真正创建跑腿订单（无缩略图）
+     * 内部方法：创建跑腿订单
      */
     private OrderMain createErrandOrderInternal(CreateErrandOrderDto createOrderDTO, String orderNo,
                                                 OrderAmountInfo amountInfo, Long userAddressId) {
@@ -679,7 +679,7 @@ public class UserOrderServiceImpl implements IUserOrderService {
         orderMain.setGoodsAmount(amountInfo.getGoodsAmount());
         orderMain.setDeliveryFeeAmount(amountInfo.getDeliveryFee());
 
-        // ⭐ 跑腿订单无缩略图
+        // 跑腿订单无缩略图
         orderMain.setOrderThumbnail(null);
 
         // 支付状态（已支付）
@@ -689,6 +689,7 @@ public class UserOrderServiceImpl implements IUserOrderService {
 
         // 订单状态（待接单）
         orderMain.setOrderStatus(2L);
+        //orderMain.setOrderStatus(OrderStatusEnum.RIDER_PENDING_ACCEPT.getCode());
 
         // 取货地址处理（支持帮我买订单：userAddressId 为 null）
         if (userAddressId != null) {
@@ -718,7 +719,6 @@ public class UserOrderServiceImpl implements IUserOrderService {
         orderMain.setDeliverPhone(createOrderDTO.getDeliverPhone());
         orderMain.setDeliverLongitude(createOrderDTO.getDeliverLongitude());
         orderMain.setDeliverLatitude(createOrderDTO.getDeliverLatitude());
-        orderMain.setOrderStatus(OrderStatusEnum.MERCHANT_PENDING_ACCEPT.getCode());
         orderMain.setRemark(createOrderDTO.getRemark());
         orderMain.setCreateTime(new Date());
         orderMain.setUpdateTime(new Date());
@@ -760,7 +760,7 @@ public class UserOrderServiceImpl implements IUserOrderService {
         orderDeliveryMapper.insertOrderDelivery(delivery);
 
         // 5. 记录订单创建日志
-        saveStatusLog(orderMain.getOrderMainId(), null, OrderStatusEnum.MERCHANT_PENDING_ACCEPT.getCode(),
+        saveStatusLog(orderMain.getOrderMainId(), null, OrderStatusEnum.RIDER_PENDING_ACCEPT.getCode(),
                 OperatorTypeEnum.USER, createOrderDTO.getUserId(),
                 createOrderDTO.getUserNickname(), "用户支付并创建订单");
 
