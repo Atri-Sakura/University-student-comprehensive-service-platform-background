@@ -4,7 +4,7 @@ import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.platform.domain.OrderMain;
 import com.ruoyi.platform.rider.domain.vo.RiderOrderListVO;
 import com.ruoyi.platform.rider.mapper.RiderOrderMapper;
-import com.ruoyi.platform. rider.service.IRiderOrderService;
+import com.ruoyi.platform.rider.service.IRiderOrderService;
 import org. slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
