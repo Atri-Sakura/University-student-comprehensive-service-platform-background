@@ -32,4 +32,18 @@ public interface IOrderNotifyService {
      * @param userId 用户ID
      */
     void sendUserOrderSuccessNotify(OrderMain orderMain, Long userId);
+
+    /**
+     * 骑手接单通知
+     * @param riderId
+     * @param orderMainId
+     */
+    public void sendPickOrderToUserNotify(Long riderId, Long orderMainId);
+
+    /**
+     * 商家接单通知
+     * @param orderMainId
+     * @param merchantId
+     */
+    public void sendMerchantAcceptOrderToUserNotify(Long orderMainId, Long merchantId);
 }
