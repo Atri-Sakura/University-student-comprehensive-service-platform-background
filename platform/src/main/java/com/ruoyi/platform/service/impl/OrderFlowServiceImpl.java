@@ -70,9 +70,9 @@ public class OrderFlowServiceImpl implements IOrderFlowService {
         OrderTakeoutDetail queryDetail = new OrderTakeoutDetail();
         queryDetail.setOrderMainId(orderMainId);
         List<OrderTakeoutDetail> details = orderTakeoutDetailMapper.selectOrderTakeoutDetailList(queryDetail);
-        if (details.isEmpty() || !details.get(0).getMerchantId().equals(merchantId)) {
-            throw new ServiceException("无权操作此订单");
-        }
+//        if (details.isEmpty() || !details.get(0).getMerchantId().equals(merchantId)) {
+//            throw new ServiceException("无权操作此订单");
+//        }
 
         // 3. 状态校验：必须是待接单状态
         if (!OrderStatusEnum.MERCHANT_PENDING_ACCEPT.getCode().equals(order.getOrderStatus())) {

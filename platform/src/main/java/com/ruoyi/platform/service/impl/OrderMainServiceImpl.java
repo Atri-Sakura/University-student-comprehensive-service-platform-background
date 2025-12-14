@@ -215,4 +215,14 @@ public class OrderMainServiceImpl implements IOrderMainService
     {
         return orderMainMapper.selectMerchantTodayRefund(merchantId, startTime, endTime);
     }
+
+    /**
+     * 根据orderNo查询订单
+     * @param orderNo
+     * @return
+     */
+    @Override
+    public OrderMain selectByOrderNo(String orderNo) {
+        return orderMainMapper.selectByOrderNo(orderNo);
+    }
 }

@@ -49,8 +49,8 @@ public class RiderWalletRecord extends BaseEntity {
     private Long tradeStatus;
 
     /** 交易时间 */
-    @JsonFormat(pattern = "yyyy-MM-dd")
-    @Excel(name = "交易时间", width = 30, dateFormat = "yyyy-MM-dd")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @Excel(name = "交易时间", width = 30, dateFormat = "yyyy-MM-dd HH:mm:ss")
     private Date tradeTime;
 
     public void setRiderWalletRecordId(Long riderWalletRecordId) {

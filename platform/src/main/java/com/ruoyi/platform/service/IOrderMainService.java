@@ -89,4 +89,6 @@ public interface IOrderMainService
      * @return 结果
      */
     int handleOrderRefund(Long orderMainId, String refundReason);
+
+    OrderMain selectByOrderNo(String orderNo);
 }

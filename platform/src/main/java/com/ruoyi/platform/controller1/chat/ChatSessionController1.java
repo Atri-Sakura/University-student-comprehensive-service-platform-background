@@ -87,4 +87,11 @@ public class ChatSessionController1 {
     public AjaxResult readUnreadCount(Long sessionId) {
         return AjaxResult.success(chatSessionService.readUnreadCount(sessionId));
     }
+
+    @GetMapping("/systemSession")
+    public AjaxResult getSystemSession(Long fromType, Long fromId) {
+        Long sessionId = chatSessionService.selectChatSessionIdByFromTo(4L,0L,fromType,fromId);
+        ChatSession chatSession = chatSessionService.selectChatSessionBySessionId(sessionId);
+        return AjaxResult.success("操作成功",chatSession);
+    }
 }
