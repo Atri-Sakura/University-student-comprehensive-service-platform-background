@@ -3,6 +3,7 @@ package com.ruoyi.platform.service.impl;
 import com.ruoyi.common.core.redis.RedisCache;
 import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.utils.DateUtils;
+import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.common.utils.uuid.IdUtils;
 import com.ruoyi.platform.domain.*;
 import com.ruoyi.platform.domain.dto.CreateOrderDTO;
@@ -142,6 +143,47 @@ public class UserOrderServiceImpl implements IUserOrderService {
     }
 
     /**
+     * 验证支付密码（仅余额支付时需要）
+     *
+     * @param userId 用户ID
+     * @param payType 支付方式
+     * @param payPassword 支付密码
+     */
+    private void validatePayPassword(Long userId, Long payType, String payPassword) {
+        // 只有余额支付（payType = 1）才需要验证支付密码
+        if (payType != 1L) {
+            log.info("非余额支付，跳过支付密码验证，用户ID：{}，支付方式：{}", userId, payType);
+            return;
+        }
+
+        log.info("余额支付，开始验证支付密码，用户ID：{}", userId);
+
+        // 余额支付必须提供支付密码
+        if (payPassword == null || payPassword.trim().isEmpty()) {
+            throw new ServiceException("余额支付需要输入支付密码");
+        }
+
+        // 查询用户信息
+        UserBase user = userBaseMapper.selectUserBaseByUserBaseId(userId);
+        if (user == null) {
+            throw new ServiceException("用户不存在");
+        }
+
+        // 检查用户是否设置了支付密码
+        if (user.getPayPassword() == null || user.getPayPassword().isEmpty()) {
+            throw new ServiceException("请先设置支付密码");
+        }
+
+        // 验证支付密码是否正确（使用BCrypt验证）
+        if (!SecurityUtils.matchesPassword(payPassword, user.getPayPassword())) {
+            log.warn("支付密码验证失败，用户ID：{}", userId);
+            throw new ServiceException("支付密码错误");
+        }
+
+        log.info("支付密码验证成功，用户ID：{}", userId);
+    }
+
+    /**
      * 支付并创建外卖订单（先扣款，再创建订单）
      */
     @Override
@@ -160,6 +202,8 @@ public class UserOrderServiceImpl implements IUserOrderService {
         if (!createOrderDTO.getUserId().equals(userId)) {
             throw new ServiceException("订单信息异常");
         }
+
+        validatePayPassword(userId, payOrderDTO.getPayType(), payOrderDTO.getPayPassword());
 
         // 3. 重新计算金额（防止金额被篡改）
         OrderAmountInfo amountInfo = calculateOrderAmount(createOrderDTO);
@@ -236,6 +280,8 @@ public class UserOrderServiceImpl implements IUserOrderService {
         if (!createOrderDTO.getUserId().equals(userId)) {
             throw new ServiceException("订单信息异常");
         }
+
+        validatePayPassword(userId, payOrderDTO.getPayType(), payOrderDTO.getPayPassword());
 
         // 3. 重新计算金额（防止金额被篡改）
         OrderAmountInfo amountInfo = calculateErrandOrderAmount(createOrderDTO);

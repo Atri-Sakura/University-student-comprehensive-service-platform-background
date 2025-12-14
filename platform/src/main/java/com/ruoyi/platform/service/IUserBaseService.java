@@ -89,4 +89,13 @@ public interface IUserBaseService
      * @return 昵称
      */
     String getNicknameByPhone(String phone);
+
+    /**
+     * 验证支付密码
+     *
+     * @param userBaseId 用户ID
+     * @param payPassword 支付密码（明文）
+     * @return 是否正确
+     */
+    boolean verifyPayPassword(Long userBaseId, String payPassword);
 }
