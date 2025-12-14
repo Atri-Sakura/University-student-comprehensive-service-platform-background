@@ -78,11 +78,10 @@ public class RiderWalletRiderController extends BaseController {
      * 骑手钱包流水查询
      */
     @GetMapping("/flow")
-    public TableDataInfo getRiderWalletFlow() {
+    public AjaxResult getRiderWalletFlow() {
         Long riderId = SecurityUtils.getRiderBaseId();
-        startPage();
         List<RiderWalletRecord> riderWalletRecords = riderWalletService.selectRiderWalletRecordByRiderBaseId(riderId);
-        return getDataTable(riderWalletRecords);
+        return AjaxResult.success("查询成功",riderWalletRecords);
     }
 
 

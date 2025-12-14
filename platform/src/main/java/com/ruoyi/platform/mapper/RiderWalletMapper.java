@@ -70,6 +70,6 @@ public interface RiderWalletMapper
     int increaseBalance(@Param("riderId") Long riderId,
                         @Param("amount") BigDecimal amount);
 
-    @Select("select * from rider_wallet_record where rider_base_id = #{riderId}")
+    @Select("select * from rider_wallet_record where rider_base_id = #{riderId} order by trade_time desc")
     List<RiderWalletRecord> selectRiderWalletRecordByRiderBaseId(Long riderId);
 }
