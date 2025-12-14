@@ -10,6 +10,7 @@ import com.ruoyi.platform.domain.OrderMain;
 import com.ruoyi.platform.domain.OrderSecondhandDetail;
 import com.ruoyi.platform.domain.dto.CreateOrderDTO;
 import com.ruoyi.platform.domain.dto.PayOrderDTO;
+import com.ruoyi.platform.domain.enums.OrderStatusEnum;
 import com.ruoyi.platform.mapper.OrderMainMapper;
 import com.ruoyi.platform.service.IUserOrderService;
 import org.springframework.beans.factory.annotation.Autowired;

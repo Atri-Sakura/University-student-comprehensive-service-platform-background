@@ -2,6 +2,7 @@ package com.ruoyi.platform.merchant.service.impl;
 
 import java.util.List;
 import com.ruoyi.common.exception.ServiceException;
+import com.ruoyi.platform.domain.enums.OrderStatusEnum;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.ruoyi.platform.merchant.mapper.MerchantOrderMapper;
@@ -49,15 +50,15 @@ public class MerchantOrderServiceImpl implements IMerchantOrderService {
         // 这一步也可以通过查询 order_takeout_detail 表来确认
         // 但既然详情能查出来，说明权限已通过，这里主要是做状态校验
 
-        // 校验订单状态是否为“待接单”
-        if (order.getOrderStatus() != 1L) {
+        // 校验订单状态是否为 1-商家待接单
+        if (!OrderStatusEnum.MERCHANT_PENDING_ACCEPT.getCode().equals(order.getOrderStatus())) {
             throw new ServiceException("订单状态已更新，请勿重复操作");
         }
 
         // 3. 更新订单状态
         OrderMain updateOrder = new OrderMain();
         updateOrder.setOrderMainId(orderMainId);
-        updateOrder.setOrderStatus(2L); // 2: 待取货
+        updateOrder.setOrderStatus(OrderStatusEnum. RIDER_PENDING_ACCEPT.getCode());
 
         return merchantOrderMapper.updateOrderMain(updateOrder);
     }
@@ -69,13 +70,14 @@ public class MerchantOrderServiceImpl implements IMerchantOrderService {
         if (order == null) {
             throw new ServiceException("订单不存在");
         }
-        if (order.getOrderStatus() != 1L) {
+
+        if (!OrderStatusEnum.MERCHANT_PENDING_ACCEPT.getCode().equals(order.getOrderStatus())) {
             throw new ServiceException("订单状态已更新，无法拒单");
         }
         // 构造更新对象
         OrderMain updateOrder = new OrderMain();
         updateOrder.setOrderMainId(orderMainId);
-        updateOrder.setOrderStatus(5L);
+        updateOrder.setOrderStatus(OrderStatusEnum. CANCELED.getCode());
         updateOrder.setCancelOperator(cancelOperator);
 
         // 同时更新支付状态为 已退款 (3)

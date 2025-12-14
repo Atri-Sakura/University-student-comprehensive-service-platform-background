@@ -9,6 +9,7 @@ import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.utils.DateUtils;
 import com.ruoyi.platform.domain.MerchantWallet;
 import com.ruoyi.platform.domain.MerchantWalletFlow;
+import com.ruoyi.platform.domain.enums.OrderStatusEnum;
 import com.ruoyi.platform.merchant.mapper.MerchantWalletFlowMapper;
 import com.ruoyi.platform.mapper.MerchantWalletMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,12 +46,12 @@ public class OrderMainServiceImpl implements IOrderMainService
             throw new ServiceException("订单不存在");
         }
 
-        // 2. 校验订单状态
-        if (order.getOrderStatus() == 4L) {
+        // 2. 校验订单状态 - 使用枚举
+        if (OrderStatusEnum.COMPLETED.getCode().equals(order.getOrderStatus())) {
             throw new ServiceException("订单已完成,请勿重复操作");
         }
 
-        if (order.getPayStatus() != 1L) {
+        if (order.getPayStatus() != 1) {
             throw new ServiceException("订单未支付,无法完成");
         }
 
@@ -88,8 +89,8 @@ public class OrderMainServiceImpl implements IOrderMainService
 
         merchantWalletFlowMapper.insertMerchantWalletFlow(flow);
 
-        // 8. 更新订单状态为已完成
-        order.setOrderStatus(4L);
+        // 8. 更新订单状态为已完成 - 使用枚举
+        order.setOrderStatus(OrderStatusEnum.COMPLETED.getCode());
         order.setCompleteTime(new Date());
         return orderMainMapper.updateOrderMain(order);
     }
@@ -101,17 +102,17 @@ public class OrderMainServiceImpl implements IOrderMainService
     @Transactional(rollbackFor = Exception.class)
     public int handleOrderRefund(Long orderMainId, String refundReason) {
         // 1. 查询订单详情
-        OrderMain order = orderMainMapper. selectOrderMainByOrderMainId(orderMainId);
+        OrderMain order = orderMainMapper.selectOrderMainByOrderMainId(orderMainId);
         if (order == null) {
             throw new ServiceException("订单不存在");
         }
 
         // 2. 校验订单状态
-        if (order. getPayStatus() == 3L) {
+        if (order.getPayStatus() == 3) {
             throw new ServiceException("订单已退款,请勿重复操作");
         }
 
-        if (order.getPayStatus() != 1L) {
+        if (order.getPayStatus() != 1) {
             throw new ServiceException("订单未支付,无法退款");
         }
 
@@ -133,7 +134,7 @@ public class OrderMainServiceImpl implements IOrderMainService
         }
 
         // 6. 计算变动后余额
-        BigDecimal balanceAfter = wallet. getBalance().subtract(refundAmount);
+        BigDecimal balanceAfter = wallet.getBalance().subtract(refundAmount);
 
         // 7. 扣减商家钱包余额
         int updateCount = merchantWalletMapper.increaseBalance(
@@ -157,14 +158,13 @@ public class OrderMainServiceImpl implements IOrderMainService
 
         merchantWalletFlowMapper.insertMerchantWalletFlow(flow);
 
-        // 9. 更新订单状态为已退款
+        // 9. 更新订单状态为已取消 - 使用枚举
         order.setPayStatus(3L);
-        order.setOrderStatus(5L);
+        order.setOrderStatus(OrderStatusEnum.CANCELED.getCode());
         order.setCancelReason(refundReason);
         return orderMainMapper.updateOrderMain(order);
     }
 
-    // ... 原有方法实现 ...
 
     @Override
     public OrderMain selectOrderMainByOrderMainId(Long orderMainId)

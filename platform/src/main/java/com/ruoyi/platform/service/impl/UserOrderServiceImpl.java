@@ -81,8 +81,15 @@ public class UserOrderServiceImpl implements IUserOrderService {
 
     @Autowired
     private UserAddressMapper userAddressMapper;
+
     @Autowired
     private OrderErrandDetailMapper orderErrandDetailMapper;
+
+    @Autowired
+    private MerchantGoodsImageMapper merchantGoodsImageMapper;
+
+    @Autowired
+    private SecondhandGoodsImageMapper secondhandGoodsImageMapper;
 
     /**
      * 创建预支付订单（只校验，不真正创建订单）
@@ -105,12 +112,9 @@ public class UserOrderServiceImpl implements IUserOrderService {
             // 以数据库价格为准，覆盖前端传来的价格
             item.setGoodsPrice(goods.getPrice());
             item.setGoodsName(goods.getGoodsName());
-            goods.setStock(goods.getStock() - item.getQuantity());
-            goods.setSalesCount(goods.getSalesCount() + item.getQuantity());
-            merchantGoodsMapper.updateMerchantGoods(goods);
         }
 
-        // 3. 计算订单金额（包含配送费）
+        // 3. 计算订单金额（包含从数据库获取的配送费）
         OrderAmountInfo amountInfo = calculateOrderAmount(createOrderDTO);
 
         // 4. 生成预订单号
@@ -137,9 +141,8 @@ public class UserOrderServiceImpl implements IUserOrderService {
         return prePayOrder;
     }
 
-
     /**
-     * 支付并创建订单（先扣款，再创建订单）
+     * 支付并创建外卖订单（先扣款，再创建订单）
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -192,7 +195,7 @@ public class UserOrderServiceImpl implements IUserOrderService {
 
             // 10. 记录支付日志
             UserBase user = userBaseMapper.selectUserBaseByUserBaseId(userId);
-            saveStatusLog(order.getOrderMainId(), null, OrderStatusEnum.PENDING_ACCEPT.getCode(),
+            saveStatusLog(order.getOrderMainId(), null, OrderStatusEnum.MERCHANT_PENDING_ACCEPT.getCode(),
                     OperatorTypeEnum.USER, userId,
                     user.getNickname(), "用户支付并创建订单");
 
@@ -215,11 +218,11 @@ public class UserOrderServiceImpl implements IUserOrderService {
     }
 
     /**
-     * 支付并创建订单（先扣款，再创建订单）
+     * 支付并创建跑腿订单（先扣款，再创建订单）
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public OrderMain payAndCreateErrandOrder(Long userId, PayOrderDTO payOrderDTO,Long userAddressId) {
+    public OrderMain payAndCreateErrandOrder(Long userId, PayOrderDTO payOrderDTO, Long userAddressId) {
         String preOrderNo = payOrderDTO.getPreOrderNo();
 
         // 1. 从 Redis 获取预订单信息
@@ -254,8 +257,8 @@ public class UserOrderServiceImpl implements IUserOrderService {
         }
 
         try {
-            // 7. 创建真正的订单（扣减库存）
-            OrderMain order = createErrandOrderInternal(createOrderDTO, orderNo, amountInfo,userAddressId);
+            // 7. 创建真正的订单
+            OrderMain order = createErrandOrderInternal(createOrderDTO, orderNo, amountInfo, userAddressId);
 
             // 8. 更新订单支付状态为已支付
             order.setPayStatus(PayStatusEnum.PAID.getCode());
@@ -268,18 +271,18 @@ public class UserOrderServiceImpl implements IUserOrderService {
 
             // 10. 记录支付日志
             UserBase user = userBaseMapper.selectUserBaseByUserBaseId(userId);
-            saveStatusLog(order.getOrderMainId(), null, OrderStatusEnum.PENDING_ACCEPT.getCode(),
+            saveStatusLog(order.getOrderMainId(), null, OrderStatusEnum.MERCHANT_PENDING_ACCEPT.getCode(),
                     OperatorTypeEnum.USER, userId,
-                    user.getNickname(), "用户支付并创建订单");
+                    user.getNickname(), "用户支付并创建跑腿订单");
 
-            log.info("用户支付并创建订单成功，订单号：{}，用户ID：{}，配送费：{}",
+            log.info("用户支付并创建跑腿订单成功，订单号：{}，用户ID：{}，配送费：{}",
                     order.getOrderNo(), userId, amountInfo.getDeliveryFee());
 
             return order;
 
         } catch (Exception e) {
             // 如果订单创建失败，退款
-            log.error("订单创建失败，开始退款，预订单号：{}，用户ID：{}", preOrderNo, userId, e);
+            log.error("跑腿订单创建失败，开始退款，预订单号：{}，用户ID：{}", preOrderNo, userId, e);
             try {
                 // TODO: 实现退款逻辑
                 // walletFlowService.refundUser(userId, 0L, amountInfo.getPayAmount());
@@ -290,6 +293,9 @@ public class UserOrderServiceImpl implements IUserOrderService {
         }
     }
 
+    /**
+     * 创建跑腿预支付订单
+     */
     @Override
     public PrePayOrderDTO createPrePayErrandOrder(CreateErrandOrderDto createErrandOrderDto) {
         validateErrandOrderParams(createErrandOrderDto);
@@ -311,7 +317,7 @@ public class UserOrderServiceImpl implements IUserOrderService {
         prePayOrder.setCreateTime(new Date());
         prePayOrder.setExpireTime(new Date(System.currentTimeMillis() + PRE_ORDER_EXPIRE_MINUTES * 60 * 1000));
 
-        log.info("创建预支付订单成功，预订单号：{}，用户ID：{}，配送费：{}",
+        log.info("创建跑腿预支付订单成功，预订单号：{}，用户ID：{}，配送费：{}",
                 preOrderNo, createErrandOrderDto.getUserId(), amountInfo.getDeliveryFee());
 
         return prePayOrder;
@@ -343,7 +349,7 @@ public class UserOrderServiceImpl implements IUserOrderService {
     }
 
     /**
-     * 取消预支付订单
+     * 取消跑腿预支付订单
      */
     @Override
     public boolean cancelPrePayErrandOrder(Long userId, String preOrderNo) {
@@ -362,7 +368,7 @@ public class UserOrderServiceImpl implements IUserOrderService {
         // 3. 删除预订单缓存
         redisCache.deleteObject(cacheKey);
 
-        log.info("取消预支付订单成功，预订单号：{}，用户ID：{}", preOrderNo, userId);
+        log.info("取消跑腿预支付订单成功，预订单号：{}，用户ID：{}", preOrderNo, userId);
 
         return true;
     }
@@ -385,7 +391,7 @@ public class UserOrderServiceImpl implements IUserOrderService {
         }
 
         // 3. 校验订单状态（只有待接单状态可以取消）
-        if (!OrderStatusEnum.PENDING_ACCEPT.getCode().equals(order.getOrderStatus())) {
+        if (!OrderStatusEnum.MERCHANT_PENDING_ACCEPT.getCode().equals(order.getOrderStatus())) {
             throw new ServiceException("当前订单状态不允许取消");
         }
 
@@ -412,7 +418,7 @@ public class UserOrderServiceImpl implements IUserOrderService {
 
             // 7. 记录状态变更日志
             UserBase user = userBaseMapper.selectUserBaseByUserBaseId(userId);
-            saveStatusLog(orderMainId, OrderStatusEnum.PENDING_ACCEPT.getCode(),
+            saveStatusLog(orderMainId, OrderStatusEnum.MERCHANT_PENDING_ACCEPT.getCode(),
                     OrderStatusEnum.CANCELED.getCode(),
                     OperatorTypeEnum.USER, userId,
                     user.getNickname(), "用户取消订单：" + cancelReason);
@@ -476,7 +482,7 @@ public class UserOrderServiceImpl implements IUserOrderService {
     }
 
     /**
-     * 用户确认收货
+     * 用户确认收货（跑腿订单）
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -524,7 +530,7 @@ public class UserOrderServiceImpl implements IUserOrderService {
     }
 
     /**
-     * 内部方法：真正创建订单
+     * ⭐ 内部方法：真正创建外卖订单（带缩略图）
      */
     private OrderMain createTakeoutOrderInternal(CreateOrderDTO createOrderDTO, String orderNo, OrderAmountInfo amountInfo) {
         // 1. 查询商家地址（作为取货地址）
@@ -534,7 +540,14 @@ public class UserOrderServiceImpl implements IUserOrderService {
             throw new ServiceException("商家地址不存在");
         }
 
-        // 2. 创建订单主表记录
+        // ⭐ 2. 获取订单缩略图（外卖订单：首个商品的主图）
+        String orderThumbnail = null;
+        if (createOrderDTO.getItems() != null && ! createOrderDTO.getItems().isEmpty()) {
+            Long firstGoodsId = createOrderDTO. getItems().get(0).getGoodsId();
+            orderThumbnail = getGoodsMainImage(firstGoodsId);
+        }
+
+        // 3. 创建订单主表记录
         OrderMain orderMain = new OrderMain();
         orderMain.setOrderMainId(com.ruoyi.platform.chat.utils.SnowflakeIdGenerator.getInstance().nextId());
         orderMain.setOrderNo(orderNo);
@@ -547,31 +560,20 @@ public class UserOrderServiceImpl implements IUserOrderService {
         orderMain.setTotalAmount(amountInfo.getTotalAmount());
         orderMain.setPayAmount(amountInfo.getPayAmount());
         orderMain.setDiscountAmount(amountInfo.getDiscountAmount());
-        orderMain.setPlatformHoldAmount(amountInfo.getPayAmount());
+        orderMain.setPlatformHoldAmount(amountInfo.getPayAmount()); // 初始平台暂存=实付金额
         orderMain.setGoodsAmount(amountInfo.getGoodsAmount());
         orderMain.setDeliveryFeeAmount(amountInfo.getDeliveryFee());
 
-        // 获取第一个商品的首图作为订单缩略图
-        if (createOrderDTO.getItems() != null && !createOrderDTO.getItems().isEmpty()) {
-            Long firstGoodsId = createOrderDTO.getItems().get(0).getGoodsId();
-            try {
-                String thumbnail = orderMainMapper.selectGoodsMainImage(firstGoodsId);
-                orderMain.setOrderThumbnail(thumbnail);
-                log.info("设置订单缩略图成功，订单号：{}，商品ID：{}，图片：{}",
-                        orderNo, firstGoodsId, thumbnail);
-            } catch (Exception e) {
-                log.warn("获取商品首图失败，商品ID：{}", firstGoodsId, e);
-                // 获取失败不影响订单创建，继续执行
-            }
-        }
+        // ⭐ 设置订单缩略图
+        orderMain.setOrderThumbnail(orderThumbnail);
 
         // 支付状态（已支付）
         orderMain.setPayStatus(PayStatusEnum.PAID.getCode());
         orderMain.setPayTime(new Date());
-        orderMain.setPayType(1L);
+        orderMain.setPayType(1L); // 默认余额支付
 
         // 订单状态（待接单）
-        orderMain.setOrderStatus(OrderStatusEnum.PENDING_ACCEPT.getCode());
+        orderMain.setOrderStatus(OrderStatusEnum.MERCHANT_PENDING_ACCEPT.getCode());
 
         // 取货地址（商家地址）
         orderMain.setPickAddressId(merchantAddress.getMerchantAddressId());
@@ -598,7 +600,7 @@ public class UserOrderServiceImpl implements IUserOrderService {
             throw new ServiceException("创建订单失败");
         }
 
-        // 3. 创建订单明细并扣减库存
+        // 4. 创建订单明细并扣减库存
         for (OrderItemDTO item : createOrderDTO.getItems()) {
             // 查询商品信息
             MerchantGoods goods = merchantGoodsMapper.selectMerchantGoodsByMerchantGoodsId(item.getGoodsId());
@@ -633,7 +635,7 @@ public class UserOrderServiceImpl implements IUserOrderService {
             orderTakeoutDetailMapper.insertOrderTakeoutDetail(detail);
         }
 
-        // 4. 创建配送记录
+        // 5. 创建配送记录
         OrderDelivery delivery = new OrderDelivery();
         delivery.setOrderDeliveryId(generateLongId());
         delivery.setOrderMainId(orderMain.getOrderMainId());
@@ -646,8 +648,8 @@ public class UserOrderServiceImpl implements IUserOrderService {
 
         orderDeliveryMapper.insertOrderDelivery(delivery);
 
-        // 5. 记录订单创建日志
-        saveStatusLog(orderMain.getOrderMainId(), null, OrderStatusEnum.PENDING_ACCEPT.getCode(),
+        // 6. 记录订单创建日志
+        saveStatusLog(orderMain.getOrderMainId(), null, OrderStatusEnum.MERCHANT_PENDING_ACCEPT.getCode(),
                 OperatorTypeEnum.USER, createOrderDTO.getUserId(),
                 createOrderDTO.getUserNickname(), "用户支付并创建订单");
 
@@ -655,7 +657,7 @@ public class UserOrderServiceImpl implements IUserOrderService {
     }
 
     /**
-     * 内部方法：真正创建订单
+     * ⭐ 内部方法：真正创建跑腿订单（无缩略图）
      */
     private OrderMain createErrandOrderInternal(CreateErrandOrderDto createOrderDTO, String orderNo,
                                                 OrderAmountInfo amountInfo, Long userAddressId) {
@@ -676,6 +678,9 @@ public class UserOrderServiceImpl implements IUserOrderService {
         orderMain.setPlatformHoldAmount(amountInfo.getPayAmount()); // 初始平台暂存=实付金额
         orderMain.setGoodsAmount(amountInfo.getGoodsAmount());
         orderMain.setDeliveryFeeAmount(amountInfo.getDeliveryFee());
+
+        // ⭐ 跑腿订单无缩略图
+        orderMain.setOrderThumbnail(null);
 
         // 支付状态（已支付）
         orderMain.setPayStatus(PayStatusEnum.PAID.getCode());
@@ -713,7 +718,7 @@ public class UserOrderServiceImpl implements IUserOrderService {
         orderMain.setDeliverPhone(createOrderDTO.getDeliverPhone());
         orderMain.setDeliverLongitude(createOrderDTO.getDeliverLongitude());
         orderMain.setDeliverLatitude(createOrderDTO.getDeliverLatitude());
-        orderMain.setOrderStatus(OrderStatusEnum.PENDING_ACCEPT.getCode());
+        orderMain.setOrderStatus(OrderStatusEnum.MERCHANT_PENDING_ACCEPT.getCode());
         orderMain.setRemark(createOrderDTO.getRemark());
         orderMain.setCreateTime(new Date());
         orderMain.setUpdateTime(new Date());
@@ -755,14 +760,48 @@ public class UserOrderServiceImpl implements IUserOrderService {
         orderDeliveryMapper.insertOrderDelivery(delivery);
 
         // 5. 记录订单创建日志
-        saveStatusLog(orderMain.getOrderMainId(), null, OrderStatusEnum.PENDING_ACCEPT.getCode(),
+        saveStatusLog(orderMain.getOrderMainId(), null, OrderStatusEnum.MERCHANT_PENDING_ACCEPT.getCode(),
                 OperatorTypeEnum.USER, createOrderDTO.getUserId(),
                 createOrderDTO.getUserNickname(), "用户支付并创建订单");
 
         return orderMain;
     }
 
+    /**
+     * 查询外卖商品主图
+     */
+    private String getGoodsMainImage(Long goodsId) {
+        if (goodsId == null) {
+            return null;
+        }
 
+        try {
+            // 查询商品图片表，获取主图
+            MerchantGoodsImage image = merchantGoodsImageMapper.selectMainImageByGoodsId(goodsId);
+            return image != null ? image.getImageUrl() : null;
+        } catch (Exception e) {
+            log.warn("查询商品主图失败，商品ID：{}", goodsId, e);
+            return null;
+        }
+    }
+
+    /**
+     * 查询二手商品主图
+     */
+    private String getSecondhandGoodsMainImage(Long goodsId) {
+        if (goodsId == null) {
+            return null;
+        }
+
+        try {
+            // 查询二手商品图片表，获取主图
+            SecondhandGoodsImage image = secondhandGoodsImageMapper. selectMainImageByGoodsId(goodsId);
+            return image != null ? image.getImageUrl() : null;
+        } catch (Exception e) {
+            log.warn("查询二手商品主图失败，商品ID：{}", goodsId, e);
+            return null;
+        }
+    }
 
     /**
      * 恢复商品库存（取消订单时调用）
@@ -817,7 +856,7 @@ public class UserOrderServiceImpl implements IUserOrderService {
     }
 
     /**
-     * 计算订单金额
+     * 计算订单金额（从数据库获取配送费）
      */
     private OrderAmountInfo calculateOrderAmount(CreateOrderDTO createOrderDTO) {
         OrderAmountInfo info = new OrderAmountInfo();
@@ -829,8 +868,32 @@ public class UserOrderServiceImpl implements IUserOrderService {
             goodsAmount = goodsAmount.add(itemAmount);
         }
 
-        // 2. 计算配送费
-        BigDecimal deliveryFee = calculateDeliveryFee(createOrderDTO);
+        // 2. 从数据库获取商家配送费
+        BigDecimal deliveryFee = BigDecimal.ZERO;
+        try {
+            MerchantBase merchant = merchantInfoMapper.selectMerchantBaseByMerchantBaseId(
+                    createOrderDTO.getMerchantId());
+
+            if (merchant == null) {
+                log.warn("商家不存在，使用默认配送费，商家ID：{}", createOrderDTO.getMerchantId());
+                deliveryFee = new BigDecimal("5.00");
+            } else {
+                // 从数据库获取配送费
+                deliveryFee = merchant. getDeliveryFee();
+
+                // 如果数据库配送费为空，使用默认值
+                if (deliveryFee == null) {
+                    log.warn("商家配送费为空，使用默认配送费，商家ID：{}", createOrderDTO.getMerchantId());
+                    deliveryFee = new BigDecimal("5.00");
+                }
+            }
+
+            log.info("获取商家配送费成功，商家ID：{}，配送费：{}", createOrderDTO.getMerchantId(), deliveryFee);
+
+        } catch (Exception e) {
+            log.error("查询商家配送费失败，使用默认配送费，商家ID：{}", createOrderDTO.getMerchantId(), e);
+            deliveryFee = new BigDecimal("5.00");
+        }
 
         // 3. 计算优惠金额（暂时为0，后续可扩展）
         BigDecimal discountAmount = BigDecimal.ZERO;
@@ -897,132 +960,6 @@ public class UserOrderServiceImpl implements IUserOrderService {
     }
 
     /**
-     * 计算配送费
-     *
-     * 策略1（已注释）：根据距离动态计算
-     * 策略2（当前使用）：固定5元
-     */
-    private BigDecimal calculateDeliveryFee(CreateOrderDTO createOrderDTO) {
-        // ==================== 策略1：根据距离动态计算（已注释） ====================
-        /*
-        try {
-            // 1. 查询商家信息获取商家坐标
-            MerchantBase merchant = merchantInfoMapper.selectMerchantBaseByMerchantBaseId(
-                    createOrderDTO.getMerchantId());
-
-            if (merchant == null) {
-                log.warn("商家不存在，使用默认配送费，商家ID：{}", createOrderDTO.getMerchantId());
-                return new BigDecimal("5.00");
-            }
-
-            // 2. 检查商家和用户坐标是否存在
-            BigDecimal merchantLongitude = merchant.getLongitude();
-            BigDecimal merchantLatitude = merchant.getLatitude();
-            BigDecimal userLongitude = createOrderDTO.getDeliverLongitude();
-            BigDecimal userLatitude = createOrderDTO.getDeliverLatitude();
-
-            if (merchantLongitude == null || merchantLatitude == null ||
-                userLongitude == null || userLatitude == null) {
-                log.warn("坐标信息不完整，使用默认配送费");
-                return new BigDecimal("5.00");
-            }
-
-            // 3. 计算距离（单位：公里）
-            BigDecimal distance = calculateDistance(
-                    merchantLongitude.doubleValue(),
-                    merchantLatitude.doubleValue(),
-                    userLongitude.doubleValue(),
-                    userLatitude.doubleValue()
-            );
-
-            log.info("计算配送距离，商家ID：{}，距离：{}公里", createOrderDTO.getMerchantId(), distance);
-
-            // 4. 根据距离计算配送费
-            BigDecimal deliveryFee;
-
-            if (distance.compareTo(new BigDecimal("2")) <= 0) {
-                // 2公里以内：5元
-                deliveryFee = new BigDecimal("5.00");
-            } else if (distance.compareTo(new BigDecimal("3")) <= 0) {
-                // 2-3公里：6元
-                deliveryFee = new BigDecimal("6.00");
-            } else if (distance.compareTo(new BigDecimal("5")) <= 0) {
-                // 3-5公里：8元
-                deliveryFee = new BigDecimal("8.00");
-            } else if (distance.compareTo(new BigDecimal("8")) <= 0) {
-                // 5-8公里：12元
-                deliveryFee = new BigDecimal("12.00");
-            } else if (distance.compareTo(new BigDecimal("10")) <= 0) {
-                // 8-10公里：15元
-                deliveryFee = new BigDecimal("15.00");
-            } else {
-                // 超过10公里：15元 + 超出部分每公里2元
-                BigDecimal extraDistance = distance.subtract(new BigDecimal("10"));
-                BigDecimal extraFee = extraDistance.multiply(new BigDecimal("2"));
-                deliveryFee = new BigDecimal("15.00").add(extraFee);
-            }
-
-            // 5. 检查是否超过商家配送范围
-            BigDecimal merchantDeliveryRange = merchant.getDeliveryRange();
-            if (merchantDeliveryRange != null && distance.compareTo(merchantDeliveryRange) > 0) {
-                throw new ServiceException("超出商家配送范围，最大配送距离：" + merchantDeliveryRange + "公里");
-            }
-
-            // 6. 四舍五入到小数点后2位
-            deliveryFee = deliveryFee.setScale(2, RoundingMode.HALF_UP);
-
-            log.info("计算配送费完成，距离：{}公里，配送费：{}元", distance, deliveryFee);
-
-            return deliveryFee;
-
-        } catch (ServiceException e) {
-            throw e; // 超出配送范围的异常需要抛出
-        } catch (Exception e) {
-            log.error("计算配送费失败，使用默认配送费", e);
-            return new BigDecimal("5.00");
-        }
-        */
-
-        // ==================== 策略2：固定配送费（当前使用） ====================
-        return new BigDecimal("5.00");
-    }
-
-    /**
-     * 计算两点之间的距离（单位：公里）
-     * 使用 Haversine 公式计算球面距离
-     *
-     * @param lon1 起点经度
-     * @param lat1 起点纬度
-     * @param lon2 终点经度
-     * @param lat2 终点纬度
-     * @return 距离（公里）
-     */
-    private BigDecimal calculateDistance(double lon1, double lat1, double lon2, double lat2) {
-        // 将经纬度转换为弧度
-        double lat1Rad = Math.toRadians(lat1);
-        double lat2Rad = Math.toRadians(lat2);
-        double lon1Rad = Math.toRadians(lon1);
-        double lon2Rad = Math.toRadians(lon2);
-
-        // 计算差值
-        double deltaLat = lat2Rad - lat1Rad;
-        double deltaLon = lon2Rad - lon1Rad;
-
-        // Haversine 公式
-        double a = Math.sin(deltaLat / 2) * Math.sin(deltaLat / 2) +
-                Math.cos(lat1Rad) * Math.cos(lat2Rad) *
-                        Math.sin(deltaLon / 2) * Math.sin(deltaLon / 2);
-
-        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-
-        // 计算距离
-        double distance = EARTH_RADIUS * c;
-
-        // 转换为 BigDecimal 并保留2位小数
-        return new BigDecimal(distance).setScale(2, RoundingMode.HALF_UP);
-    }
-
-    /**
      * 生成预订单编号
      */
     private String generatePreOrderNo() {
@@ -1070,13 +1007,7 @@ public class UserOrderServiceImpl implements IUserOrderService {
      * 生成Long类型的唯一ID
      */
     private Long generateLongId() {
-        String uuid = IdUtils.fastSimpleUUID();
-        String hexString = uuid.substring(0, 15);
-        try {
-            return Long.parseLong(hexString, 16);
-        } catch (NumberFormatException e) {
-            return System.currentTimeMillis() * 1000 + (long)(Math.random() * 1000);
-        }
+        return com.ruoyi.platform.chat.utils.SnowflakeIdGenerator.getInstance().nextId();
     }
 
     /**

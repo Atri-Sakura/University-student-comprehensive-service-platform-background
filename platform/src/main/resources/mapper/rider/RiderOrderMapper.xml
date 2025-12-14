@@ -222,7 +222,7 @@
         LEFT JOIN merchant_base mb ON om.merchant_id = mb.merchant_base_id
         LEFT JOIN user_base ub ON om.user_id = ub.user_base_id
         WHERE om.order_main_id = #{orderMainId}
-        AND om.order_status != 5
+        AND om.order_status != 6
     </select>
 
     <!-- 按时间范围统计订单数量 -->

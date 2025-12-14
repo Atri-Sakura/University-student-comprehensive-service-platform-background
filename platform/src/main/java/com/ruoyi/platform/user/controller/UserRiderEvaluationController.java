@@ -37,7 +37,6 @@ public class UserRiderEvaluationController extends BaseController
     @GetMapping("/myList")
     public TableDataInfo myList(RiderEvaluation riderEvaluation)
     {
-        startPage();
         // 只能查询当前用户的评价
 //        Long userId = SecurityUtils.getUserBaseId();
 //        riderEvaluation.setUserId(userId);
@@ -147,7 +146,6 @@ public class UserRiderEvaluationController extends BaseController
     @GetMapping("/listByRating/{riderBaseId}")
     public TableDataInfo listByRating(@PathVariable("riderBaseId") Long riderBaseId, Integer filterType)
     {
-        startPage();
         List<RiderEvaluation> list = riderEvaluationService.selectRiderEvaluationListByRating(riderBaseId, filterType);
         return getDataTable(list);
     }

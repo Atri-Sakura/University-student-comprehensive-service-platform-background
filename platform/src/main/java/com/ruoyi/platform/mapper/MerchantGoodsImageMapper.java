@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.ruoyi.platform.domain.GoodsEvaluationImage;
 import com.ruoyi.platform.domain.MerchantGoodsImage;
+import org.apache.ibatis.annotations.Select;
 
 /**
  * 商品图片关联（支持多图展示）Mapper接口
@@ -62,4 +63,12 @@ public interface MerchantGoodsImageMapper
     public int deleteMerchantGoodsImageByMerchantGoodsImageIds(Long[] merchantGoodsImageIds);
 
     List<GoodsEvaluationImage> selectImagesByGoodsEvaluationId(Long goodsEvaluationId);
+
+    /**
+     * 查询商品主图
+     * @param goodsId 商品ID
+     * @return 主图信息
+     */
+    @Select("SELECT * FROM merchant_goods_image WHERE merchant_goods_id = #{goodsId} AND is_main = 1 LIMIT 1")
+    MerchantGoodsImage selectMainImageByGoodsId(Long goodsId);
 }

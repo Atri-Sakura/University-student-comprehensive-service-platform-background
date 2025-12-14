@@ -53,7 +53,6 @@ public class UserGoodsController extends BaseController {
             return getDataTable(List.of());
         }
 
-        startPage();
 
         MerchantGoods query = new MerchantGoods();
         query.setMerchantBaseId(merchantBaseId);
@@ -129,7 +128,6 @@ public class UserGoodsController extends BaseController {
             @PathVariable("merchantBaseId") Long merchantBaseId,
             @RequestParam("keyword") String keyword) {
 
-        startPage();
 
         MerchantGoods query = new MerchantGoods();
         query.setMerchantBaseId(merchantBaseId);

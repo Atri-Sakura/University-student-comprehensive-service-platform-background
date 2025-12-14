@@ -1,27 +1,33 @@
-package com.ruoyi.platform.domain.enums;
+package com.ruoyi.platform.domain. enums;
 
 /**
  * 订单状态枚举
  */
 public enum OrderStatusEnum {
 
-    /** 待接单 */
-    PENDING_ACCEPT(1L, "待接单"),
+    /** 商家待接单 */
+    MERCHANT_PENDING_ACCEPT(1L, "商家待接单"),
 
-    /** 待取货 */
-    PENDING_PICKUP(2L, "待取货"),
+    /** 骑手待接单 */
+    RIDER_PENDING_ACCEPT(2L, "骑手待接单"),
+
+    /** 骑手待取货 */
+    RIDER_PENDING_PICKUP(3L, "骑手待取货"),
 
     /** 配送中 */
-    DELIVERING(3L, "配送中"),
+    DELIVERING(4L, "配送中"),
 
     /** 已完成 */
-    COMPLETED(4L, "已完成"),
+    COMPLETED(5L, "已完成"),
 
     /** 已取消 */
-    CANCELED(5L, "已取消"),
+    CANCELED(6L, "已取消"),
 
     /** 已拒单 */
-    REJECTED(6L, "已拒单");
+    REJECTED(8L, "已拒单"),
+
+    /** 骑手异常报备 */
+    RIDER_ABNORMAL_REPORT(7L, "骑手异常报备");
 
     private final Long code;
     private final String description;
@@ -52,5 +58,12 @@ public enum OrderStatusEnum {
             }
         }
         return null;
+    }
+
+    /**
+     * 判断是否为有效状态值
+     */
+    public static boolean isValidStatus(Long code) {
+        return getByCode(code) != null;
     }
 }

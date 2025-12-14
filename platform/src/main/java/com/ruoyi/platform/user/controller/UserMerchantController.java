@@ -36,8 +36,6 @@ public class UserMerchantController extends BaseController {
             @RequestParam(required = false) String merchantName,
             @RequestParam(required = false) String businessScope) {
 
-        startPage();
-
         MerchantBase query = new MerchantBase();
         query.setAuditStatus(1L);
         query.setBusinessStatus(1L);
@@ -86,8 +84,6 @@ public class UserMerchantController extends BaseController {
     @GetMapping("/search")
     public TableDataInfo search(@RequestParam("keyword") String keyword) {
 
-        startPage();
-
         MerchantBase query = new MerchantBase();
         query.setAuditStatus(1L);
         query.setBusinessStatus(1L);
@@ -108,8 +104,6 @@ public class UserMerchantController extends BaseController {
     @GetMapping("/scope/{businessScope}")
     public TableDataInfo listByScope(@PathVariable("businessScope") String businessScope) {
 
-        startPage();
-
         MerchantBase query = new MerchantBase();
         query.setAuditStatus(1L);
         query.setBusinessStatus(1L);
@@ -129,8 +123,6 @@ public class UserMerchantController extends BaseController {
      */
     @GetMapping("/hot")
     public TableDataInfo listHotMerchants() {
-
-        startPage();
 
         MerchantBase query = new MerchantBase();
         query.setAuditStatus(1L);

@@ -1,6 +1,8 @@
 package com.ruoyi.platform.rider.domain.vo;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.ruoyi.platform.domain.enums.OrderStatusEnum;
+
 import java.math.BigDecimal;
 import java.util.Date;
 
@@ -16,7 +18,7 @@ public class RiderOrderListVO {
     private String orderNo;
 
     /** 下单时间 */
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm: ss")
     private Date createTime;
 
     /** 订单缩略图 */
@@ -32,7 +34,7 @@ public class RiderOrderListVO {
     private BigDecimal totalAmount;
 
     /** 订单状态 */
-    private Integer orderStatus;
+    private Long orderStatus;  // 改为 Long 类型
 
     /** 订单状态名称 */
     private String orderStatusName;
@@ -64,8 +66,6 @@ public class RiderOrderListVO {
     /** 用户昵称 */
     private String userNickname;
 
-    // ==================== Getter和Setter方法 ====================
-
     public Long getOrderMainId() {
         return orderMainId;
     }
@@ -94,6 +94,10 @@ public class RiderOrderListVO {
         return orderThumbnail;
     }
 
+    public void setOrderThumbnail(String orderThumbnail) {
+        this.orderThumbnail = orderThumbnail;
+    }
+
     public String getPickAddress() {
         return pickAddress;
     }
@@ -118,11 +122,11 @@ public class RiderOrderListVO {
         this.totalAmount = totalAmount;
     }
 
-    public Integer getOrderStatus() {
+    public Long getOrderStatus() {  // 返回类型改为 Long
         return orderStatus;
     }
 
-    public void setOrderStatus(Integer orderStatus) {
+    public void setOrderStatus(Long orderStatus) {  // 参数类型改为 Long
         this.orderStatus = orderStatus;
         this.orderStatusName = getStatusName(orderStatus);
     }
@@ -211,18 +215,12 @@ public class RiderOrderListVO {
     // ==================== 辅助方法 ====================
 
     /**
-     * 获取订单状态名称
+     * 获取订单状态名称（使用枚举）
      */
-    private String getStatusName(Integer status) {
+    private String getStatusName(Long status) {
         if (status == null) return "";
-        switch (status) {
-            case 1: return "待接单";
-            case 2: return "待取货";
-            case 3: return "配送中";
-            case 4: return "已完成";
-            case 5: return "已取消";
-            default: return "未知状态";
-        }
+        OrderStatusEnum statusEnum = OrderStatusEnum.getByCode(status);
+        return statusEnum != null ? statusEnum.getDescription() : "未知状态";
     }
 
     /**

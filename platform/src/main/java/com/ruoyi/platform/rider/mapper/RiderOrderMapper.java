@@ -17,6 +17,7 @@ public interface RiderOrderMapper {
 
     /**
      * 查询可接单的订单列表（简化字段）
+     * 状态必须是：2-骑手待接单
      *
      * @param orderMain 查询条件
      * @return 订单列表VO
@@ -25,6 +26,7 @@ public interface RiderOrderMapper {
 
     /**
      * 查询骑手自己的订单列表（简化字段）
+     * 包含状态：3-骑手待取货, 4-配送中, 5-已完成, 7-骑手异常报备
      *
      * @param riderId 骑手ID
      * @param orderMain 查询条件
@@ -55,9 +57,31 @@ public interface RiderOrderMapper {
     int countByTimeRange(@Param("riderId") Long riderId,
                          @Param("timeRange") String timeRange);
 
-    @Update("update order_main set order_status = 7 and cancel_reason = #{cancelReason} and cancel_operator = '骑手' where order_main_id = #{orderMainId} and order_status = 3")
-    int reportAbnormal(Long riderId, Long orderMainId,String cancelReason);
+    /**
+     * 骑手异常报备 - 更新订单状态为 7-骑手异常报备
+     * 状态流转：4-配送中 → 7-骑手异常报备
+     *
+     * @param riderId 骑手ID
+     * @param orderMainId 订单ID
+     * @param cancelReason 异常原因
+     * @return 影响行数
+     */
+    @Update("UPDATE order_main SET order_status = 7, cancel_reason = #{cancelReason}, " +
+            "cancel_operator = '骑手', update_time = NOW() " +
+            "WHERE order_main_id = #{orderMainId} AND order_status = 4")
+    int reportAbnormal(@Param("riderId") Long riderId,
+                       @Param("orderMainId") Long orderMainId,
+                       @Param("cancelReason") String cancelReason);
 
-    @Update("update order_delivery set delivery_status = 4 where order_main_id = #{orderMainId} and rider_id = #{riderId}")
-    int reportAbnormal1(Long riderId, Long orderMainId);
+    /**
+     * 骑手异常报备 - 更新配送状态为异常
+     *
+     * @param riderId 骑手ID
+     * @param orderMainId 订单ID
+     * @return 影响行数
+     */
+    @Update("UPDATE order_delivery SET delivery_status = 4 " +
+            "WHERE order_main_id = #{orderMainId} AND rider_id = #{riderId}")
+    int reportAbnormal1(@Param("riderId") Long riderId,
+                        @Param("orderMainId") Long orderMainId);
 }

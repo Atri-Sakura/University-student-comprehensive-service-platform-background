@@ -64,7 +64,6 @@ public class MerchantOrderController extends BaseController {
      *
      * @param orderMainId 订单ID
      * @return 结果
-     * @deprecated 建议使用 acceptOrderV2 (POST /accept-v2/{orderMainId})
      */
     @Deprecated
     @Log(title = "商家接单", businessType = BusinessType.UPDATE)
@@ -98,7 +97,6 @@ public class MerchantOrderController extends BaseController {
      *
      * @param orderMainId 订单ID
      * @return 结果
-     * @deprecated 建议使用 rejectOrderV2 (POST /reject-v2/{orderMainId})
      */
     @Deprecated
     @Log(title = "商家拒单", businessType = BusinessType.UPDATE)

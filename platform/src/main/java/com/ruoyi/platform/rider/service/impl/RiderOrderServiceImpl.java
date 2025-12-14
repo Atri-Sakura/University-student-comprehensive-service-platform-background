@@ -1,11 +1,12 @@
-package com.ruoyi.platform.rider.service. impl;
+package com.ruoyi.platform. rider.service.impl;
 
 import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.platform.domain.OrderMain;
+import com.ruoyi.platform.domain.enums.OrderStatusEnum;
 import com.ruoyi.platform.rider.domain.vo.RiderOrderListVO;
 import com.ruoyi.platform.rider.mapper.RiderOrderMapper;
 import com.ruoyi.platform.rider.service.IRiderOrderService;
-import org. slf4j.Logger;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -31,6 +32,7 @@ public class RiderOrderServiceImpl implements IRiderOrderService {
 
     @Override
     public List<RiderOrderListVO> selectAvailableOrderList(OrderMain orderMain) {
+        // 可接单的订单必须是状态 2-骑手待接单
         return riderOrderMapper.selectAvailableOrderList(orderMain);
     }
 
@@ -88,26 +90,50 @@ public class RiderOrderServiceImpl implements IRiderOrderService {
         }
 
         Map<String, Object> statistics = new HashMap<>();
-        statistics. put("todayCount", riderOrderMapper.countByTimeRange(riderId, "today"));
+        statistics.put("todayCount", riderOrderMapper.countByTimeRange(riderId, "today"));
         statistics.put("yesterdayCount", riderOrderMapper.countByTimeRange(riderId, "yesterday"));
-        statistics. put("weekCount", riderOrderMapper.countByTimeRange(riderId, "week"));
+        statistics.put("weekCount", riderOrderMapper.countByTimeRange(riderId, "week"));
         statistics.put("monthCount", riderOrderMapper.countByTimeRange(riderId, "month"));
         statistics.put("totalCount", riderOrderMapper.countByTimeRange(riderId, null));
 
         return statistics;
     }
 
+    /**
+     * 骑手异常报备
+     * 将订单状态从 4-配送中 更新为 7-骑手异常报备
+     */
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public Boolean reportAbnormal(Long riderId, OrderMain orderMain) {
         if (riderId == null) {
             throw new ServiceException("骑手ID不能为空");
         }
-        if (orderMain == null) {
-            throw new ServiceException("订单不能为空");
+        if (orderMain == null || orderMain.getOrderMainId() == null) {
+            throw new ServiceException("订单信息不能为空");
         }
-        int result = riderOrderMapper.reportAbnormal(riderId, orderMain.getOrderMainId(),orderMain.getCancelReason());
-        int result1 = riderOrderMapper.reportAbnormal1(riderId,orderMain.getOrderMainId());
-        return result + result1 > 1 ? true : false;
+        if (orderMain.getCancelReason() == null || orderMain.getCancelReason().trim().isEmpty()) {
+            throw new ServiceException("异常原因不能为空");
+        }
+
+        log.info("骑手异常报备 - 骑手ID: {}, 订单ID: {}, 原因: {}",
+                riderId, orderMain. getOrderMainId(), orderMain.getCancelReason());
+
+        // 更新订单状态为 7-骑手异常报备
+        int result = riderOrderMapper.reportAbnormal(riderId, orderMain.getOrderMainId(), orderMain.getCancelReason());
+
+        // 更新配送状态
+        int result1 = riderOrderMapper.reportAbnormal1(riderId, orderMain.getOrderMainId());
+
+        boolean success = (result + result1) > 1;
+
+        if (success) {
+            log.info("骑手异常报备成功 - 订单ID: {}", orderMain.getOrderMainId());
+        } else {
+            log.warn("骑手异常报备失败 - 订单ID: {}, 可能订单状态不是配送中", orderMain.getOrderMainId());
+            throw new ServiceException("报备失败，订单状态必须是配送中");
+        }
+
+        return success;
     }
 }
