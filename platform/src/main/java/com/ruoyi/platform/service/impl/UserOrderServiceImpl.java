@@ -547,14 +547,28 @@ public class UserOrderServiceImpl implements IUserOrderService {
         orderMain.setTotalAmount(amountInfo.getTotalAmount());
         orderMain.setPayAmount(amountInfo.getPayAmount());
         orderMain.setDiscountAmount(amountInfo.getDiscountAmount());
-        orderMain.setPlatformHoldAmount(amountInfo.getPayAmount()); // 初始平台暂存=实付金额
+        orderMain.setPlatformHoldAmount(amountInfo.getPayAmount());
         orderMain.setGoodsAmount(amountInfo.getGoodsAmount());
         orderMain.setDeliveryFeeAmount(amountInfo.getDeliveryFee());
+
+        // 获取第一个商品的首图作为订单缩略图
+        if (createOrderDTO.getItems() != null && !createOrderDTO.getItems().isEmpty()) {
+            Long firstGoodsId = createOrderDTO.getItems().get(0).getGoodsId();
+            try {
+                String thumbnail = orderMainMapper.selectGoodsMainImage(firstGoodsId);
+                orderMain.setOrderThumbnail(thumbnail);
+                log.info("设置订单缩略图成功，订单号：{}，商品ID：{}，图片：{}",
+                        orderNo, firstGoodsId, thumbnail);
+            } catch (Exception e) {
+                log.warn("获取商品首图失败，商品ID：{}", firstGoodsId, e);
+                // 获取失败不影响订单创建，继续执行
+            }
+        }
 
         // 支付状态（已支付）
         orderMain.setPayStatus(PayStatusEnum.PAID.getCode());
         orderMain.setPayTime(new Date());
-        orderMain.setPayType(1L); // 默认余额支付
+        orderMain.setPayType(1L);
 
         // 订单状态（待接单）
         orderMain.setOrderStatus(OrderStatusEnum.PENDING_ACCEPT.getCode());

@@ -224,6 +224,10 @@ public class OrderMain extends BaseEntity
     @Excel(name = "骑手收入")
     private BigDecimal riderIncome;
 
+    /** 订单缩略图 */
+    @Excel(name = "订单缩略图")
+    private String orderThumbnail;
+
     private List<OrderTakeoutDetail> orderTakeoutDetailList;
 
     private List<OrderErrandDetail> orderErrandDetailList;
@@ -706,6 +710,14 @@ public class OrderMain extends BaseEntity
         this.orderSecondhandDetailList = orderSecondhandDetailList;
     }
 
+    public String getOrderThumbnail() {
+        return orderThumbnail;
+    }
+
+    public void setOrderThumbnail(String orderThumbnail) {
+        this.orderThumbnail = orderThumbnail;
+    }
+
     @Override
     public String toString() {
         return new ToStringBuilder(this, ToStringStyle.MULTI_LINE_STYLE)
@@ -761,6 +773,7 @@ public class OrderMain extends BaseEntity
                 .append("deliverTime", getDeliverTime())
                 .append("deliveryFee", getDeliveryFee())
                 .append("riderIncome", getRiderIncome())
+                .append("orderThumbnail", getOrderThumbnail())
                 .toString();
     }
 }
