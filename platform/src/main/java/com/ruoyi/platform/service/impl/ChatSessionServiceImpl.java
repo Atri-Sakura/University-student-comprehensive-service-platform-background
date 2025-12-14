@@ -140,6 +140,10 @@ public class ChatSessionServiceImpl implements IChatSessionService
     @Override
     public Integer increaseUnreadCount(Long sessionId)
     {
+        if(sessionId.equals(null)){
+            log.warn("会话ID为空，无法增加未读计数");
+            return 0;
+        }
         ChatSession chatSession = selectChatSessionBySessionId(sessionId);
         chatSession.setUnreadCount(chatSession.getUnreadCount()+1);
         return chatSessionMapper.updateChatSession(chatSession);

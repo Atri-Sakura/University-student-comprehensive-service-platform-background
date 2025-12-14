@@ -3,6 +3,7 @@ package com.ruoyi.platform.service;
 import java.math.BigDecimal;
 import java.util.List;
 import com.ruoyi.platform.domain.RiderWallet;
+import com.ruoyi.platform.domain.RiderWalletRecord;
 
 /**
  * 骑手钱包Service接口
@@ -66,4 +67,6 @@ public interface IRiderWalletService {
      * @return 结果
      */
     public int deleteRiderWalletByRiderWalletId(Long riderWalletId);
+
+    List<RiderWalletRecord> selectRiderWalletRecordByRiderBaseId(Long riderId);
 }
