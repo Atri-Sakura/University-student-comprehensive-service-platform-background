@@ -183,4 +183,7 @@ public interface OrderMainMapper {
      * @return 图片URL
      */
     String selectSecondhandGoodsMainImage(@Param("goodsId") Long goodsId);
+
+    @Select("select username from user_base where user_base_id = #{userBaseId}")
+    String selectUserNickName(Long userBaseId);
 }
