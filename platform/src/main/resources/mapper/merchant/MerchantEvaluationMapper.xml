@@ -104,4 +104,65 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             #{merchantEvaluationId}
         </foreach>
     </delete>
+
+    <!-- 商家查询评价列表（带高级筛选） -->
+    <select id="selectMerchantEvaluationListByMerchant" resultMap="MerchantEvaluationResult">
+        <include refid="selectMerchantEvaluationVo"/>
+        <where>
+            merchant_base_id = #{merchantBaseId}
+
+            <!-- 评分筛选 -->
+            <if test="req.rating != null">
+                AND rating = #{req.rating}
+            </if>
+
+            <!-- 只看有内容的评价 -->
+            <if test="req.hasContent != null and req.hasContent == 1">
+                AND content IS NOT NULL AND content != ''
+            </if>
+
+            <!-- 只看有图片的评价 -->
+            <if test="req. hasImages != null and req.hasImages == 1">
+                AND img_urls IS NOT NULL AND img_urls != ''
+            </if>
+
+            <!-- 回复状态筛选 -->
+            <if test="req.replyStatus != null and req.replyStatus == 0">
+                AND (merchant_reply IS NULL OR merchant_reply = '')
+            </if>
+            <if test="req.replyStatus != null and req.replyStatus == 1">
+                AND merchant_reply IS NOT NULL AND merchant_reply != ''
+            </if>
+        </where>
+
+        <!-- 排序 -->
+        <choose>
+            <when test="req.sortType != null and req.sortType == 2">
+                ORDER BY rating DESC, create_time DESC
+            </when>
+            <when test="req. sortType != null and req.sortType == 3">
+                ORDER BY rating ASC, create_time DESC
+            </when>
+            <otherwise>
+                <!-- 默认按最新评价排序 -->
+                ORDER BY create_time DESC
+            </otherwise>
+        </choose>
+    </select>
+
+    <!-- 商家评价统计信息 -->
+    <select id="selectEvaluationStatistics" resultType="com.ruoyi.platform.domain.vo.MerchantEvaluationStatisticsVO">
+        SELECT
+            COUNT(*) AS totalCount,
+            ROUND(AVG(rating), 2) AS avgRating,
+            SUM(CASE WHEN rating = 5 THEN 1 ELSE 0 END) AS fiveStarCount,
+            SUM(CASE WHEN rating = 4 THEN 1 ELSE 0 END) AS fourStarCount,
+            SUM(CASE WHEN rating = 3 THEN 1 ELSE 0 END) AS threeStarCount,
+            SUM(CASE WHEN rating = 2 THEN 1 ELSE 0 END) AS twoStarCount,
+            SUM(CASE WHEN rating = 1 THEN 1 ELSE 0 END) AS oneStarCount,
+            SUM(CASE WHEN (merchant_reply IS NULL OR merchant_reply = '') THEN 1 ELSE 0 END) AS pendingReplyCount,
+            SUM(CASE WHEN (img_urls IS NOT NULL AND img_urls != '') THEN 1 ELSE 0 END) AS withImageCount
+        FROM merchant_evaluation
+        WHERE merchant_base_id = #{merchantBaseId}
+    </select>
 </mapper>

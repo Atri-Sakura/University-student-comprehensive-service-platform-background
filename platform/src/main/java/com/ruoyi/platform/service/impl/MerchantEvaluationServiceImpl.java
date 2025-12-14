@@ -11,17 +11,19 @@ import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.common.utils.uuid.IdUtils;
 import com.ruoyi.common.utils.file.MinioFileUtils;
 import com.ruoyi.platform.domain.OrderMain;
-import com.ruoyi.platform.domain.vo.MerchantEvaluationAddReq;
-import com.ruoyi.platform.domain.vo.MerchantEvaluationUpdateReq;
+import com.ruoyi.platform.domain.UserBase;
+import com.ruoyi.platform.domain.vo.*;
 import com.ruoyi.platform.mapper.OrderMainMapper;
+import com.ruoyi.platform.mapper.UserBaseMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.ruoyi.platform.mapper.MerchantEvaluationMapper;
 import com.ruoyi.platform.domain.MerchantEvaluation;
 import com.ruoyi.platform.service.IMerchantEvaluationService;
-import org.springframework.transaction.annotation. Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
@@ -37,6 +39,9 @@ public class MerchantEvaluationServiceImpl implements IMerchantEvaluationService
 
     @Autowired
     private MerchantEvaluationMapper merchantEvaluationMapper;
+
+    @Autowired
+    private UserBaseMapper userBaseMapper;
 
     @Autowired
     private OrderMainMapper orderMainMapper;
@@ -430,5 +435,182 @@ public class MerchantEvaluationServiceImpl implements IMerchantEvaluationService
     public int deleteMerchantEvaluationByMerchantEvaluationId(Long merchantEvaluationId)
     {
         return merchantEvaluationMapper.deleteMerchantEvaluationByMerchantEvaluationId(merchantEvaluationId);
+    }
+
+    /**
+     * 商家查询评价列表（带高级筛选）
+     */
+    @Override
+    public List<MerchantEvaluationDetailVO> getMerchantEvaluationList(
+            MerchantEvaluationQueryReq req, Long merchantBaseId) {
+
+        // 1. 基础校验
+        if (merchantBaseId == null) {
+            throw new ServiceException("商家身份异常");
+        }
+
+        // 2. 查询评价列表
+        List<MerchantEvaluation> evaluationList = merchantEvaluationMapper
+                .selectMerchantEvaluationListByMerchant(merchantBaseId, req);
+
+        // 3. 转换为VO
+        List<MerchantEvaluationDetailVO> result = new ArrayList<>();
+        for (MerchantEvaluation evaluation : evaluationList) {
+            MerchantEvaluationDetailVO vo = convertToDetailVO(evaluation);
+            result. add(vo);
+        }
+
+        return result;
+    }
+
+    /**
+     * 商家查询评价统计信息
+     */
+    @Override
+    public MerchantEvaluationStatisticsVO getEvaluationStatistics(Long merchantBaseId) {
+        // 1. 基础校验
+        if (merchantBaseId == null) {
+            throw new ServiceException("商家身份异常");
+        }
+
+        // 2. 查询统计信息
+        MerchantEvaluationStatisticsVO statistics = merchantEvaluationMapper
+                .selectEvaluationStatistics(merchantBaseId);
+
+        // 3. 处理可能的null值
+        if (statistics == null) {
+            statistics = new MerchantEvaluationStatisticsVO();
+            statistics.setTotalCount(0L);
+            statistics.setAvgRating(0.0);
+            statistics.setFiveStarCount(0L);
+            statistics.setFourStarCount(0L);
+            statistics.setThreeStarCount(0L);
+            statistics.setTwoStarCount(0L);
+            statistics.setOneStarCount(0L);
+            statistics. setPendingReplyCount(0L);
+            statistics.setWithImageCount(0L);
+        }
+
+        return statistics;
+    }
+
+    /**
+     * 商家回复评价
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public int replyEvaluation(MerchantEvaluationReplyReq req, Long merchantBaseId) {
+        // 1. 基础校验
+        if (merchantBaseId == null) {
+            throw new ServiceException("商家身份异常，无法回复评价");
+        }
+
+        // 2. 查询评价信息
+        MerchantEvaluation existingEval = merchantEvaluationMapper
+                .selectMerchantEvaluationByMerchantEvaluationId(req.getMerchantEvaluationId());
+
+        // 3. 校验评价是否存在
+        if (existingEval == null) {
+            throw new ServiceException("评价不存在");
+        }
+
+        // 4. 【安全校验】评价归属权验证：必须是当前商家的评价
+        if (! existingEval.getMerchantBaseId().equals(merchantBaseId)) {
+            throw new ServiceException("无权回复其他商家的评价");
+        }
+
+        // 5. 【业务校验】检查是否已回复
+        if (StringUtils.isNotEmpty(existingEval.getMerchantReply())) {
+            throw new ServiceException("该评价已回复，如需修改请联系管理员");
+        }
+
+        // 6. 构建更新对象
+        MerchantEvaluation updateEval = new MerchantEvaluation();
+        updateEval.setMerchantEvaluationId(req.getMerchantEvaluationId());
+        updateEval.setMerchantReply(req.getMerchantReply());
+        updateEval.setReplyTime(DateUtils.getNowDate());
+
+        // 7. 执行更新
+        return merchantEvaluationMapper.updateMerchantEvaluation(updateEval);
+    }
+
+    /**
+     * 商家查询评价详情
+     */
+    @Override
+    public MerchantEvaluationDetailVO getEvaluationDetail(
+            Long merchantEvaluationId, Long merchantBaseId) {
+
+        // 1. 基础校验
+        if (merchantBaseId == null) {
+            throw new ServiceException("商家身份异常");
+        }
+
+        // 2. 查询评价信息
+        MerchantEvaluation evaluation = merchantEvaluationMapper
+                .selectMerchantEvaluationByMerchantEvaluationId(merchantEvaluationId);
+
+        // 3. 校验评价是否存在
+        if (evaluation == null) {
+            throw new ServiceException("评价不存在");
+        }
+
+        // 4. 【安全校验】评价归属权验证
+        if (!evaluation.getMerchantBaseId().equals(merchantBaseId)) {
+            throw new ServiceException("无权查看其他商家的评价");
+        }
+
+        // 5. 转换为VO
+        return convertToDetailVO(evaluation);
+    }
+
+    // ================= 辅助方法 =================
+
+    /**
+     * 将MerchantEvaluation转换为MerchantEvaluationDetailVO
+     *
+     * @param evaluation 评价实体
+     * @return 评价详情VO
+     */
+    private MerchantEvaluationDetailVO convertToDetailVO(MerchantEvaluation evaluation) {
+        MerchantEvaluationDetailVO vo = new MerchantEvaluationDetailVO();
+
+        // 1. 复制基本属性
+        BeanUtils.copyProperties(evaluation, vo);
+
+        // 2. 查询用户信息（脱敏）
+        try {
+            UserBase user = userBaseMapper.selectUserBaseByUserBaseId(evaluation.getUserId());
+            if (user != null) {
+                // 用户昵称脱敏：只显示第一个字 + ***
+                String nickname = user.getNickname();
+                if (StringUtils.isNotEmpty(nickname)) {
+                    if (nickname.length() == 1) {
+                        vo.setUserNickname(nickname + "***");
+                    } else {
+                        vo.setUserNickname(nickname.substring(0, 1) + "***");
+                    }
+                } else {
+                    vo.setUserNickname("匿名用户");
+                }
+                vo.setUserAvatar(user.getAvatar());
+            } else {
+                vo.setUserNickname("匿名用户");
+            }
+        } catch (Exception e) {
+            log.warn("查询用户信息失败，userId={}", evaluation.getUserId(), e);
+            vo.setUserNickname("匿名用户");
+        }
+
+        // 3. 处理图片列表
+        if (StringUtils.isNotEmpty(evaluation. getImgUrls())) {
+            List<String> imageList = Arrays.asList(evaluation.getImgUrls().split(","));
+            vo.setImageList(imageList);
+        }
+
+        // 4. 设置是否已回复标志
+        vo.setHasReply(StringUtils.isNotEmpty(evaluation. getMerchantReply()));
+
+        return vo;
     }
 }

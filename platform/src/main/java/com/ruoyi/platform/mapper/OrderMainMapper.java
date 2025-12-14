@@ -169,4 +169,18 @@ public interface OrderMainMapper {
     List<OrderSecondhandDetail> selectOrderSecondhandDetailListBySellerId(Long userId);
 
     OrderMain selectSecondHandOrderMainWithDetailsByOrderMainNo(String orderMainId);
+
+    /**
+     * 查询商品主图URL
+     * @param goodsId 商品ID
+     * @return 图片URL
+     */
+    String selectGoodsMainImage(@Param("goodsId") Long goodsId);
+
+    /**
+     * 查询二手商品主图URL
+     * @param goodsId 二手商品ID
+     * @return 图片URL
+     */
+    String selectSecondhandGoodsMainImage(@Param("goodsId") Long goodsId);
 }

@@ -80,6 +80,7 @@
         om.order_main_id,
         om.order_no,
         om.create_time,
+        om.order_thumbnail,
         om.pick_address,
         om.deliver_address,
         om.total_amount,
@@ -110,6 +111,7 @@
         om.order_main_id,
         om.order_no,
         om.create_time,
+        om.order_thumbnail,
         om.pick_address,
         om.deliver_address,
         om.total_amount,
@@ -164,7 +166,7 @@
         ORDER BY om.create_time DESC
     </select>
 
-    <!-- 【关键修复】查询骑手订单详情 -->
+    <!-- 查询骑手订单详情 -->
     <select id="selectRiderOrderById" parameterType="Long" resultMap="OrderMainResult">
         SELECT
         om.order_main_id,
@@ -198,6 +200,7 @@
         om.update_time,
         om.complete_time,
         om.remark,
+        om.order_thumbnail,
         om.merchant_id,
         om.platform_hold_amount,
         od.rider_id,

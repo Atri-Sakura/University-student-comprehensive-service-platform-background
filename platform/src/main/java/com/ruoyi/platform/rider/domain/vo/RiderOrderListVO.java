@@ -19,6 +19,9 @@ public class RiderOrderListVO {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date createTime;
 
+    /** 订单缩略图 */
+    private String orderThumbnail;
+
     /** 取货地址 */
     private String pickAddress;
 
@@ -85,6 +88,10 @@ public class RiderOrderListVO {
 
     public void setCreateTime(Date createTime) {
         this.createTime = createTime;
+    }
+
+    public String getOrderThumbnail() {
+        return orderThumbnail;
     }
 
     public String getPickAddress() {

@@ -2,6 +2,9 @@ package com.ruoyi.platform.mapper;
 
 import java.util.List;
 import com.ruoyi.platform.domain.MerchantEvaluation;
+import com.ruoyi.platform.domain.vo.MerchantEvaluationQueryReq;
+import com.ruoyi.platform.domain.vo.MerchantEvaluationStatisticsVO;
+import io.lettuce.core.dynamic.annotation.Param;
 
 /**
  * 商家评价Mapper接口
@@ -58,4 +61,23 @@ public interface MerchantEvaluationMapper
      * @return 结果
      */
     public int deleteMerchantEvaluationByMerchantEvaluationIds(Long[] merchantEvaluationIds);
+
+    /**
+     * 商家查询评价列表（带高级筛选）
+     *
+     * @param merchantBaseId 商家ID
+     * @param req 查询条件
+     * @return 评价列表
+     */
+    List<MerchantEvaluation> selectMerchantEvaluationListByMerchant(
+            @Param("merchantBaseId") Long merchantBaseId,
+            @Param("req") MerchantEvaluationQueryReq req);
+
+    /**
+     * 商家查询评价统计信息
+     *
+     * @param merchantBaseId 商家ID
+     * @return 统计信息
+     */
+    MerchantEvaluationStatisticsVO selectEvaluationStatistics(@Param("merchantBaseId") Long merchantBaseId);
 }
