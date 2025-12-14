@@ -19,6 +19,8 @@
         <result property="merchantLogo" column="merchant_logo"/>
         <result property="merchantRating" column="merchant_rating"/>
         <result property="merchantPhone" column="merchant_phone"/>
+        <result property="username" column="username"/>
+        <result property="userNickname" column="user_nickname"/>
     </resultMap>
 
     <!-- 详情查询ResultMap（完整字段） -->
@@ -26,6 +28,7 @@
         <result property="orderMainId" column="order_main_id"/>
         <result property="orderNo" column="order_no"/>
         <result property="userId" column="user_id"/>
+        <result property="username" column="username"/>
         <result property="userNickname" column="user_nickname"/>
         <result property="merchantId" column="merchant_id"/>
         <result property="orderType" column="order_type"/>
@@ -38,6 +41,8 @@
         <result property="payTime" column="pay_time"/>
         <result property="payType" column="pay_type"/>
         <result property="orderStatus" column="order_status"/>
+        <result property="cancelReason" column="cancel_reason"/>
+        <result property="cancelOperator" column="cancel_operator"/>
         <result property="pickAddressId" column="pick_address_id"/>
         <result property="pickAddress" column="pick_address"/>
         <result property="pickContact" column="pick_contact"/>
@@ -64,6 +69,9 @@
         <result property="receiveTime" column="receive_time"/>
         <result property="pickTime" column="pick_time"/>
         <result property="deliverTime" column="deliver_time"/>
+        <result property="deliveryFee" column="delivery_fee"/>
+        <result property="riderIncome" column="rider_income"/>
+        <result property="platformHoldAmount" column="platform_hold_amount"/>
     </resultMap>
 
     <!-- 查询可接单的订单列表 -->
@@ -76,9 +84,12 @@
         om.deliver_address,
         om.total_amount,
         om.order_status,
-        om.order_type
+        om.order_type,
+        ub.username,
+        ub.nickname as user_nickname
         FROM order_main om
         INNER JOIN order_delivery od ON om.order_main_id = od.order_main_id
+        LEFT JOIN user_base ub ON om.user_id = ub.user_base_id
         <where>
             om.order_status = 2
             AND om.pay_status = 1
@@ -93,7 +104,7 @@
         ORDER BY om.create_time DESC
     </select>
 
-    <!-- 查询骑手自己的订单列表（简化字段） -->
+    <!-- 查询骑手自己的订单列表 -->
     <select id="selectRiderOrderList" resultMap="OrderListResult">
         SELECT
         om.order_main_id,
@@ -108,14 +119,15 @@
         mb.merchant_name,
         mb.logo as merchant_logo,
         mb.rating as merchant_rating,
-        mb.phone as merchant_phone
+        mb. phone as merchant_phone,
+        ub.username,
+        ub.nickname as user_nickname
         FROM order_main om
         INNER JOIN order_delivery od ON om.order_main_id = od.order_main_id
         LEFT JOIN merchant_base mb ON om.merchant_id = mb.merchant_base_id
+        LEFT JOIN user_base ub ON om. user_id = ub.user_base_id
         <where>
             od.rider_id = #{riderId}
-
-            <!-- 时间范围筛选 -->
             <if test="timeRange != null and timeRange != ''">
                 <choose>
                     <when test="timeRange == 'today'">
@@ -136,7 +148,6 @@
                     </when>
                 </choose>
             </if>
-
             <if test="orderMain != null and orderMain.orderStatus != null">
                 AND om.order_status = #{orderMain.orderStatus}
             </if>
@@ -153,26 +164,62 @@
         ORDER BY om.create_time DESC
     </select>
 
-    <!-- 询骑手订单详情（完整字段） -->
-    <select id="selectRiderOrderById" resultMap="OrderMainResult">
+    <!-- 【关键修复】查询骑手订单详情 -->
+    <select id="selectRiderOrderById" parameterType="Long" resultMap="OrderMainResult">
         SELECT
-            om.*,
-            od.rider_id,
-            od.delivery_status,
-            od.receive_time,
-            od.pick_time,
-            od.deliver_time,
-            mb.merchant_base_id,
-            mb.merchant_name,
-            mb.logo as merchant_logo,
-            mb.rating as merchant_rating,
-            mb.phone as merchant_phone,
-            mb.business_hours as merchant_business_hours
+        om.order_main_id,
+        om.order_no,
+        om.user_id,
+        om.order_type,
+        om.total_amount,
+        om.pay_amount,
+        om.discount_amount,
+        om.goods_amount,
+        om.delivery_fee_amount,
+        om.pay_status,
+        om.pay_time,
+        om.pay_type,
+        om.order_status,
+        om.cancel_reason,
+        om.cancel_operator,
+        om.pick_address_id,
+        om.pick_address,
+        om.pick_contact,
+        om.pick_phone,
+        om.pick_longitude,
+        om.pick_latitude,
+        om.deliver_address_id,
+        om.deliver_address,
+        om.deliver_contact,
+        om.deliver_phone,
+        om.deliver_longitude,
+        om.deliver_latitude,
+        om.create_time,
+        om.update_time,
+        om.complete_time,
+        om.remark,
+        om.merchant_id,
+        om.platform_hold_amount,
+        od.rider_id,
+        od.delivery_status,
+        od.receive_time,
+        od.pick_time,
+        od.deliver_time,
+        od.delivery_fee,
+        od.rider_income,
+        mb.merchant_name,
+        mb.logo as merchant_logo,
+        mb.rating as merchant_rating,
+        mb.phone as merchant_phone,
+        mb.business_hours as merchant_business_hours,
+        ub.username,
+        ub.nickname as user_nickname
         FROM order_main om
-                 INNER JOIN order_delivery od ON om.order_main_id = od.order_main_id
-                 LEFT JOIN merchant_base mb ON om.merchant_id = mb.merchant_base_id
+        INNER JOIN order_delivery od ON om.order_main_id = od.order_main_id
+        LEFT JOIN merchant_base mb ON om.merchant_id = mb.merchant_base_id
+        LEFT JOIN user_base ub ON om.user_id = ub.user_base_id
         WHERE om.order_main_id = #{orderMainId}
-          AND om.order_status != 5  /* 排除已取消的订单 */
+        AND om.order_status != 5
     </select>
 
     <!-- 按时间范围统计订单数量 -->
@@ -182,20 +229,19 @@
         INNER JOIN order_delivery od ON om.order_main_id = od.order_main_id
         <where>
             od.rider_id = #{riderId}
-
             <if test="timeRange != null and timeRange != ''">
                 <choose>
                     <when test="timeRange == 'today'">
                         AND om.create_time &gt;= DATE_FORMAT(CURDATE(), '%Y-%m-%d 00:00:00')
-                        AND om. create_time &lt;= NOW()
+                        AND om.create_time &lt;= NOW()
                     </when>
                     <when test="timeRange == 'yesterday'">
                         AND om.create_time &gt;= DATE_SUB(CURDATE(), INTERVAL 1 DAY)
                         AND om.create_time &lt; DATE_FORMAT(CURDATE(), '%Y-%m-%d 00:00:00')
                     </when>
                     <when test="timeRange == 'week'">
-                        AND om. create_time &gt;= DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY)
-                        AND om.create_time &lt;= NOW()
+                        AND om.create_time &gt;= DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY)
+                        AND om. create_time &lt;= NOW()
                     </when>
                     <when test="timeRange == 'month'">
                         AND om.create_time &gt;= DATE_FORMAT(CURDATE(), '%Y-%m-01 00:00:00')

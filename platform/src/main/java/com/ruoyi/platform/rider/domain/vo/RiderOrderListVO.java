@@ -5,9 +5,7 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 /**
- * 骑手订单列表VO（简化字段）
- *
- * @author ruoyi
+ * 骑手订单列表VO
  */
 public class RiderOrderListVO {
 
@@ -21,22 +19,22 @@ public class RiderOrderListVO {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date createTime;
 
-    /** 取货地址（绿点显示） */
+    /** 取货地址 */
     private String pickAddress;
 
-    /** 送货地址（红点显示） */
+    /** 送货地址 */
     private String deliverAddress;
 
     /** 订单金额 */
     private BigDecimal totalAmount;
 
-    /** 订单状态：1-待接单 2-待取货 3-配送中 4-已完成 5-已取消 */
+    /** 订单状态 */
     private Integer orderStatus;
 
     /** 订单状态名称 */
     private String orderStatusName;
 
-    /** 订单类型：1-外卖单 2-跑腿单 3-二手交易单 */
+    /** 订单类型 */
     private Integer orderType;
 
     /** 订单类型名称 */
@@ -56,6 +54,12 @@ public class RiderOrderListVO {
 
     /** 商家电话 */
     private String merchantPhone;
+
+    /** 用户账号(手机号) */
+    private String username;
+
+    /** 用户昵称 */
+    private String userNickname;
 
     // ==================== Getter和Setter方法 ====================
 
@@ -113,7 +117,6 @@ public class RiderOrderListVO {
 
     public void setOrderStatus(Integer orderStatus) {
         this.orderStatus = orderStatus;
-        // 自动设置状态名称
         this.orderStatusName = getStatusName(orderStatus);
     }
 
@@ -131,7 +134,6 @@ public class RiderOrderListVO {
 
     public void setOrderType(Integer orderType) {
         this.orderType = orderType;
-        // 自动设置类型名称
         this.orderTypeName = getTypeName(orderType);
     }
 
@@ -181,6 +183,22 @@ public class RiderOrderListVO {
 
     public void setMerchantPhone(String merchantPhone) {
         this.merchantPhone = merchantPhone;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getUserNickname() {
+        return userNickname;
+    }
+
+    public void setUserNickname(String userNickname) {
+        this.userNickname = userNickname;
     }
 
     // ==================== 辅助方法 ====================
