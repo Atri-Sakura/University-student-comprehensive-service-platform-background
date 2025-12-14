@@ -100,10 +100,10 @@ public class MerchantInfoController {
                 return AjaxResult. error("只支持上传图片格式文件");
             }
 
-            // 4. 验证文件大小（限制5MB）
-            long maxSize = 5 * 1024 * 1024; // 5MB
+            // 4. 验证文件大小（限制20MB）
+            long maxSize = 20 * 1024 * 1024; // 20MB
             if (file.getSize() > maxSize) {
-                return AjaxResult.error("文件大小不能超过5MB");
+                return AjaxResult.error("文件大小不能超过20MB");
             }
 
             // 5. 查询商家原有Logo

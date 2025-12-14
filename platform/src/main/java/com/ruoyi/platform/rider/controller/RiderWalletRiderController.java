@@ -79,7 +79,7 @@ public class RiderWalletRiderController extends BaseController {
      */
     @GetMapping("/flow")
     public TableDataInfo getRiderWalletFlow() {
-        Long riderId = SecurityUtils.getUserBaseId();
+        Long riderId = SecurityUtils.getRiderBaseId();
         startPage();
         List<RiderWalletRecord> riderWalletRecords = riderWalletService.selectRiderWalletRecordByRiderBaseId(riderId);
         return getDataTable(riderWalletRecords);

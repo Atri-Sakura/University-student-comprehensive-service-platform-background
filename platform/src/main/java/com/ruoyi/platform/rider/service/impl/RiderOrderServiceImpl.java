@@ -4,7 +4,7 @@ import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.platform.domain.OrderMain;
 import com.ruoyi.platform.rider.domain.vo.RiderOrderListVO;
 import com.ruoyi.platform.rider.mapper.RiderOrderMapper;
-import com.ruoyi.platform. rider.service.IRiderOrderService;
+import com.ruoyi.platform.rider.service.IRiderOrderService;
 import org. slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -106,8 +106,8 @@ public class RiderOrderServiceImpl implements IRiderOrderService {
         if (orderMain == null) {
             throw new ServiceException("订单不能为空");
         }
-        int result = riderOrderMapper.reportAbnormal(riderId, orderMain);
-        int result1 = riderOrderMapper.reportAbnormal1(riderId,orderMain);
+        int result = riderOrderMapper.reportAbnormal(riderId, orderMain.getOrderMainId(),orderMain.getCancelReason());
+        int result1 = riderOrderMapper.reportAbnormal1(riderId,orderMain.getOrderMainId());
         return result + result1 > 1 ? true : false;
     }
 }

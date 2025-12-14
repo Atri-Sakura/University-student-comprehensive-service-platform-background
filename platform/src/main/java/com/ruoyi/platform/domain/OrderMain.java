@@ -31,8 +31,12 @@ public class OrderMain extends BaseEntity
     @Excel(name = "下单用户ID", readConverterExp = "关=联user_db.user_base.user_base_id")
     private Long userId;
 
-    /** 用户昵称(冗余) */
-    @Excel(name = "用户昵称(冗余)")
+    /** 用户账号(手机号) */
+    @Excel(name = "用户账号")
+    private String username;
+
+    /** 用户昵称 */
+    @Excel(name = "用户昵称")
     private String userNickname;
 
     /** 订单类型：1-外卖单 2-跑腿单 3-二手交易单 */
@@ -220,6 +224,10 @@ public class OrderMain extends BaseEntity
     @Excel(name = "骑手收入")
     private BigDecimal riderIncome;
 
+    /** 订单缩略图 */
+    @Excel(name = "订单缩略图")
+    private String orderThumbnail;
+
     private List<OrderTakeoutDetail> orderTakeoutDetailList;
 
     private List<OrderErrandDetail> orderErrandDetailList;
@@ -264,14 +272,20 @@ public class OrderMain extends BaseEntity
         return userId;
     }
 
-    public void setUserNickname(String userNickname)
-    {
-        this.userNickname = userNickname;
+    public String getUsername() {
+        return username;
     }
 
-    public String getUserNickname()
-    {
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getUserNickname() {
         return userNickname;
+    }
+
+    public void setUserNickname(String userNickname) {
+        this.userNickname = userNickname;
     }
 
     public void setOrderType(Long orderType)
@@ -696,12 +710,21 @@ public class OrderMain extends BaseEntity
         this.orderSecondhandDetailList = orderSecondhandDetailList;
     }
 
+    public String getOrderThumbnail() {
+        return orderThumbnail;
+    }
+
+    public void setOrderThumbnail(String orderThumbnail) {
+        this.orderThumbnail = orderThumbnail;
+    }
+
     @Override
     public String toString() {
         return new ToStringBuilder(this, ToStringStyle.MULTI_LINE_STYLE)
                 .append("orderMainId", getOrderMainId())
                 .append("orderNo", getOrderNo())
                 .append("userId", getUserId())
+                .append("username", getUsername())
                 .append("userNickname", getUserNickname())
                 .append("merchantId", getMerchantId())
                 .append("orderType", getOrderType())
@@ -750,6 +773,7 @@ public class OrderMain extends BaseEntity
                 .append("deliverTime", getDeliverTime())
                 .append("deliveryFee", getDeliveryFee())
                 .append("riderIncome", getRiderIncome())
+                .append("orderThumbnail", getOrderThumbnail())
                 .toString();
     }
 }

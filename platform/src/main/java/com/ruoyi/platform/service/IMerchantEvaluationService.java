@@ -2,8 +2,7 @@ package com.ruoyi.platform.service;
 
 import java.util.List;
 import com.ruoyi.platform.domain.MerchantEvaluation;
-import com.ruoyi.platform.domain.vo.MerchantEvaluationAddReq;
-import com.ruoyi.platform.domain.vo.MerchantEvaluationUpdateReq;
+import com.ruoyi.platform.domain.vo.*;
 
 /**
  * 商家评价Service接口
@@ -78,4 +77,41 @@ public interface IMerchantEvaluationService
      * 删除商家评价信息
      */
     public int deleteMerchantEvaluationByMerchantEvaluationId(Long merchantEvaluationId);
+
+    /**
+     * 商家查询评价列表（带高级筛选）
+     *
+     * @param req 查询条件
+     * @param merchantBaseId 当前商家ID
+     * @return 评价详情列表
+     */
+    List<MerchantEvaluationDetailVO> getMerchantEvaluationList(
+            MerchantEvaluationQueryReq req, Long merchantBaseId);
+
+    /**
+     * 商家查询评价统计信息
+     *
+     * @param merchantBaseId 当前商家ID
+     * @return 统计信息
+     */
+    MerchantEvaluationStatisticsVO getEvaluationStatistics(Long merchantBaseId);
+
+    /**
+     * 商家回复评价
+     *
+     * @param req 回复请求
+     * @param merchantBaseId 当前商家ID
+     * @return 结果
+     */
+    int replyEvaluation(MerchantEvaluationReplyReq req, Long merchantBaseId);
+
+    /**
+     * 商家查询评价详情
+     *
+     * @param merchantEvaluationId 评价ID
+     * @param merchantBaseId 当前商家ID
+     * @return 评价详情
+     */
+    MerchantEvaluationDetailVO getEvaluationDetail(
+            Long merchantEvaluationId, Long merchantBaseId);
 }
