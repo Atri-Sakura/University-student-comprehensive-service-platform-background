@@ -623,9 +623,9 @@
 
     <insert id="insertSecondhandOrderMain" parameterType="com.ruoyi.platform.domain.OrderMain" useGeneratedKeys="false">
         INSERT INTO order_main (
-            order_main_id, order_no, user_id, user_nickname, order_type, total_amount, pay_amount, pay_type, pay_status, order_status, pick_address_id, pick_address, pick_contact, pick_phone, deliver_address, deliver_contact, deliver_phone, remark, create_time, update_time
+            order_main_id, order_no, user_id, user_nickname, order_type, total_amount, pay_amount, pay_type, pay_status, order_status, pick_address_id, pick_address, pick_contact, pick_phone, deliver_address, deliver_contact, deliver_phone, remark, create_time, update_time, order_thumbnail
         ) VALUES (
-                     #{orderMainId}, #{orderNo}, #{userId}, #{userNickname}, #{orderType}, #{totalAmount}, #{payAmount}, #{payType}, #{payStatus}, #{orderStatus}, #{pickAddressId}, #{pickAddress}, #{pickContact}, #{pickPhone}, #{deliverAddress}, #{deliverContact}, #{deliverPhone}, #{remark}, NOW(), NOW()
+                     #{orderMainId}, #{orderNo}, #{userId}, #{userNickname}, #{orderType}, #{totalAmount}, #{payAmount}, #{payType}, #{payStatus}, #{orderStatus}, #{pickAddressId}, #{pickAddress}, #{pickContact}, #{pickPhone}, #{deliverAddress}, #{deliverContact}, #{deliverPhone}, #{remark}, NOW(), NOW(),#{orderThumbnail}
                  )
     </insert>
 
