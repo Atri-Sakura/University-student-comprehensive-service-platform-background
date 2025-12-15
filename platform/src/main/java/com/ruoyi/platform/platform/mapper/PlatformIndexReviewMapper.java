@@ -17,6 +17,6 @@ public interface PlatformIndexReviewMapper {
     @Delete("delete from index_image_url where index_image_url_id = #{indexImgUrlId}")
     int deleteUserIndexImgs(Integer indexImgUrlId);
 
-    @Insert("insert into index_image_url (index_image_url_id, index_image_url) values (#{indexImgUrlId}, #{imageUrl})")
-    int addIndexImgUrl(Integer indexImgUrlId, String imageUrl);
+    @Insert("insert into index_image_url (index_image_url) values (#{imageUrl})")
+    int addIndexImgUrl(String imageUrl);
 }

@@ -1,6 +1,7 @@
 package com.ruoyi.platform.platform.service;
 
 import com.ruoyi.platform.domain.IndexImgUrl;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -9,5 +10,5 @@ public interface IPlatformIndexReviewService {
 
     int deleteUserIndexImgs(IndexImgUrl indexImgUrl);
 
-    int addIndexImgUrl(IndexImgUrl indexImgUrl);
+    int addIndexImgUrl(MultipartFile file);
 }

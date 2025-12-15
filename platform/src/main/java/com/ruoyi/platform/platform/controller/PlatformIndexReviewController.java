@@ -5,6 +5,7 @@ import com.ruoyi.platform.domain.IndexImgUrl;
 import com.ruoyi.platform.platform.service.IPlatformIndexReviewService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -27,8 +28,8 @@ public class PlatformIndexReviewController {
     }
 
     @PostMapping
-    public AjaxResult addIndexImgUrl(@RequestBody IndexImgUrl indexImgUrl){
-        int result = platformIndexReviewService.addIndexImgUrl(indexImgUrl);
+    public AjaxResult addIndexImgUrl(@RequestParam("file") MultipartFile file){
+        int result = platformIndexReviewService.addIndexImgUrl(file);
         return result > 0 ? AjaxResult.success("添加成功") : AjaxResult.error("添加失败");
     }
 

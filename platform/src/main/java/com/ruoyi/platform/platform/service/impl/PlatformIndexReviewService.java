@@ -7,8 +7,11 @@ import com.ruoyi.platform.platform.service.IPlatformIndexReviewService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 @Service
 public class PlatformIndexReviewService implements IPlatformIndexReviewService {
@@ -38,7 +41,29 @@ public class PlatformIndexReviewService implements IPlatformIndexReviewService {
     }
 
     @Override
-    public int addIndexImgUrl(IndexImgUrl indexImgUrl) {
-        return platformIndexReviewMapper.addIndexImgUrl(indexImgUrl.getIndexImageUrlId(),indexImgUrl.getIndexImageUrl());
+    @Transactional
+    public int addIndexImgUrl(MultipartFile file) {
+        String url;
+        try {
+            Long random = new Random().nextLong(9000000000L);
+            List<IndexImgUrl> indexImgUrls = platformIndexReviewMapper.getUserIndexImgs();
+            List<Integer> indexImgUrlIds = new ArrayList<>();
+            for (IndexImgUrl indexImgUrl : indexImgUrls) {
+                    indexImgUrlIds.add(indexImgUrl.getIndexImageUrlId());
+            }
+            while (indexImgUrlIds.contains(random)) {
+                random = new Random().nextLong(9000000000L);
+            }
+            url = minioFileUtils.upload(file,"indeximage",random );
+            int result = platformIndexReviewMapper.addIndexImgUrl(url);
+            if (result > 0) {
+                return result;
+            }else{
+                minioFileUtils.deleteByUrl(url);
+                return 0;
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }
