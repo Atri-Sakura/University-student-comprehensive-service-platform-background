@@ -20,10 +20,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         WHERE rider_base_id = #{riderBaseId}
     </select>
 
-    <!--
-        查询骑手钱包列表
-        参数：riderWallet（可按条件筛选）
-    -->
+    <!--查询骑手钱包列表-->
     <select id="selectRiderWalletList" parameterType="com.ruoyi.platform.domain.RiderWallet" resultMap="RiderWalletResult">
         SELECT rider_wallet_id, rider_base_id, balance, freeze_amount, create_time, update_time
         FROM rider_wallet
