@@ -59,7 +59,7 @@ public interface RiderOrderMapper {
 
     /**
      * 骑手异常报备 - 更新订单状态为 7-骑手异常报备
-     * 状态流转：4-配送中 → 7-骑手异常报备
+     * 状态流转：3-骑手待取货 或 4-配送中 → 7-骑手异常报备
      *
      * @param riderId 骑手ID
      * @param orderMainId 订单ID
@@ -68,7 +68,7 @@ public interface RiderOrderMapper {
      */
     @Update("UPDATE order_main SET order_status = 7, cancel_reason = #{cancelReason}, " +
             "cancel_operator = '骑手', update_time = NOW() " +
-            "WHERE order_main_id = #{orderMainId} AND order_status = 4")
+            "WHERE order_main_id = #{orderMainId} AND order_status IN (3, 4)")
     int reportAbnormal(@Param("riderId") Long riderId,
                        @Param("orderMainId") Long orderMainId,
                        @Param("cancelReason") String cancelReason);
@@ -80,8 +80,9 @@ public interface RiderOrderMapper {
      * @param orderMainId 订单ID
      * @return 影响行数
      */
-    @Update("UPDATE order_delivery SET delivery_status = 4 " +
-            "WHERE order_main_id = #{orderMainId} AND rider_id = #{riderId}")
+    @Update("UPDATE order_delivery SET delivery_status = 4, update_time = NOW() " +
+            "WHERE order_main_id = #{orderMainId} AND rider_id = #{riderId} " +
+            "AND delivery_status IN (1, 2)")
     int reportAbnormal1(@Param("riderId") Long riderId,
                         @Param("orderMainId") Long orderMainId);
 }
