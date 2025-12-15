@@ -29,11 +29,12 @@ public interface IChatSessionService
 
     /**
      * 新增聊天会话（管理双方的聊天窗口关系）
-     * 
+     *
      * @param chatSession 聊天会话（管理双方的聊天窗口关系）
-     * @return 结果
+     * @return 生成的sessionId
      */
-    public int insertChatSession(ChatSession chatSession);
+    ChatSession insertChatSession(ChatSession chatSession);
+
 
     /**
      * 修改聊天会话（管理双方的聊天窗口关系）

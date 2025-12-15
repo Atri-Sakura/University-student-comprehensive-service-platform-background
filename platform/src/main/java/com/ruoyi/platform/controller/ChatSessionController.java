@@ -77,7 +77,7 @@ public class ChatSessionController extends BaseController
     @PostMapping
     public AjaxResult add(@RequestBody ChatSession chatSession)
     {
-        return toAjax(chatSessionService.insertChatSession(chatSession));
+        return AjaxResult.success(chatSessionService.insertChatSession(chatSession));
     }
 
     /**

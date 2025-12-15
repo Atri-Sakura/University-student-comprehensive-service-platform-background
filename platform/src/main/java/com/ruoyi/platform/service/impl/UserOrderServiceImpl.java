@@ -442,12 +442,12 @@ public class UserOrderServiceImpl implements IUserOrderService {
             throw new ServiceException("订单不存在");
         }
 
-        // 2. 校验订单归属
+//         2. 校验订单归属
         if (!order.getUserId().equals(userId)) {
             throw new ServiceException("无权操作此订单");
         }
 
-        // 3. 校验订单状态（必须是配送中状态）
+//         3. 校验订单状态（必须是配送中状态）
         if (!OrderStatusEnum.DELIVERING.getCode().equals(order.getOrderStatus())) {
             throw new ServiceException("订单状态不正确");
         }
@@ -718,7 +718,7 @@ public class UserOrderServiceImpl implements IUserOrderService {
         orderMain.setDeliverPhone(createOrderDTO.getDeliverPhone());
         orderMain.setDeliverLongitude(createOrderDTO.getDeliverLongitude());
         orderMain.setDeliverLatitude(createOrderDTO.getDeliverLatitude());
-        orderMain.setOrderStatus(OrderStatusEnum.MERCHANT_PENDING_ACCEPT.getCode());
+        orderMain.setOrderStatus(OrderStatusEnum.RIDER_PENDING_ACCEPT.getCode());
         orderMain.setRemark(createOrderDTO.getRemark());
         orderMain.setCreateTime(new Date());
         orderMain.setUpdateTime(new Date());

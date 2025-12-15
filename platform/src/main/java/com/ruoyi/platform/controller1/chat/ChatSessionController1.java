@@ -45,9 +45,9 @@ public class ChatSessionController1 {
      * 新增聊天会话
      */
     @PostMapping
-    public R<Integer> add(@RequestBody ChatSession chatSession) {
-        int result = chatSessionService.insertChatSession(chatSession);
-        return result > 0 ? R.ok(result, "新增聊天会话成功") : R.fail("新增聊天会话失败");
+    public R<ChatSession> add(@RequestBody ChatSession chatSession) {
+        ChatSession result = chatSessionService.insertChatSession(chatSession);
+        return result != null ? R.ok(result, "新增聊天会话成功") : R.fail("新增聊天会话失败");
     }
 
     /**

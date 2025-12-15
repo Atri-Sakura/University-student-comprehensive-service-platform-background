@@ -46,4 +46,30 @@ public interface IOrderNotifyService {
      * @param merchantId
      */
     public void sendMerchantAcceptOrderToUserNotify(Long orderMainId, Long merchantId);
+
+    /**
+     * 骑手取货通知
+     * @param riderId
+     * @param orderMainId
+     */
+    public void sendRiderGetOrderToUserNotify(Long riderId, Long orderMainId);
+
+    /**
+     * 骑手配送成功通知
+     * @param orderMainId
+     */
+    public void sendRiderFinishOrderToUserNotify(Long orderMainId);
+
+    /**
+     * 订单完成通知
+     * @param orderMainId
+     */
+    public void sendOrderFinishNotify(Long orderMainId);
+
+    /**
+     * 订单取消通知
+     * @param orderMain
+     * @param orderMainId
+     */
+//    public void cancelOrderNotify(OrderMain orderMain, Long orderMainId);
 }

@@ -89,7 +89,7 @@ public class MerchantOrderController extends BaseController {
         // 调用订单流转服务的接单方法
         int result = orderFlowService.merchantAcceptOrder(merchantId, orderMainId);
 
-        return toAjax(result);
+        return AjaxResult.success("接单成功",orderMainId);
     }
 
     /**

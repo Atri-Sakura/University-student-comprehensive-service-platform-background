@@ -4,7 +4,7 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.ruoyi.platform.mapper.OrderDeliveryMapper">
 
-    <resultMap type="OrderDelivery" id="OrderDeliveryResult">
+    <resultMap type="com.ruoyi.platform.domain.OrderDelivery" id="OrderDeliveryResult">
         <result property="orderDeliveryId"    column="order_delivery_id"    />
         <result property="orderMainId"    column="order_main_id"    />
         <result property="riderId"    column="rider_id"    />
@@ -137,7 +137,7 @@
         </foreach>
     </delete>
 
-    <select id="selectOrderDeliveryByOrderMainId">
+    <select id="selectOrderDeliveryByOrderMainId" parameterType="java.lang.Long" resultType="OrderDelivery">
         SELECT * FROM order_delivery WHERE order_main_id = #{orderMainId}
     </select>
 

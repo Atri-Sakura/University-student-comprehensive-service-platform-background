@@ -1,8 +1,9 @@
 package com.ruoyi.platform.user.aop;
 
 import com.ruoyi.common.core.domain.AjaxResult;
-import com.ruoyi.common.utils.SecurityUtils;
+import com.ruoyi.platform.domain.OrderDelivery;
 import com.ruoyi.platform.domain.OrderMain;
+import com.ruoyi.platform.mapper.OrderDeliveryMapper;
 import com.ruoyi.platform.service.IOrderMainService;
 import com.ruoyi.platform.service.IOrderNotifyService;
 import lombok.extern.slf4j.Slf4j;
@@ -27,15 +28,18 @@ public class OrderAspect {
     private final IOrderNotifyService orderNotifyService;
     private final IOrderMainService orderMainService;
     private final ThreadPoolTaskExecutor asyncExecutor;
+    private final OrderDeliveryMapper orderDeliveryMapper;
 
     // 构造器注入（解决字段注入警告+线程池Bean冲突）
     @Autowired
     public OrderAspect(IOrderNotifyService orderNotifyService,
                        IOrderMainService orderMainService,
-                       @Qualifier("threadPoolTaskExecutor") ThreadPoolTaskExecutor asyncExecutor) {
+                       @Qualifier("threadPoolTaskExecutor") ThreadPoolTaskExecutor asyncExecutor,
+                       OrderDeliveryMapper orderDeliveryMapper) {
         this.orderNotifyService = orderNotifyService;
         this.orderMainService = orderMainService;
         this.asyncExecutor = asyncExecutor;
+        this.orderDeliveryMapper = orderDeliveryMapper;
     }
 
     /**
@@ -68,7 +72,15 @@ public class OrderAspect {
     @Pointcut("execution(* com.ruoyi.platform.rider.controller.RiderOrderFlowController.acceptOrder(..))")
     public void riderAcceptOrderPointcut() {}
 
-    // ------------------------------ 外卖订单支付通知 ------------------------------
+    // ========== 新增：骑手取货切点 ==========
+    @Pointcut("execution(* com.ruoyi.platform.rider.controller.RiderOrderFlowController.pickupOrder(..))")
+    public void riderPickupOrderPointcut() {}
+
+    // ========== 新增：用户确认收货（订单完成）切点 ==========
+    @Pointcut("execution(* com.ruoyi.platform.user.controller.UserTakeOutOrderController.confirmReceive(..))")
+    public void userConfirmReceivePointcut() {}
+
+    // ------------------------------ 原有逻辑保持不变 ------------------------------
     @AfterReturning(pointcut = "takeoutOrderPayPointcut()", returning = "result")
     public void afterTakeoutOrderPay(Object result) {
         asyncExecutor.execute(() -> {
@@ -89,7 +101,6 @@ public class OrderAspect {
         });
     }
 
-    // ------------------------------ 跑腿订单支付通知 ------------------------------
     @AfterReturning(pointcut = "errandOrderPayPointcut()", returning = "result")
     public void afterErrandOrderPay(Object result) {
         asyncExecutor.execute(() -> {
@@ -108,7 +119,6 @@ public class OrderAspect {
         });
     }
 
-    // ------------------------------ 二手订单创建通知 ------------------------------
     @AfterReturning(pointcut = "secondhandOrderPayPointcut()", returning = "result")
     public void afterSecondhandOrderPay(Object result) {
         asyncExecutor.execute(() -> {
@@ -125,6 +135,8 @@ public class OrderAspect {
                         orderNotifyService.sendUserOrderSuccessNotify(orderMain, orderMain.getUserId());
                         log.info("AOP异步发送二手订单通知完成，订单号：{}，用户ID：{}",
                                 orderMain.getOrderNo(), orderMain.getUserId());
+                    } else {
+                        log.warn("二手订单创建通知：未获取到有效订单信息，返回数据：{}", data);
                     }
                 }
             } catch (Exception e) {
@@ -133,15 +145,30 @@ public class OrderAspect {
         });
     }
 
-    // ------------------------------ 商家接单通知 ------------------------------
     @AfterReturning(pointcut = "merchantAcceptOrderPointcut()", returning = "result")
     public void afterMerchantAcceptOrder(Object result) {
         asyncExecutor.execute(() -> {
             try {
                 if (result instanceof AjaxResult ajaxResult && ajaxResult.isSuccess()) {
-                    OrderMain orderMain = (OrderMain)ajaxResult.getData();
-                    Long orderMainId = orderMain.getOrderMainId();
-                    Long merchantId = orderMainService.selectOrderMainByOrderMainId(orderMainId).getMerchantId();
+                    // 增加orderMainId非空校验
+                    Object data = ajaxResult.getData();
+                    if (!(data instanceof Long orderMainId) || orderMainId == null) {
+                        log.warn("商家接单通知：订单ID为空，返回数据：{}", data);
+                        return;
+                    }
+
+                    OrderMain orderMain = orderMainService.selectOrderMainByOrderMainId(orderMainId);
+                    if (orderMain == null) {
+                        log.warn("商家接单通知：未找到订单信息，订单ID：{}", orderMainId);
+                        return;
+                    }
+
+                    Long merchantId = orderMain.getMerchantId();
+                    if (merchantId == null) {
+                        log.warn("商家接单通知：订单{}的商家ID为空", orderMainId);
+                        return;
+                    }
+
                     // 调用商家接单通知方法
                     orderNotifyService.sendMerchantAcceptOrderToUserNotify(orderMainId, merchantId);
                     log.info("AOP异步发送商家接单通知完成，订单ID：{}，商家ID：{}", orderMainId, merchantId);
@@ -152,17 +179,33 @@ public class OrderAspect {
         });
     }
 
-    // ------------------------------ 骑手接单通知 ------------------------------
     @AfterReturning(pointcut = "riderAcceptOrderPointcut()", returning = "result")
     public void afterRiderAcceptOrder(Object result) {
         asyncExecutor.execute(() -> {
             try {
                 if (result instanceof AjaxResult ajaxResult && ajaxResult.isSuccess()) {
-                    // 解析订单ID（生产建议用JoinPoint获取PathVariable）
-                    OrderMain orderMain = (OrderMain)ajaxResult.getData();
-                    Long orderMainId = orderMain.getOrderMainId();
-                    Long riderId = SecurityUtils.getRiderBaseId(); // 从上下文获取骑手ID
-                    // 调用骑手接单通知方法
+                    // 1. 校验并获取订单ID（核心修复点）
+                    Object data = ajaxResult.getData();
+                    if (!(data instanceof Long orderMainId) || orderMainId == null) {
+                        log.warn("骑手接单通知：订单ID为空或格式错误，返回数据：{}", data);
+                        return;
+                    }
+
+                    // 2. 查询配送信息并校验非空
+                    OrderDelivery orderDelivery = orderDeliveryMapper.selectOrderDeliveryByOrderMainId(orderMainId);
+                    if (orderDelivery == null) {
+                        log.warn("骑手接单通知：未找到订单{}的配送信息", orderMainId);
+                        return;
+                    }
+
+                    // 3. 校验骑手ID非空
+                    Long riderId = orderDelivery.getRiderId();
+                    if (riderId == null) {
+                        log.warn("骑手接单通知：订单{}的配送信息中骑手ID为空", orderMainId);
+                        return;
+                    }
+
+                    // 4. 发送通知
                     orderNotifyService.sendPickOrderToUserNotify(riderId, orderMainId);
                     log.info("AOP异步发送骑手接单通知完成，订单ID：{}，骑手ID：{}", orderMainId, riderId);
                 }
@@ -171,6 +214,69 @@ public class OrderAspect {
             }
         });
     }
+
+    // ========== 新增：骑手取货通知逻辑 ==========
+    @AfterReturning(pointcut = "riderPickupOrderPointcut()", returning = "result")
+    public void afterRiderPickupOrder(Object result) {
+        asyncExecutor.execute(() -> {
+            try {
+                if (result instanceof AjaxResult ajaxResult && ajaxResult.isSuccess()) {
+                    // 提取订单ID
+                    Long orderMainId = null;
+                    Object data = ajaxResult.getData();
+                    if (data instanceof Long) {
+                        orderMainId = (Long) data;
+                    }
+
+                    if (orderMainId == null) {
+                        log.warn("骑手取货通知：订单ID为空，返回数据：{}", data);
+                        return;
+                    }
+
+                    // 查询配送信息
+                    OrderDelivery orderDelivery = orderDeliveryMapper.selectOrderDeliveryByOrderMainId(orderMainId);
+                    if (orderDelivery == null || orderDelivery.getRiderId() == null) {
+                        log.warn("骑手取货通知：配送信息异常，订单ID：{}", orderMainId);
+                        return;
+                    }
+
+                    // 发送骑手取货通知
+                    orderNotifyService.sendRiderGetOrderToUserNotify(orderDelivery.getRiderId(), orderMainId);
+                    log.info("AOP异步发送骑手取货通知完成，订单ID：{}，骑手ID：{}", orderMainId, orderDelivery.getRiderId());
+                }
+            } catch (Exception e) {
+                log.error("骑手取货通知发送失败", e);
+            }
+        });
+    }
+
+    // ========== 新增：用户确认收货（订单完成）通知逻辑 ==========
+//    @AfterReturning(pointcut = "userConfirmReceivePointcut()", returning = "result")
+//    public void afterUserConfirmReceive(Object result) {
+//        asyncExecutor.execute(() -> {
+//            try {
+//                if (result instanceof AjaxResult ajaxResult && ajaxResult.isSuccess()) {
+//                    // 提取订单ID
+//                    Long orderMainId = null;
+//                    Object data = ajaxResult.getData();
+//                    if (data instanceof Long) {
+//                        orderMainId = (Long) data;
+//                    }
+//
+//                    if (orderMainId == null) {
+//                        log.warn("用户确认收货通知：订单ID为空，返回数据：{}", data);
+//                        return;
+//                    }
+//
+//                    // 发送订单完成通知
+//                    orderNotifyService.sendOrderFinishNotify(orderMainId);
+//                    log.info("AOP异步发送用户确认收货通知完成，订单ID：{}", orderMainId);
+//                }
+//            } catch (Exception e) {
+//                log.error("用户确认收货通知发送失败", e);
+//            }
+//        });
+//    }
 
     // 预留方法（保持原有结构）
     public void sendMerchantAcceptOrderToUserNotify(Object result) {}
