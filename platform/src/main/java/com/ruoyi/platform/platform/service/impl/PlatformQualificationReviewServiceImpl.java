@@ -26,9 +26,13 @@ public class PlatformQualificationReviewServiceImpl implements IPlatformQualific
         List<RiderBaseVO> riderBaseVOList = new ArrayList<>();
         for (RiderBase riderBase1 : riderBase) {
             RiderBaseVO riderBaseVO = new RiderBaseVO();
-            BeanUtils.copyProperties(riderBase,riderBaseVO);
-            riderBaseVO.setIdCard(MaskUtils.maskIdCard(riderBaseVO.getIdCard()));
-            riderBaseVO.setPhone(MaskUtils.maskPhone(riderBaseVO.getPhone()));
+            BeanUtils.copyProperties(riderBase1,riderBaseVO);
+            if (riderBase1.getIdCard()!=null){
+                riderBaseVO.setIdCard(MaskUtils.maskIdCard(riderBaseVO.getIdCard()));
+            }
+            if (riderBase1.getPhone()!=null){
+                riderBaseVO.setPhone(MaskUtils.maskPhone(riderBaseVO.getPhone()));
+            }
             riderBaseVOList.add(riderBaseVO);
         }
 
@@ -51,7 +55,9 @@ public class PlatformQualificationReviewServiceImpl implements IPlatformQualific
         for (MerchantBase merchantBase1 : merchantBase) {
             MerchantBaseVO merchantBaseVO = new MerchantBaseVO();
             BeanUtils.copyProperties(merchantBase1,merchantBaseVO);
-            merchantBaseVO.setPhone(MaskUtils.maskPhone(merchantBaseVO.getPhone()));
+            if (merchantBase1.getPhone()!=null){
+                merchantBaseVO.setPhone(MaskUtils.maskPhone(merchantBaseVO.getPhone()));
+            }
             merchantBaseVOList.add(merchantBaseVO);
         }
         return merchantBaseVOList;
