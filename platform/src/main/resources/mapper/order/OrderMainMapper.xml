@@ -608,7 +608,7 @@
                  JOIN order_takeout_detail d ON o.order_main_id = d.order_main_id
         WHERE d.merchant_id = #{merchantId}
           AND o.pay_status = 1
-          AND o.order_status = 4
+          AND o.order_status = 5  # 状态码变更
           AND o.complete_time BETWEEN #{startTime} AND #{endTime}
     </select>
 
@@ -647,7 +647,7 @@
 
     <update id="updateOrderComplete">
         UPDATE order_main
-        SET order_status = 4, complete_time = #{completeTime}, update_time = NOW()
+        SET order_status = 5, complete_time = #{completeTime}, update_time = NOW()
         WHERE order_no = #{orderNo}
     </update>
 
