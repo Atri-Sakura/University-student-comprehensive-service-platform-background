@@ -45,17 +45,17 @@ public class PlatformIndexReviewService implements IPlatformIndexReviewService {
     public int addIndexImgUrl(MultipartFile file) {
         String url;
         try {
-            Long random = new Random().nextLong(9000000000L);
+            Long random = new Random().nextLong(9000000L);
             List<IndexImgUrl> indexImgUrls = platformIndexReviewMapper.getUserIndexImgs();
             List<Integer> indexImgUrlIds = new ArrayList<>();
             for (IndexImgUrl indexImgUrl : indexImgUrls) {
                     indexImgUrlIds.add(indexImgUrl.getIndexImageUrlId());
             }
             while (indexImgUrlIds.contains(random)) {
-                random = new Random().nextLong(9000000000L);
+                random = new Random().nextLong(9000000L);
             }
             url = minioFileUtils.upload(file,"indeximage",random );
-            int result = platformIndexReviewMapper.addIndexImgUrl(url);
+            int result = platformIndexReviewMapper.addIndexImgUrl(Math.toIntExact(random),url);
             if (result > 0) {
                 return result;
             }else{
