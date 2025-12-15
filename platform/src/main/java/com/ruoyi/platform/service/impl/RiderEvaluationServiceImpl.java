@@ -86,7 +86,8 @@ public class RiderEvaluationServiceImpl implements IRiderEvaluationService
         }
 
         // 3. 验证订单状态是否已完成
-        if (orderMain.getOrderStatus() != 4L) {
+        // 状态码对照：订单状态：1-商家待接单 2-骑手待接单 3-骑手待取货 4-配送中 5-已完成 6-已取消 7-异常报备
+        if (orderMain.getOrderStatus() != 5L) {
             throw new ServiceException("订单未完成,无法评价");
         }
 
