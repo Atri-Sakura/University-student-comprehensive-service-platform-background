@@ -50,8 +50,9 @@ public class OrderFlowServiceImpl implements IOrderFlowService {
 
     @Autowired
     private IWalletFlowService walletFlowService;
+
     @Autowired
-    private IOrderNotifyService orderNotifyService;
+    private MerchantGoodsMapper merchantGoodsMapper;
 
     /**
      * 商家接单（仅外卖单：1->2）
@@ -103,10 +104,7 @@ public class OrderFlowServiceImpl implements IOrderFlowService {
             throw new ServiceException("订单状态更新失败");
         }
 
-        // 6. 结算商品金额给商家
-        walletFlowService.settleMerchant(merchantId, orderMainId, order.getGoodsAmount());
-
-        // 7. 更新订单明细结算状态
+        // 6. 更新订单明细结算状态
         for (OrderTakeoutDetail detail : details) {
             OrderTakeoutDetail updateDetail = new OrderTakeoutDetail();
             updateDetail.setOrderTakeoutDetailId(detail.getOrderTakeoutDetailId());
@@ -114,7 +112,7 @@ public class OrderFlowServiceImpl implements IOrderFlowService {
             orderTakeoutDetailMapper.updateOrderTakeoutDetail(updateDetail);
         }
 
-        // 8. 记录状态变更日志
+        // 7. 记录状态变更日志
         MerchantBase merchant = merchantBaseMapper.selectMerchantBaseByMerchantBaseId(merchantId);
         saveStatusLog(orderMainId, OrderStatusEnum.MERCHANT_PENDING_ACCEPT.getCode(),
                 OrderStatusEnum.RIDER_PENDING_ACCEPT.getCode(),
@@ -186,8 +184,7 @@ public class OrderFlowServiceImpl implements IOrderFlowService {
 
         // 7. 恢复商品库存
         for (OrderTakeoutDetail detail : details) {
-            // TODO: 调用商品服务恢复库存
-            // merchantGoodsMapper.increaseStock(detail.getGoodsId(), detail.getQuantity());
+            merchantGoodsMapper.increaseStock(detail.getGoodsId(), detail.getQuantity());
         }
 
         // 8. 记录状态变更日志
@@ -307,9 +304,9 @@ public class OrderFlowServiceImpl implements IOrderFlowService {
             throw new ServiceException("订单不存在");
         }
 
-        // 2. 状态校验
-        if (! OrderStatusEnum.RIDER_PENDING_PICKUP.getCode().equals(order.getOrderStatus())) {
-            throw new ServiceException("订单状态不正确，无法取货，当前状态：" + order. getOrderStatus());
+        // 2. 状态校验：必须是"骑手待取货"状态
+        if (!OrderStatusEnum.RIDER_PENDING_PICKUP.getCode().equals(order.getOrderStatus())) {
+            throw new ServiceException("订单状态不正确，无法取货，当前状态：" + order.getOrderStatus());
         }
 
         // 3. 查询配送记录并校验权限
@@ -324,10 +321,6 @@ public class OrderFlowServiceImpl implements IOrderFlowService {
         if (!riderId.equals(delivery.getRiderId())) {
             throw new ServiceException("无权操作此订单");
         }
-
-//        if (!Long.valueOf(1L).equals(delivery.getDeliveryStatus())) {
-//            throw new ServiceException("配送状态不正确");
-//        }
 
         // 4. 更新订单状态为配送中
         OrderMain updateOrder = new OrderMain();
@@ -344,7 +337,7 @@ public class OrderFlowServiceImpl implements IOrderFlowService {
         OrderDelivery updateDelivery = new OrderDelivery();
         updateDelivery.setOrderDeliveryId(delivery.getOrderDeliveryId());
         updateDelivery.setPickTime(DateUtils.getNowDate());
-        updateDelivery.setDeliveryStatus(2L); // 2-已取货
+        updateDelivery.setDeliveryStatus(2L); // 2-已取货（配送中）
         orderDeliveryMapper.updateOrderDelivery(updateDelivery);
 
         // 6. 记录状态变更日志
@@ -353,7 +346,7 @@ public class OrderFlowServiceImpl implements IOrderFlowService {
                 OrderStatusEnum.DELIVERING.getCode(),
                 OperatorTypeEnum.RIDER, riderId,
                 rider != null ? rider.getNickname() : "骑手", "骑手取货");
-        orderNotifyService.sendPickOrderToUserNotify(riderId,orderMainId);
+
         log.info("骑手取货成功，订单号：{}，骑手ID：{}", order.getOrderNo(), riderId);
         return result;
     }
@@ -372,7 +365,7 @@ public class OrderFlowServiceImpl implements IOrderFlowService {
 
         // 2. 状态校验
         if (!OrderStatusEnum.DELIVERING.getCode().equals(order.getOrderStatus())) {
-            throw new ServiceException("订单状态不正确，无法完成配送");
+            throw new ServiceException("订单状态不正确，无法完成配送，当前状态：" + order.getOrderStatus());
         }
 
         // 3. 查询配送记录并校验权限
@@ -389,7 +382,7 @@ public class OrderFlowServiceImpl implements IOrderFlowService {
         }
 
         if (!Long.valueOf(2L).equals(delivery.getDeliveryStatus())) {
-            throw new ServiceException("配送状态不正确");
+            throw new ServiceException("配送状态不正确，当前状态：" + delivery. getDeliveryStatus());
         }
 
         // 4. 更新订单状态为已完成
@@ -411,7 +404,42 @@ public class OrderFlowServiceImpl implements IOrderFlowService {
         updateDelivery.setDeliveryStatus(3L); // 3-已送达
         orderDeliveryMapper.updateOrderDelivery(updateDelivery);
 
-        // 6. 记录状态变更日志
+        // 6. 结算给骑手
+        try {
+            BigDecimal riderIncome = order.getDeliveryFeeAmount();
+
+            if (riderIncome == null || riderIncome.compareTo(BigDecimal.ZERO) <= 0) {
+                log.warn("配送费为空或为0，订单ID：{}", orderMainId);
+                riderIncome = BigDecimal.ZERO;
+            }
+
+            walletFlowService.settleRider(riderId, orderMainId, riderIncome);
+            log.info("骑手结算成功，订单ID：{}，骑手ID：{}，配送费：{}", orderMainId, riderId, riderIncome);
+
+            // 更新配送记录的收入发放状态
+            OrderDelivery updateIncomeStatus = new OrderDelivery();
+            updateIncomeStatus.setOrderDeliveryId(delivery.getOrderDeliveryId());
+            updateIncomeStatus.setIncomeStatus(1L);
+            orderDeliveryMapper.updateOrderDelivery(updateIncomeStatus);
+
+        } catch (Exception e) {
+            log.error("骑手结算失败，订单ID：{}，骑手ID：{}", orderMainId, riderId, e);
+            throw new ServiceException("骑手结算失败：" + e.getMessage());
+        }
+
+        // 7. 结算给商家（仅外卖订单）
+        if (order.getOrderType() == 1L && order.getMerchantId() != null) {
+            try {
+                walletFlowService.settleMerchant(order.getMerchantId(), orderMainId, order.getGoodsAmount());
+                log. info("商家结算成功，订单ID：{}，商家ID：{}，金额：{}",
+                        orderMainId, order.getMerchantId(), order.getGoodsAmount());
+            } catch (Exception e) {
+                log.error("商家结算失败，订单ID：{}，商家ID：{}", orderMainId, order. getMerchantId(), e);
+                // 商家结算失败不影响骑手结算，只记录日志
+            }
+        }
+
+        // 8. 记录状态变更日志
         RiderBase rider = riderBaseMapper.selectRiderBaseByRiderBaseId(riderId);
         saveStatusLog(orderMainId, OrderStatusEnum.DELIVERING.getCode(),
                 OrderStatusEnum.COMPLETED.getCode(),
