@@ -2,8 +2,6 @@ package com.ruoyi.platform.service;
 
 import com.ruoyi.platform.domain.OrderMain;
 
-import java.math.BigDecimal;
-
 /**
  * 订单流转服务接口
  *
@@ -47,9 +45,7 @@ public interface IOrderFlowService {
      * @param orderMainId 订单ID
      * @return 结果
      */
-    int riderPickupOrder(Long riderId, Long orderMainId,
-                         BigDecimal actualPickLongitude,
-                         BigDecimal actualPickLatitude);
+    int riderPickupOrder(Long riderId, Long orderMainId);
 
     /**
      * 骑手送达
@@ -58,7 +54,5 @@ public interface IOrderFlowService {
      * @param orderMainId 订单ID
      * @return 结果
      */
-    int riderDeliverOrder(Long riderId, Long orderMainId,
-                          BigDecimal actualDeliverLongitude,
-                          BigDecimal actualDeliverLatitude);
+    int riderDeliverOrder(Long riderId, Long orderMainId);
 }
