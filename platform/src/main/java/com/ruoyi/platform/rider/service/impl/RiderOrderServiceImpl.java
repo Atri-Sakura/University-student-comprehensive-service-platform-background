@@ -2,7 +2,10 @@ package com.ruoyi.platform. rider.service.impl;
 
 import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.platform.domain.OrderMain;
+import com.ruoyi.platform.domain.RiderBase;
+import com.ruoyi.platform.domain.enums.OperatorTypeEnum;
 import com.ruoyi.platform.domain.enums.OrderStatusEnum;
+import com.ruoyi.platform.mapper.OrderMainMapper;
 import com.ruoyi.platform.rider.domain.vo.RiderOrderListVO;
 import com.ruoyi.platform.rider.mapper.RiderOrderMapper;
 import com.ruoyi.platform.rider.service.IRiderOrderService;
@@ -29,6 +32,9 @@ public class RiderOrderServiceImpl implements IRiderOrderService {
 
     @Autowired
     private RiderOrderMapper riderOrderMapper;
+
+    @Autowired
+    private OrderMainMapper orderMainMapper;
 
     @Override
     public List<RiderOrderListVO> selectAvailableOrderList(OrderMain orderMain) {
@@ -64,7 +70,7 @@ public class RiderOrderServiceImpl implements IRiderOrderService {
 
         log.info("查询骑手订单详情 - 骑手ID: {}, 订单ID:  {}", riderId, orderMainId);
 
-        // 查询订单（不再在 SQL 层面限制骑手ID）
+        // 查询订单
         OrderMain order = riderOrderMapper.selectRiderOrderById(riderId, orderMainId);
 
         if (order == null) {
@@ -101,11 +107,13 @@ public class RiderOrderServiceImpl implements IRiderOrderService {
 
     /**
      * 骑手异常报备
-     * 将订单状态从 4-配送中 更新为 7-骑手异常报备
+     * 允许状态：3-骑手待取货、4-配送中
+     * 目标状态：7-骑手异常报备
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Boolean reportAbnormal(Long riderId, OrderMain orderMain) {
+        // 1. 参数校验
         if (riderId == null) {
             throw new ServiceException("骑手ID不能为空");
         }
@@ -117,21 +125,35 @@ public class RiderOrderServiceImpl implements IRiderOrderService {
         }
 
         log.info("骑手异常报备 - 骑手ID: {}, 订单ID: {}, 原因: {}",
-                riderId, orderMain. getOrderMainId(), orderMain.getCancelReason());
+                riderId, orderMain.getOrderMainId(), orderMain.getCancelReason());
 
-        // 更新订单状态为 7-骑手异常报备
+        // 2. 查询订单并校验状态
+        OrderMain existingOrder = orderMainMapper.selectOrderMainByOrderMainId(orderMain. getOrderMainId());
+        if (existingOrder == null) {
+            throw new ServiceException("订单不存在");
+        }
+
+        // 3. 校验订单状态：只有 3-待取货 或 4-配送中 才能报备
+        Long currentStatus = existingOrder.getOrderStatus();
+        if (!OrderStatusEnum.RIDER_PENDING_PICKUP.getCode().equals(currentStatus)
+                && !OrderStatusEnum.DELIVERING.getCode().equals(currentStatus)) {
+            throw new ServiceException("只有待取货或配送中的订单才能进行异常报备，当前状态：" + currentStatus);
+        }
+
+        // 5. 更新订单状态为 7-骑手异常报备
         int result = riderOrderMapper.reportAbnormal(riderId, orderMain.getOrderMainId(), orderMain.getCancelReason());
 
-        // 更新配送状态
+        // 6. 更新配送状态为异常
         int result1 = riderOrderMapper.reportAbnormal1(riderId, orderMain.getOrderMainId());
 
         boolean success = (result + result1) > 1;
 
         if (success) {
-            log.info("骑手异常报备成功 - 订单ID: {}", orderMain.getOrderMainId());
+            log.info("骑手异常报备成功 - 订单ID: {}，原状态：{}，新状态：7",
+                    orderMain.getOrderMainId(), currentStatus);
         } else {
-            log.warn("骑手异常报备失败 - 订单ID: {}, 可能订单状态不是配送中", orderMain.getOrderMainId());
-            throw new ServiceException("报备失败，订单状态必须是配送中");
+            log.error("骑手异常报备失败 - 订单ID: {}，数据库更新失败", orderMain.getOrderMainId());
+            throw new ServiceException("异常报备失败，请稍后重试");
         }
 
         return success;

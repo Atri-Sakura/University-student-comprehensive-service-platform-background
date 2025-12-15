@@ -308,9 +308,8 @@ public class OrderFlowServiceImpl implements IOrderFlowService {
         }
 
         // 2. 状态校验
-        if (!OrderStatusEnum.RIDER_PENDING_PICKUP.getCode().equals(order.getOrderStatus())
-                && order.getOrderType().equals(1)) {
-            throw new ServiceException("订单状态不正确，无法取货");
+        if (! OrderStatusEnum.RIDER_PENDING_PICKUP.getCode().equals(order.getOrderStatus())) {
+            throw new ServiceException("订单状态不正确，无法取货，当前状态：" + order. getOrderStatus());
         }
 
         // 3. 查询配送记录并校验权限
@@ -326,9 +325,9 @@ public class OrderFlowServiceImpl implements IOrderFlowService {
             throw new ServiceException("无权操作此订单");
         }
 
-        if (!Long.valueOf(1L).equals(delivery.getDeliveryStatus())) {
-            throw new ServiceException("配送状态不正确");
-        }
+//        if (!Long.valueOf(1L).equals(delivery.getDeliveryStatus())) {
+//            throw new ServiceException("配送状态不正确");
+//        }
 
         // 4. 更新订单状态为配送中
         OrderMain updateOrder = new OrderMain();
