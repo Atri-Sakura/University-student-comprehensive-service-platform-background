@@ -155,3 +155,7 @@ file:
     bucket: my-bucket
     access-key: xxx
     secret-key: xxx
+
+# 高德地图配置
+amap:
+  api-key: e53fc751ef24eab9fcbad45bde09a888

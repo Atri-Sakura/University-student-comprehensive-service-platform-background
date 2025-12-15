@@ -42,6 +42,10 @@ public class CreateErrandOrderDto {
     /** 运费 */
     private BigDecimal deliverAmount;
 
+    private BigDecimal pickLongitude;
+
+    private BigDecimal pickLatitude;
+
     /** 送货经度 */
     private BigDecimal deliverLongitude;
 
