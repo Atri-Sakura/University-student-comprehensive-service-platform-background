@@ -6,6 +6,10 @@ import com.ruoyi.platform.chat.factory.MessageHandlerFactory;
 import com.ruoyi.platform.chat.handler.ClientWebSocketHandler;
 import com.ruoyi.platform.chat.manager.ChannelSessionManager;
 import com.ruoyi.platform.chat.protobuf.ChatMessageProto;
+import com.ruoyi.platform.mapper.UserBaseMapper;
+import com.ruoyi.platform.merchant.service.IMerchantInfoService;
+import com.ruoyi.platform.service.IMerchantBaseService;
+import com.ruoyi.platform.service.IRiderBaseService;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -76,7 +80,12 @@ public class NettyClientUtil {
     private static volatile ScheduledFuture<?> reconnectFuture;
     // 保存心跳任务引用，避免重复提交
     private ScheduledFuture<?> heartbeatFuture;
-
+    @Autowired
+    private UserBaseMapper userBaseMapper;
+    @Autowired
+    private IMerchantInfoService merchantInfoService;
+    @Autowired
+    private IRiderBaseService riderBaseService;
 
     /**
      * 连接WebSocket服务器并注册用户
@@ -84,7 +93,15 @@ public class NettyClientUtil {
     public boolean connectAndRegister(Long userType, Long userBaseId) {
         // 保存当前用户信息（用于重连）
         currentUserType = userType;
-        currentUserId = userBaseId;
+        if(userType == 1){
+            currentUserId = userBaseMapper.selectUserBaseByPhone(String.valueOf(userBaseId)).getUserBaseId();
+        }
+        if(userType == 3){
+            currentUserId = merchantInfoService.getMerchantBaseIdByPhone(String.valueOf(userBaseId));
+        }
+        if(userType == 2){
+            currentUserId = riderBaseService.selectRiderBaseIdByPhone(String.valueOf(userBaseId));
+        }
         // 重置重连计数器（新连接/首次连接时）
         resetReconnectAttempts();
 

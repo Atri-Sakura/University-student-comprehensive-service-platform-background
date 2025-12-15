@@ -133,4 +133,11 @@ public interface IRiderBaseService
      */
     RiderBase selectRiderBaseByUserId(Long userId);
 
+    /**
+     * 根据手机号获取骑手信息
+     * @param phone
+     * @return
+     */
+    Long selectRiderBaseIdByPhone(String phone);
+
 }
