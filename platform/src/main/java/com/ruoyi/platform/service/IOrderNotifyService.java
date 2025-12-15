@@ -66,6 +66,9 @@ public interface IOrderNotifyService {
      */
     public void sendOrderFinishNotify(Long orderMainId);
 
+    // ------------------------------ 二手交易订单完成 ------------------------------
+    void sendSecondHandOrderFinishNotify(Long orderMainId,Long sellerId);
+
     /**
      * 订单取消通知
      * @param orderMainId

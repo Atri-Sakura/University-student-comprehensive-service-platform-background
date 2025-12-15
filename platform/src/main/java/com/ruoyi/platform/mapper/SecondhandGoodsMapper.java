@@ -6,6 +6,7 @@ import com.ruoyi.platform.domain.dto.SecondhandGoodsSearchDTO;
 import com.ruoyi.platform.domain.vo.SecondhandGoodDetailVO;
 import com.ruoyi.platform.domain.vo.SecondhandGoodsListVO;
 import io.lettuce.core.dynamic.annotation.Param;
+import org.apache.ibatis.annotations.Select;
 
 /**
  * 二手商品(简化版)Mapper接口
@@ -99,4 +100,7 @@ public interface SecondhandGoodsMapper
      * @param status
      */
     int updateSecondhandGoodsStatus(@Param("goodsId") Long goodsId,@Param("status") Long status);
+
+    @Select("select seller_id from order_secondhand_detail where order_main_id = #{orderMainId}")
+    Long selectSellerIdByOrderMainId(Long orderMainId);
 }
