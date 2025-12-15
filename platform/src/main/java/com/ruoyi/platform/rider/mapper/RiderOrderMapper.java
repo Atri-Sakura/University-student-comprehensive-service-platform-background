@@ -80,7 +80,7 @@ public interface RiderOrderMapper {
      * @param orderMainId 订单ID
      * @return 影响行数
      */
-    @Update("UPDATE order_delivery SET delivery_status = 4, update_time = NOW() " +
+    @Update("UPDATE order_delivery SET delivery_status = 4 " +
             "WHERE order_main_id = #{orderMainId} AND rider_id = #{riderId} " +
             "AND delivery_status IN (1, 2)")
     int reportAbnormal1(@Param("riderId") Long riderId,
