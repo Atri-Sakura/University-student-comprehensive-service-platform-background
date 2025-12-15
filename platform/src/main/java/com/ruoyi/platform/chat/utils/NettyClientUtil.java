@@ -96,10 +96,10 @@ public class NettyClientUtil {
         if(userType == 1){
             currentUserId = userBaseMapper.selectUserBaseByPhone(String.valueOf(userBaseId)).getUserBaseId();
         }
-        if(userType == 2){
+        if(userType == 3){
             currentUserId = merchantInfoService.getMerchantBaseIdByPhone(String.valueOf(userBaseId));
         }
-        if(userType == 3){
+        if(userType == 2){
             currentUserId = riderBaseService.selectRiderBaseIdByPhone(String.valueOf(userBaseId));
         }
         // 重置重连计数器（新连接/首次连接时）
