@@ -68,8 +68,7 @@ public interface IOrderNotifyService {
 
     /**
      * 订单取消通知
-     * @param orderMain
      * @param orderMainId
      */
-//    public void cancelOrderNotify(OrderMain orderMain, Long orderMainId);
+    public void cancelOrderNotify(Long orderMainId);
 }

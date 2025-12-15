@@ -8,6 +8,7 @@ import com.ruoyi.platform.domain.enums.OrderStatusEnum;
 import com.ruoyi.platform.domain.enums.PayStatusEnum;
 import com.ruoyi.platform.mapper.*;
 import com.ruoyi.platform.service.IOrderFlowService;
+import com.ruoyi.platform.service.IOrderNotifyService;
 import com.ruoyi.platform.service.IWalletFlowService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,6 +50,8 @@ public class OrderFlowServiceImpl implements IOrderFlowService {
 
     @Autowired
     private IWalletFlowService walletFlowService;
+    @Autowired
+    private IOrderNotifyService orderNotifyService;
 
     /**
      * 商家接单（仅外卖单：1->2）
@@ -350,7 +353,7 @@ public class OrderFlowServiceImpl implements IOrderFlowService {
                 OrderStatusEnum.DELIVERING.getCode(),
                 OperatorTypeEnum.RIDER, riderId,
                 rider != null ? rider.getNickname() : "骑手", "骑手取货");
-
+        orderNotifyService.sendPickOrderToUserNotify(riderId,orderMainId);
         log.info("骑手取货成功，订单号：{}，骑手ID：{}", order.getOrderNo(), riderId);
         return result;
     }

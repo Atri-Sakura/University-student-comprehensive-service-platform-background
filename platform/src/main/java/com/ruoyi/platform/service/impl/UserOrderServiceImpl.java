@@ -17,6 +17,7 @@ import com.ruoyi.platform.domain.vo.CreateErrandOrderDto;
 import com.ruoyi.platform.mapper.*;
 import com.ruoyi.platform.merchant.mapper.MerchantAddressInfoMapper;
 import com.ruoyi.platform.merchant.mapper.MerchantInfoMapper;
+import com.ruoyi.platform.service.IOrderNotifyService;
 import com.ruoyi.platform.service.IUserOrderService;
 import com.ruoyi.platform.service.IWalletFlowService;
 import org.slf4j.Logger;
@@ -91,6 +92,9 @@ public class UserOrderServiceImpl implements IUserOrderService {
 
     @Autowired
     private SecondhandGoodsImageMapper secondhandGoodsImageMapper;
+
+    @Autowired
+    private IOrderNotifyService orderNotifyService;
 
     /**
      * 创建预支付订单（只校验，不真正创建订单）
@@ -320,7 +324,7 @@ public class UserOrderServiceImpl implements IUserOrderService {
             saveStatusLog(order.getOrderMainId(), null, OrderStatusEnum.MERCHANT_PENDING_ACCEPT.getCode(),
                     OperatorTypeEnum.USER, userId,
                     user.getNickname(), "用户支付并创建跑腿订单");
-
+            orderNotifyService.sendUserOrderSuccessNotify(order, userId);
             log.info("用户支付并创建跑腿订单成功，订单号：{}，用户ID：{}，配送费：{}",
                     order.getOrderNo(), userId, amountInfo.getDeliveryFee());
 
@@ -468,7 +472,7 @@ public class UserOrderServiceImpl implements IUserOrderService {
                     OrderStatusEnum.CANCELED.getCode(),
                     OperatorTypeEnum.USER, userId,
                     user.getNickname(), "用户取消订单：" + cancelReason);
-
+            orderNotifyService.cancelOrderNotify(orderMainId);
             log.info("用户取消订单成功，订单ID：{}，用户ID：{}", orderMainId, userId);
         }
 
@@ -520,7 +524,7 @@ public class UserOrderServiceImpl implements IUserOrderService {
                     OrderStatusEnum.COMPLETED.getCode(),
                     OperatorTypeEnum.USER, userId,
                     user.getNickname(), "用户确认收货");
-
+            orderNotifyService.sendOrderFinishNotify(orderMainId);
             log.info("用户确认收货成功，订单ID：{}，用户ID：{}", orderMainId, userId);
         }
 
@@ -568,7 +572,7 @@ public class UserOrderServiceImpl implements IUserOrderService {
                     OrderStatusEnum.COMPLETED.getCode(),
                     OperatorTypeEnum.USER, userId,
                     user.getNickname(), "用户确认收货");
-
+            orderNotifyService.sendOrderFinishNotify(orderMainId);
             log.info("用户确认收货成功，订单ID：{}，用户ID：{}", orderMainId, userId);
         }
 

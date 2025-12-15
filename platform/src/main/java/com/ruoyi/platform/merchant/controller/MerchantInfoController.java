@@ -11,6 +11,7 @@ import com.ruoyi.platform.domain.MerchantWallet;
 import com. ruoyi.platform.merchant.service.IMerchantInfoService;
 import com.ruoyi.platform.merchant.service. IMerchantAddressInfoService;
 import com.ruoyi.platform.service.IMerchantWalletService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind. annotation.*;
@@ -25,6 +26,7 @@ import java.util.Map;
  * 商家基础信息控制器
  * 支持 merchant_base 和 merchant_address 基础信息的查询与修改
  */
+@Slf4j
 @RestController
 @RequestMapping("/merchant/info")
 public class MerchantInfoController {
@@ -285,4 +287,80 @@ public class MerchantInfoController {
 
         return AjaxResult.success("钱包初始化成功");
     }
+
+    @PostMapping("qualifaction/upload")
+    public AjaxResult uploadQualifaction(@RequestParam("file") MultipartFile file) {
+        try {
+            // 1. 获取当前登录商家ID
+            Long merchantBaseId = SecurityUtils.getMerchantBaseId();
+            if (merchantBaseId == null) {
+                return AjaxResult.error("获取商家信息失败");
+            }
+
+            // 2. 验证文件
+            if (file == null || file.isEmpty()) {
+                return AjaxResult.error("上传文件不能为空");
+            }
+
+            // 3. 验证文件类型（只允许图片）
+            String contentType = file.getContentType();
+            if (contentType == null || !contentType.startsWith("image/")) {
+                return AjaxResult.error("只支持上传图片格式文件");
+            }
+
+            // 4. 验证文件大小（限制20MB）
+            long maxSize = 20 * 1024 * 1024; // 20MB
+            if (file.getSize() > maxSize) {
+                return AjaxResult.error("文件大小不能超过20MB");
+            }
+
+            // 5. 查询商家原有凭证
+            MerchantBase merchantBase = merchantInfoService.selectMerchantBaseByMerchantBaseId(merchantBaseId);
+            if (merchantBase == null) {
+                return AjaxResult.error("商家信息不存在");
+            }
+            String oldLicenseImgUrl = merchantBase.getLicenseImg(); // 旧文件URL
+
+            // 6. 上传新凭证到MinIO
+            String bucketName = "merchant-license"; // 商家凭证存储桶
+            String licenseUrl = minioFileUtils.upload(file, bucketName, merchantBaseId);
+            if (licenseUrl == null || licenseUrl.isEmpty()) {
+                return AjaxResult.error("商家凭证上传失败");
+            }
+
+            // 7. 更新数据库中的凭证字段
+            merchantBase.setLicenseImg(licenseUrl);
+            int result = merchantInfoService.updateMerchantBase(merchantBase);
+            if (result <= 0) {
+                // 如果数据库更新失败，删除已上传的新文件
+                minioFileUtils.deleteByUrl(licenseUrl);
+                return AjaxResult.error("用户凭证更新失败");
+            }
+
+            // 8. 删除旧凭证（修复核心：使用旧文件URL，且排除与新文件相同的情况）
+            if (oldLicenseImgUrl != null && !oldLicenseImgUrl.isEmpty()
+                    && !oldLicenseImgUrl.equals(licenseUrl)) { // 防误删：新旧URL不同才删除
+                minioFileUtils.safeDeleteByUrl(oldLicenseImgUrl);
+            }
+
+            // 9. 返回成功结果
+            Map<String, Object> result_data = new HashMap<>();
+            result_data.put("licenseUrl", licenseUrl);
+            return AjaxResult.success("用户凭证上传成功", result_data);
+
+        } catch (Exception e) {
+            // 异常时：如果已上传新文件，需要回删
+            try {
+                // 注意：如果licenseUrl在异常时未定义，需调整变量作用域，或在catch外声明
+                String licenseUrl = null; // 补充变量作用域
+                if (licenseUrl != null && !licenseUrl.isEmpty()) {
+                    minioFileUtils.deleteByUrl(licenseUrl);
+                }
+            } catch (Exception ex) {
+                log.error("回删上传文件失败", ex);
+            }
+            return AjaxResult.error("用户凭证上传失败：" + e.getMessage());
+        }
+    }
+
 }

@@ -12,4 +12,7 @@ public interface PlatformQualificationReviewMapper {
 
     @Update("update rider_base set audit_status = #{status} where rider_base_id = #{riderId}")
     int setRiderQualificationStatus(Integer status, Integer riderId);
+
+    @Update("update merchant_base set audit_status = #{status} where merchant_base_id = #{merchantId}")
+    int setMerchantQualificationStatus(Integer status, Long merchantId);
 }

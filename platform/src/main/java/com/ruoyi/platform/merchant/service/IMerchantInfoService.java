@@ -1,6 +1,7 @@
 package com.ruoyi.platform.merchant.service;
 
 import com.ruoyi.platform.domain.MerchantBase;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * 商家基础信息Service接口
@@ -21,4 +22,6 @@ public interface IMerchantInfoService
      * @return 结果
      */
     int updateMerchantBase(MerchantBase merchantBase);
+
+
 }

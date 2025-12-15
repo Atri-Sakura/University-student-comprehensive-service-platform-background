@@ -52,6 +52,16 @@ public class UserSecondhandGoodsController1 extends BaseController {
         return AjaxResult.success("获取成功", detailVO);
     }
 
+    /**
+     * 获取用户订单详情
+     * @return
+     */
+    @PostMapping("order/seller/list")
+    public AjaxResult getSecondhandOrderList(){
+        Long currentUserBaseId = SecurityUtils.getUserBaseId();
+        return AjaxResult.success(secondhandOrderService.getSecondHandOrderList(currentUserBaseId));
+    }
+
 
     /**
      * 商品发布服务
@@ -68,6 +78,8 @@ public class UserSecondhandGoodsController1 extends BaseController {
         List<SecondhandGoodsListVO> list = secondhandGoodsService.searchSecondhandGoods(dto);
         return getDataTable(list);
     }
+
+
     /**
      * 用户确认二手商品的收货
      * @param orderNo 订单号

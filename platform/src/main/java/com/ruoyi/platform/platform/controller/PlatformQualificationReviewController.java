@@ -24,4 +24,10 @@ public class PlatformQualificationReviewController {
         int result = platformQualificationReviewService.setRiderQualificationStatus(status,riderId);
         return result > 0 ? AjaxResult.success("修改成功") : AjaxResult.error("修改失败");
     }
+
+    @PostMapping("merchant")
+    public AjaxResult setMerchantQualificationStatus(@RequestParam Integer status, @RequestParam Long merchantId){
+        int result = platformQualificationReviewService.setMerchantQualificationStatus(status,merchantId);
+        return result > 0 ? AjaxResult.success("修改成功") : AjaxResult.error("修改失败");
+    }
 }

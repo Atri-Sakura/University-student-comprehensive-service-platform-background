@@ -7,16 +7,19 @@ import com.ruoyi.platform.domain.*;
 import com.ruoyi.platform.domain.dto.SecondhandOrderCreatDTO;
 import com.ruoyi.platform.domain.vo.SecondhandOrderContactDetailVO;
 import com.ruoyi.platform.mapper.*;
+import com.ruoyi.platform.service.IOrderNotifyService;
 import com.ruoyi.platform.service.ISecondhandOrderService;
 import com.ruoyi.platform.utils.OrderNoUtils;
+import org.apache.commons.collections.CollectionUtils;
+import org.simpleframework.xml.Order;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Objects;
-import java.util.Random;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class  SecondhandOrderServiceImpl implements ISecondhandOrderService {
@@ -35,6 +38,9 @@ public class  SecondhandOrderServiceImpl implements ISecondhandOrderService {
 
     @Autowired
     private UserBaseMapper userBaseMapper;
+
+    @Autowired
+    private IOrderNotifyService orderNotifyService;
 
 
     @Override
@@ -126,6 +132,57 @@ public class  SecondhandOrderServiceImpl implements ISecondhandOrderService {
         return vo;
     }
 
+    @Override
+    public List<OrderMain> getSecondHandOrderList(Long currentUserBaseId) {
+        // 步骤1：查询当前用户作为卖家的二手订单详情（sellerId = 当前用户ID）
+        OrderSecondhandDetail detailQuery = new OrderSecondhandDetail();
+        detailQuery.setSellerId(currentUserBaseId);
+        List<OrderSecondhandDetail> sellerDetailList = orderSecondhandDetailMapper.selectOrderSecondhandDetailList(detailQuery);
+
+        // 步骤2：提取所有关联的订单主表ID（orderMainId），去重+非空校验
+        List<Long> orderMainIds = sellerDetailList.stream()
+                .map(OrderSecondhandDetail::getOrderMainId) // 从详情中获取关联的订单主表ID
+                .filter(Objects::nonNull) // 过滤空值，避免SQL报错
+                .distinct() // 去重，防止重复查询同一订单
+                .collect(Collectors.toList());
+
+        // 步骤3：如果没有关联订单，直接返回空列表
+        if (CollectionUtils.isEmpty(orderMainIds)) {
+            return new ArrayList<>();
+        }
+
+        // 步骤4：根据订单主表ID批量查询完整的订单信息
+        List<OrderMain> sellerOrders = orderMainMapper.selectOrderMainListByIds(orderMainIds);
+
+        // 步骤5（可选）：补充查询当前用户作为买家的订单，合并后返回（保持原业务逻辑完整性）
+        // ---------- 如需同时返回买家+卖家订单，保留以下代码；仅需卖家订单则删除 ----------
+        OrderMain buyerQuery = new OrderMain();
+        buyerQuery.setUserId(currentUserBaseId);
+        buyerQuery.setOrderType(3L); // 3=二手交易单
+        List<OrderMain> buyerOrders = orderMainMapper.selectOrderMainList(buyerQuery);
+
+        // 合并买家+卖家订单，去重并按创建时间倒序排序
+        List<OrderMain> allOrders = new ArrayList<>();
+        allOrders.addAll(buyerOrders);
+        allOrders.addAll(sellerOrders);
+
+        // 去重（按orderMainId）+ 按创建时间倒序排序
+        allOrders = allOrders.stream()
+                .distinct()
+                .sorted((o1, o2) -> {
+                    // 处理createTime为空的边界情况
+                    if (o1.getCreateTime() == null && o2.getCreateTime() == null) return 0;
+                    if (o1.getCreateTime() == null) return 1;
+                    if (o2.getCreateTime() == null) return -1;
+                    return o2.getCreateTime().compareTo(o1.getCreateTime());
+                })
+                .collect(Collectors.toList());
+        // ---------- 合并逻辑结束 ----------
+
+        // 仅返回卖家订单则直接返回 sellerOrders；合并则返回 allOrders
+        return allOrders;
+    }
+
     /**
      * 确认订单
      * @param orderNo
@@ -156,6 +213,9 @@ public class  SecondhandOrderServiceImpl implements ISecondhandOrderService {
 
         // 更新商品状态 -> 已售出（status=2）
         int rows2 = secondhandGoodsMapper.updateSecondhandGoodsStatus(goodsId, 2L);
+
+        orderNotifyService.sendOrderFinishNotify(order.getOrderMainId());
+
 
         return rows1 > 0 && rows2 > 0;
     }
@@ -252,7 +312,7 @@ public class  SecondhandOrderServiceImpl implements ISecondhandOrderService {
         order.setPickAddress(dto.getTradePlace());
         order.setPickContact(dto.getReceiverName());
         order.setPickPhone(dto.getReceiverPhone());
-        order.setOrderThumbnail(orderMainMapper.selectGoodsMainImage(goods.getSecondhandGoodsId()));
+        order.setOrderThumbnail(orderMainMapper.selectSecondhandGoodsMainImage(goods.getSecondhandGoodsId()));
 
 
         order.setOrderStatus(isOfflinePay ? 2L : 1L); // 面付=待线下交付，线上=待支付

@@ -1,5 +1,6 @@
 package com.ruoyi.platform.user.service.impl;
 
+import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.platform.domain.UserWallet;
 import com.ruoyi.platform.user.mapper.SysUserWalletRecordMapper;
 import com.ruoyi.platform.user.service.ISysUserWalletRecordService;
@@ -56,6 +57,6 @@ public class SysUserWalletRecordService implements ISysUserWalletRecordService {
                 throw new RuntimeException("旧密码错误");
             }
         }
-        return userWalletRecordMapper.setPayPassword(userId, newPayPassword);
+        return userWalletRecordMapper.setPayPassword(userId, SecurityUtils.encryptPassword(newPayPassword));
     }
 }
