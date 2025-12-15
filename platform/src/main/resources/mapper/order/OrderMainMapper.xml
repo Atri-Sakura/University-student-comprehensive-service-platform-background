@@ -660,6 +660,7 @@
         SELECT image_url FROM merchant_goods_image WHERE merchant_goods_id = #{goodsId} AND is_main = 1 LIMIT 1
     </select>
 
+
     <!-- 查询二手商品首图 -->
     <select id="selectSecondhandGoodsMainImage" resultType="string">
         SELECT image_url FROM secondhand_goods_image WHERE secondhand_goods_id = #{goodsId} AND is_main = 1 LIMIT 1
