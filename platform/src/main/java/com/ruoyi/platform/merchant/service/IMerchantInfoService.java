@@ -23,5 +23,7 @@ public interface IMerchantInfoService
      */
     int updateMerchantBase(MerchantBase merchantBase);
 
+    Long getMerchantBaseIdByPhone(String phone);
+
 
 }

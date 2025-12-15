@@ -1,12 +1,12 @@
-package com.ruoyi.common.utils.map;
+package com.ruoyi. common.utils.map;
 
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
-import org.slf4j.Logger;
+import org. slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
+import org.springframework. beans.factory.annotation.Value;
+import org.springframework.stereotype. Component;
+import org.springframework. web.client.RestTemplate;
 
 import java.math.BigDecimal;
 
@@ -90,7 +90,7 @@ public class AMapGeocodeUtil {
             // 解析经纬度（格式："106.123456,26.123456"）
             String[] parts = location.split(",");
             if (parts.length != 2) {
-                log. error("经纬度格式错误：{}", location);
+                log.error("经纬度格式错误：{}", location);
                 return null;
             }
 
@@ -115,5 +115,43 @@ public class AMapGeocodeUtil {
      */
     public BigDecimal[] geocode(String address) {
         return geocode(address, null);
+    }
+
+    /**
+     * 根据省市区详细地址转经纬度
+     *
+     * @param province 省份
+     * @param city 城市
+     * @param district 区县
+     * @param detailAddress 详细地址
+     * @return 经纬度数组 [经度, 纬度]，失败返回 null
+     */
+    public BigDecimal[] geocodeByFullAddress(String province, String city, String district, String detailAddress) {
+        // 拼接完整地址
+        StringBuilder fullAddress = new StringBuilder();
+
+        if (province != null && ! province.trim().isEmpty()) {
+            fullAddress.append(province);
+        }
+        if (city != null && !city. trim().isEmpty()) {
+            fullAddress.append(city);
+        }
+        if (district != null && !district.trim().isEmpty()) {
+            fullAddress.append(district);
+        }
+        if (detailAddress != null && ! detailAddress.trim().isEmpty()) {
+            fullAddress.append(detailAddress);
+        }
+
+        String address = fullAddress.toString();
+        if (address. isEmpty()) {
+            log.warn("完整地址为空，无法进行地理编码");
+            return null;
+        }
+
+        log.info("拼接完整地址：{}", address);
+
+        // 使用city参数提高精度
+        return geocode(address, city);
     }
 }
