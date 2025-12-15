@@ -216,7 +216,7 @@ public class  SecondhandOrderServiceImpl implements ISecondhandOrderService {
 
         Long sellerId = secondhandGoodsMapper.selectSellerIdByOrderMainId(order.getOrderMainId());
         order.setMerchantId(sellerId);
-        orderNotifyService.sendOrderFinishNotify(order.getOrderMainId());
+        orderNotifyService.sendSecondHandOrderFinishNotify(order.getOrderMainId(),sellerId);
 
 
         return rows1 > 0 && rows2 > 0;

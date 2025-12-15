@@ -13,7 +13,6 @@ import com.ruoyi.platform.service.IOrderDeliveryService;
 import com.ruoyi.platform.service.IOrderMainService;
 import com.ruoyi.platform.service.IOrderNotifyService;
 import lombok.extern.slf4j.Slf4j;
-import org.simpleframework.xml.Order;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -234,6 +233,24 @@ public class OrderNotifyServiceImpl implements IOrderNotifyService {
             sendViaSystemHandler(userMessage);
         }
     }
+
+    // ------------------------------ 二手交易订单完成 ------------------------------
+    @Override
+    public void sendSecondHandOrderFinishNotify(Long orderMainId,Long sellerID) {
+        OrderMain orderMain = orderMainService.selectOrderMainByOrderMainId(orderMainId);
+
+        if(orderMain != null) {
+            ChatMessageProto.ChatMessage merchantMessage = buildChatMessage(
+                    sellerID,3,"订单已完成，订单号："+orderMain.getOrderNo()
+            );
+            ChatMessageProto.ChatMessage userMessage = buildChatMessage(
+                    orderMain.getUserId(),1,"订单已完成，订单号："+orderMain.getOrderNo()
+            );
+            sendViaSystemHandler(merchantMessage);
+            sendViaSystemHandler(userMessage);
+        }
+    }
+
 
     // ------------------------------ 订单取消 ------------------------------
     @Override
