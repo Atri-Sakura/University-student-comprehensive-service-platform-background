@@ -6,6 +6,7 @@ import com.ruoyi.platform.user.service.ISysUserWalletRecordService;
 import com.ruoyi.platform.user.vo.UserWalletRecordVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -40,10 +41,20 @@ public class SysUserWalletRecordService implements ISysUserWalletRecordService {
     }
 
     @Override
+    @Transactional
     public int setPayPassword(Long userId, String oldPayPassword, String newPayPassword) {
         String oldPassword = userWalletRecordMapper.getPayPasswordByUserId(userId);
-        if (!oldPassword.equals(oldPayPassword)) {
-            throw new RuntimeException("旧密码错误");
+        // 首次设置密码：数据库中没有旧密码，前端传的也是空
+        if (oldPassword == null || oldPassword.isEmpty()) {
+            // 允许首次设置
+            if (oldPayPassword != null && !oldPayPassword.isEmpty()) {
+                throw new RuntimeException("首次设置密码无需输入旧密码");
+            }
+        } else {
+            // 修改密码：需要验证旧密码
+            if (!oldPassword.equals(oldPayPassword)) {
+                throw new RuntimeException("旧密码错误");
+            }
         }
         return userWalletRecordMapper.setPayPassword(userId, newPayPassword);
     }

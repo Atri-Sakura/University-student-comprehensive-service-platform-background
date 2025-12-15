@@ -26,7 +26,7 @@ public interface SysUserWalletRecordMapper {
     @Update("update user_wallet set status = 1 where user_base_id = #{userId}")
     int unfreezeWallet(Long userId);
 
-    @Select("select pay_password from user_base where pay_password")
+    @Select("select pay_password from user_base where user_base_id = #{userId}")
     String getPayPasswordByUserId(Long userId);
 
     @Update("update user_base set pay_password = #{newPayPassword} where user_base_id = #{userId}")
