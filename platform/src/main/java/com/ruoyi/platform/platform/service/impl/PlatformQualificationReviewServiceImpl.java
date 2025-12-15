@@ -1,13 +1,18 @@
 package com.ruoyi.platform.platform.service.impl;
 
+import com.ruoyi.platform.domain.MerchantBase;
 import com.ruoyi.platform.domain.RiderBase;
 import com.ruoyi.platform.platform.mapper.PlatformQualificationReviewMapper;
 import com.ruoyi.platform.platform.service.IPlatformQualificationReviewService;
+import com.ruoyi.platform.platform.vo.MerchantBaseVO;
 import com.ruoyi.platform.platform.vo.RiderBaseVO;
 import com.ruoyi.platform.utils.MaskUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class PlatformQualificationReviewServiceImpl implements IPlatformQualificationReviewService {
@@ -16,13 +21,22 @@ public class PlatformQualificationReviewServiceImpl implements IPlatformQualific
 
 
     @Override
-    public RiderBaseVO getAllRiderQualificationStatus() {
-        RiderBase riderBase = platformQualificationReviewMapper.getAllRiderQualificationStatus();
-        RiderBaseVO riderBaseVO = new RiderBaseVO();
-        BeanUtils.copyProperties(riderBase,riderBaseVO);
-        riderBaseVO.setIdCard(MaskUtils.maskIdCard(riderBaseVO.getIdCard()));
-        riderBaseVO.setPhone(MaskUtils.maskPhone(riderBaseVO.getPhone()));
-        return riderBaseVO;
+    public List<RiderBaseVO> getAllRiderQualificationStatus() {
+        List<RiderBase> riderBase = platformQualificationReviewMapper.getAllRiderQualificationStatus();
+        List<RiderBaseVO> riderBaseVOList = new ArrayList<>();
+        for (RiderBase riderBase1 : riderBase) {
+            RiderBaseVO riderBaseVO = new RiderBaseVO();
+            BeanUtils.copyProperties(riderBase1,riderBaseVO);
+            if (riderBase1.getIdCard()!=null){
+                riderBaseVO.setIdCard(MaskUtils.maskIdCard(riderBaseVO.getIdCard()));
+            }
+            if (riderBase1.getPhone()!=null){
+                riderBaseVO.setPhone(MaskUtils.maskPhone(riderBaseVO.getPhone()));
+            }
+            riderBaseVOList.add(riderBaseVO);
+        }
+
+        return riderBaseVOList;
     }
 
     @Override
@@ -32,5 +46,20 @@ public class PlatformQualificationReviewServiceImpl implements IPlatformQualific
 
     public int setMerchantQualificationStatus(Integer status, Long merchantId) {
         return platformQualificationReviewMapper.setMerchantQualificationStatus(status,merchantId);
+    }
+
+    @Override
+    public List<MerchantBaseVO> getAllMerchantQualificationStatus() {
+        List<MerchantBase> merchantBase = platformQualificationReviewMapper.getAllMerchantQualificationStatus();
+        List<MerchantBaseVO> merchantBaseVOList = new ArrayList<>();
+        for (MerchantBase merchantBase1 : merchantBase) {
+            MerchantBaseVO merchantBaseVO = new MerchantBaseVO();
+            BeanUtils.copyProperties(merchantBase1,merchantBaseVO);
+            if (merchantBase1.getPhone()!=null){
+                merchantBaseVO.setPhone(MaskUtils.maskPhone(merchantBaseVO.getPhone()));
+            }
+            merchantBaseVOList.add(merchantBaseVO);
+        }
+        return merchantBaseVOList;
     }
 }
