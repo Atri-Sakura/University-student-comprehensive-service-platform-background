@@ -214,6 +214,8 @@ public class  SecondhandOrderServiceImpl implements ISecondhandOrderService {
         // 更新商品状态 -> 已售出（status=2）
         int rows2 = secondhandGoodsMapper.updateSecondhandGoodsStatus(goodsId, 2L);
 
+        Long sellerId = secondhandGoodsMapper.selectSellerIdByOrderMainId(order.getOrderMainId());
+        order.setMerchantId(sellerId);
         orderNotifyService.sendOrderFinishNotify(order.getOrderMainId());
 
 
