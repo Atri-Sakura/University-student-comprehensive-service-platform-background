@@ -14,6 +14,7 @@
         <result property="totalAmount"      column="total_amount"       />
         <result property="payAmount"        column="pay_amount"         />
         <result property="discountAmount"   column="discount_amount"    />
+        <result property="deliveryFeeAmount"   column="delivery_fee_amount"/>
         <result property="payStatus"        column="pay_status"         />
         <result property="payTime"          column="pay_time"           />
         <result property="payType"          column="pay_type"           />

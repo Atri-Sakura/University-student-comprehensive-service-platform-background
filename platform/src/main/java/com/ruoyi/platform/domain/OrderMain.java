@@ -68,8 +68,8 @@ public class OrderMain extends BaseEntity
     @Excel(name = "支付方式：1-余额 2-微信 3-支付宝")
     private Long payType;
 
-    /** 订单状态：1-待接单 2-待取货 3-配送中 4-已完成 5-已取消 */
-    @Excel(name = "订单状态：1-待接单 2-待取货 3-配送中 4-已完成 5-已取消")
+    /** 订单状态：1-商家待接单 2-骑手待接单 3-骑手待取货 4-配送中 5-已完成 6-已取消 7-异常报备*/
+    @Excel(name = "订单状态：1-商家待接单 2-骑手待接单 3-骑手待取货 4-配送中 5-已完成 6-已取消 7-异常报备")
     private Long orderStatus;
 
     /** 取消原因 */

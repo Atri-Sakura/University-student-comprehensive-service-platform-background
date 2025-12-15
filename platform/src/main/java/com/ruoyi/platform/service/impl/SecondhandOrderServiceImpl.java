@@ -198,7 +198,7 @@ public class  SecondhandOrderServiceImpl implements ISecondhandOrderService {
         }
 
         // 校验订单状态（只允许“待线下交付”或“待收货”的订单确认）
-        if (!Objects.equals(order.getOrderStatus(), 2L)) {
+        if (!Objects.equals(order.getOrderStatus(), 4L)) {
             throw new ServiceException("当前订单状态无法确认收货");
         }
 
