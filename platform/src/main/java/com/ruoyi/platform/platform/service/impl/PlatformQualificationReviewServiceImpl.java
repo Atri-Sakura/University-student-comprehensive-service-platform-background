@@ -29,4 +29,8 @@ public class PlatformQualificationReviewServiceImpl implements IPlatformQualific
     public int setRiderQualificationStatus(Integer status, Integer riderId) {
         return platformQualificationReviewMapper.setRiderQualificationStatus(status,riderId);
     }
+
+    public int setMerchantQualificationStatus(Integer status, Long merchantId) {
+        return platformQualificationReviewMapper.setMerchantQualificationStatus(status,merchantId);
+    }
 }

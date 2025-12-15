@@ -6,6 +6,7 @@ import com.ruoyi.platform.merchant.mapper.MerchantInfoMapper;
 import com.ruoyi.platform.merchant.service.IMerchantInfoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * 商家基础信息Service实现类
@@ -47,4 +48,6 @@ public class MerchantInfoServiceImpl implements IMerchantInfoService
             throw new RuntimeException("修改商家信息失败：" + e.getMessage(), e);
         }
     }
+
+
 }
