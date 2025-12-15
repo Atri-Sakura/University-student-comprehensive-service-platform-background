@@ -65,7 +65,7 @@ public class SystemMessageHandler implements MessageHandler {
         boolean pushSuccess = pushToReceiver(channelSessionManager, chatMessage);
         if (!pushSuccess) {
             // 接收方离线，标记为离线消息（后续由OfflineMessagePullHandler拉取）
-            dbMsg.setMsgStatus(3L);
+            dbMsg.setMsgStatus(1L);
             chatMessageService.updateChatMessage(dbMsg);
             // 更新会话未读计数
             Long sessionId = chatSessionService.selectChatSessionIdByFromTo(
@@ -76,7 +76,7 @@ public class SystemMessageHandler implements MessageHandler {
             );
             chatSessionService.increaseUnreadCount(sessionId);
         }else {
-            dbMsg.setMsgStatus(2L);
+            dbMsg.setMsgStatus(1L);
             dbMsg.setDeliverTime(new Date());
             chatMessageService.updateChatMessage(dbMsg);
             chatSession.setLastMsgTime(dbMsg.getDeliverTime());
