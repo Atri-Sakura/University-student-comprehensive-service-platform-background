@@ -2,6 +2,7 @@ package com.ruoyi.platform.merchant.service.impl;
 
 import com.ruoyi.common.utils.DateUtils;
 import com.ruoyi.platform.domain.MerchantBase;
+import com.ruoyi.platform.mapper.MerchantBaseMapper;
 import com.ruoyi.platform.merchant.mapper.MerchantInfoMapper;
 import com.ruoyi.platform.merchant.service.IMerchantInfoService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,9 @@ public class MerchantInfoServiceImpl implements IMerchantInfoService
 {
     @Autowired
     private MerchantInfoMapper merchantInfoMapper;
+
+    @Autowired
+    private MerchantBaseMapper merchantBaseMapper;
 
     /**
      * 根据商家ID查询商家基础信息
@@ -47,6 +51,11 @@ public class MerchantInfoServiceImpl implements IMerchantInfoService
         } catch (Exception e) {
             throw new RuntimeException("修改商家信息失败：" + e.getMessage(), e);
         }
+    }
+
+    @Override
+    public Long getMerchantBaseIdByPhone(String phone) {
+        return merchantBaseMapper.selectMerchantBaseByPhone(phone).getMerchantBaseId();
     }
 
 

@@ -407,4 +407,9 @@ public class RiderBaseServiceImpl implements IRiderBaseService
         return riderBaseMapper.selectRiderBaseByUserId(userId);
     }
 
+    @Override
+    public Long selectRiderBaseIdByPhone(String phone) {
+        return riderBaseMapper.selectRiderBaseByPhone(phone).getRiderBaseId();
+    }
+
 }
