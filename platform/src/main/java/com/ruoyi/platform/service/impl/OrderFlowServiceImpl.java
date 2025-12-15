@@ -297,7 +297,8 @@ public class OrderFlowServiceImpl implements IOrderFlowService {
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public int riderPickupOrder(Long riderId, Long orderMainId) {
+    public int riderPickupOrder(Long riderId, Long orderMainId, BigDecimal actualPickLongitude,
+                                BigDecimal actualPickLatitude) {
         // 1. 查询订单信息
         OrderMain order = orderMainMapper.selectOrderMainByOrderMainId(orderMainId);
         if (order == null) {
@@ -338,6 +339,8 @@ public class OrderFlowServiceImpl implements IOrderFlowService {
         updateDelivery.setOrderDeliveryId(delivery.getOrderDeliveryId());
         updateDelivery.setPickTime(DateUtils.getNowDate());
         updateDelivery.setDeliveryStatus(2L); // 2-已取货（配送中）
+        updateDelivery. setActualPickLongitude(actualPickLongitude);
+        updateDelivery.setActualPickLatitude(actualPickLatitude);
         orderDeliveryMapper.updateOrderDelivery(updateDelivery);
 
         // 6. 记录状态变更日志
@@ -356,7 +359,8 @@ public class OrderFlowServiceImpl implements IOrderFlowService {
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public int riderDeliverOrder(Long riderId, Long orderMainId) {
+    public int riderDeliverOrder(Long riderId, Long orderMainId, BigDecimal actualDeliverLongitude,   // ⭐ 修正参数名
+                                 BigDecimal actualDeliverLatitude) {
         // 1. 查询订单信息
         OrderMain order = orderMainMapper.selectOrderMainByOrderMainId(orderMainId);
         if (order == null) {
@@ -402,6 +406,8 @@ public class OrderFlowServiceImpl implements IOrderFlowService {
         updateDelivery.setOrderDeliveryId(delivery.getOrderDeliveryId());
         updateDelivery.setDeliverTime(DateUtils.getNowDate());
         updateDelivery.setDeliveryStatus(3L); // 3-已送达
+        updateDelivery.setActualDeliverLongitude(actualDeliverLongitude);
+        updateDelivery. setActualDeliverLatitude(actualDeliverLatitude);
         orderDeliveryMapper.updateOrderDelivery(updateDelivery);
 
         // 6. 结算给骑手
