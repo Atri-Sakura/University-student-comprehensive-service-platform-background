@@ -130,10 +130,10 @@ public class UserTakeOutOrderController extends BaseController {
      * 查询用户作为卖家的订单详情
      */
     @GetMapping("/list/seller")
-    public TableDataInfo listAsSeller() {
+    public AjaxResult listAsSeller() {
         Long userId = SecurityUtils.getUserBaseId();
         List<OrderSecondhandDetail> list = orderMainMapper.selectOrderSecondhandDetailListBySellerId(userId);
-        return getDataTable(list);
+        return AjaxResult.success("查询成功",list);
     }
 
     /**
