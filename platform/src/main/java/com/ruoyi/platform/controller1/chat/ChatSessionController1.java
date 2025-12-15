@@ -89,8 +89,8 @@ public class ChatSessionController1 {
     }
 
     @GetMapping("/systemSession")
-    public AjaxResult getSystemSession(Long fromType, Long fromId) {
-        Long sessionId = chatSessionService.selectChatSessionIdByFromTo(4L,0L,fromType,fromId);
+    public AjaxResult getSystemSession(Long toType, Long toId) {
+        Long sessionId = chatSessionService.selectChatSessionIdByFromTo(4L,0L,toType,toId);
         ChatSession chatSession = chatSessionService.selectChatSessionBySessionId(sessionId);
         return AjaxResult.success("操作成功",chatSession);
     }

@@ -186,4 +186,11 @@ public interface OrderMainMapper {
 
     @Select("select username from user_base where user_base_id = #{userBaseId}")
     String selectUserNickName(Long userBaseId);
+
+    /**
+     * 获取订单列表
+     * @param orderMainIds
+     * @return
+     */
+    List<OrderMain> selectOrderMainListByIds(@Param("orderMainIds") List<Long> orderMainIds);
 }
