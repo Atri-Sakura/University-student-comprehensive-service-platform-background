@@ -24,4 +24,6 @@ public interface IMerchantGoodsInfoService {
     int updateMerchantGoods(MerchantGoods merchantGoods);
 
     List<MerchantGoods> selectMerchantGoodsListForCustomer(Long merchantBaseId, long l, Integer pageNum, Integer pageSize);
+
+    int getMonthlySaleCounts(Long merchantGoodsId);
 }
