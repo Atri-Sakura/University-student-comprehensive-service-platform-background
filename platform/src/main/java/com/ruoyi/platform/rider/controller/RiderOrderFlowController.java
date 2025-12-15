@@ -36,7 +36,7 @@ public class RiderOrderFlowController extends BaseController {
         // 调用服务层接单方法
         int result = orderFlowService.riderAcceptOrder(riderId, orderMainId);
 
-        return toAjax(result);
+        return AjaxResult.success("骑手接单成功", orderMainId);
     }
 
     /**

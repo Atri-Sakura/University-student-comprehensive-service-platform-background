@@ -5,12 +5,15 @@ import com.ruoyi.platform.chat.manager.ChannelSessionManager;
 import com.ruoyi.platform.chat.handler.MessageHandler;
 import com.ruoyi.platform.chat.protobuf.ChatMessageProto;
 import com.ruoyi.platform.chat.utils.SnowflakeIdGenerator;
+import com.ruoyi.platform.domain.OrderDelivery;
 import com.ruoyi.platform.domain.OrderMain;
 import com.ruoyi.platform.domain.dto.CreateOrderDTO;
 import com.ruoyi.platform.domain.vo.CreateErrandOrderDto;
+import com.ruoyi.platform.service.IOrderDeliveryService;
 import com.ruoyi.platform.service.IOrderMainService;
 import com.ruoyi.platform.service.IOrderNotifyService;
 import lombok.extern.slf4j.Slf4j;
+import org.simpleframework.xml.Order;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -35,6 +38,8 @@ public class OrderNotifyServiceImpl implements IOrderNotifyService {
     private MessageHandlerFactory messageHandlerFactory;
     @Autowired
     private IOrderMainService orderMainService;
+    @Autowired
+    private IOrderDeliveryService orderDeliveryService;
 
     // ------------------------------ 外卖订单商家通知 ------------------------------
     @Override
@@ -46,10 +51,10 @@ public class OrderNotifyServiceImpl implements IOrderNotifyService {
                 orderMain.getPayAmount() != null ? orderMain.getPayAmount().doubleValue() : 0.00
         );
 
-        // 修复：商家接收方类型应为2（原代码错误混用3）
+        // 修复：3
         ChatMessageProto.ChatMessage chatMessage = buildChatMessage(
                 orderMain.getMerchantId(), // 接收方：商家ID
-                2, // 接收方类型：商家（2）
+                3, // 接收方类型：商家（3）
                 notifyContent
         );
         sendViaSystemHandler(chatMessage);
@@ -67,8 +72,8 @@ public class OrderNotifyServiceImpl implements IOrderNotifyService {
         // 给骑手发通知
         ChatMessageProto.ChatMessage riderMessage = buildChatMessage(
                 riderId,
-                3, // 接收方类型：骑手（3）
-                "您已成功接收到订单，订单号: " + orderMain.getOrderNo()
+                2, // 接收方类型：骑手（2）
+                "您已接到该订单，订单号: " + orderMain.getOrderNo()
         );
         // 给用户发通知
         ChatMessageProto.ChatMessage userMessage = buildChatMessage(
@@ -83,7 +88,7 @@ public class OrderNotifyServiceImpl implements IOrderNotifyService {
         if (orderMain.getMerchantId() != null) {
             ChatMessageProto.ChatMessage merchantMessage = buildChatMessage(
                     orderMain.getMerchantId(),
-                    2, // 修复：商家类型为2
+                    3, // 修复：3
                     "骑手已经成功接到订单,订单号: " + orderMain.getOrderNo()
             );
             sendViaSystemHandler(merchantMessage);
@@ -101,7 +106,7 @@ public class OrderNotifyServiceImpl implements IOrderNotifyService {
         // 给商家发通知
         ChatMessageProto.ChatMessage merchantMessage = buildChatMessage(
                 merchantId,
-                2, // 接收方类型：商家（2）
+                3, // 接收方类型：商家（3）
                 "您已成功接收到该订单,订单号为：" + orderMain.getOrderNo()
         );
         // 给用户发通知
@@ -128,10 +133,10 @@ public class OrderNotifyServiceImpl implements IOrderNotifyService {
                 orderMain.getPayAmount() != null ? orderMain.getPayAmount().doubleValue() : 0.00
         );
 
-        // 骑手池广播（toId=0，类型=3）
+        // 骑手池广播（toId=0，类型=2）
         ChatMessageProto.ChatMessage chatMessage = buildChatMessage(
                 0L,
-                3, // 接收方类型：骑手（3）
+                2, // 接收方类型：骑手（2）
                 notifyContent
         );
         sendViaSystemHandler(chatMessage);
@@ -167,13 +172,72 @@ public class OrderNotifyServiceImpl implements IOrderNotifyService {
             );
             ChatMessageProto.ChatMessage merchantChatMessage = buildChatMessage(
                     orderMain.getMerchantId(),
-                    2, // 修复：商家类型为2（原代码错误用3）
+                    3,
                     merchantNotifyContent
             );
             sendViaSystemHandler(merchantChatMessage);
         }
         log.info("用户下单成功通知已发送，用户ID：{}，订单号：{}", userId, orderMain.getOrderNo());
     }
+
+    // ------------------------------ 骑手取货成功通知 ------------------------------
+    public void sendRiderGetOrderToUserNotify(Long riderId, Long orderMainId){
+        OrderMain orderMain = orderMainService.selectOrderMainByOrderMainId(orderMainId);
+        if (orderMain == null) {
+            ChatMessageProto.ChatMessage merchantMessage = buildChatMessage(
+                    orderMain.getMerchantId(),3,"骑手已成功取到订单，订单号："+orderMain.getOrderNo() + "骑手ID:"+riderId
+            );
+            ChatMessageProto.ChatMessage userMessage = buildChatMessage(
+                    orderMain.getUserId(),1,"骑手已经取到您的订单，订单号：" + orderMain.getOrderNo() + "骑手ID:"+riderId
+            );
+            ChatMessageProto.ChatMessage riderMessage = buildChatMessage(
+                    riderId,2,"您已成功街道订单，订单号："+orderMain.getOrderNo()
+            );
+        }
+    }
+
+    /**
+     * 骑手送达通知
+     * @param orderMainId
+     */
+    public void sendRiderFinishOrderToUserNotify(Long orderMainId){
+        OrderDelivery orderDelivery = orderDeliveryService.selectOrderDeliveryByOrderMainId(orderMainId);
+        OrderMain orderMain = orderMainService.selectOrderMainByOrderMainId(orderMainId);
+        if (orderDelivery == null && orderMainId != null) {
+            ChatMessageProto.ChatMessage merchantMessage = buildChatMessage(
+                    orderMain.getMerchantId(),3,"骑手已送达，订单号:"+orderMain.getOrderNo()
+            );
+            ChatMessageProto.ChatMessage userMessage = buildChatMessage(
+                    orderMain.getUserId(),1,"骑手已送达，订单号:"+orderMain.getOrderNo()
+            );
+            ChatMessageProto.ChatMessage riderMessage = buildChatMessage(
+                    orderDelivery.getRiderId(),2,"您以成功送达，订单号:"+orderMain.getOrderNo()
+            );
+            sendViaSystemHandler(merchantMessage);
+            sendViaSystemHandler(userMessage);
+            sendViaSystemHandler(riderMessage);
+        }
+    }
+
+    // ------------------------------ 订单完成 ------------------------------
+    @Override
+    public void sendOrderFinishNotify(Long orderMainId) {
+        OrderMain orderMain = orderMainService.selectOrderMainByOrderMainId(orderMainId);
+        if(orderMain != null) {
+            ChatMessageProto.ChatMessage merchantMessage = buildChatMessage(
+                    orderMain.getMerchantId(),3,"订单已完成，订单号："+orderMain.getOrderNo()
+            );
+            ChatMessageProto.ChatMessage userMessage = buildChatMessage(
+                    orderMain.getUserId(),1,"订单已完成，订单号："+orderMain.getOrderNo()
+            );
+            sendViaSystemHandler(merchantMessage);
+            sendViaSystemHandler(userMessage);
+        }
+    }
+
+    // ------------------------------ 订单取消 ------------------------------
+
+
 
     // ------------------------------ 通用方法 ------------------------------
     private ChatMessageProto.ChatMessage buildChatMessage(Long toId, int toType, String content) {

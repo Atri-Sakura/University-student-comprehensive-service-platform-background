@@ -90,4 +90,10 @@ public class OrderDeliveryServiceImpl implements IOrderDeliveryService
     {
         return orderDeliveryMapper.deleteOrderDeliveryByOrderDeliveryId(orderDeliveryId);
     }
+
+    @Override
+    public OrderDelivery selectOrderDeliveryByOrderMainId(Long orderMainId) {
+        OrderDelivery result = orderDeliveryMapper.selectOrderDeliveryByOrderMainId(orderMainId);
+        return result;
+    }
 }

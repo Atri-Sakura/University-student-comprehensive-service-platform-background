@@ -65,11 +65,12 @@ public class ChatSessionServiceImpl implements IChatSessionService
      * @return 结果
      */
     @Override
-    public int insertChatSession(ChatSession chatSession)
+    public ChatSession insertChatSession(ChatSession chatSession)
     {
 
         chatSession.setCreateTime(DateUtils.getNowDate());
-        return chatSessionMapper.insertChatSession(chatSession);
+        int count =chatSessionMapper.insertChatSession(chatSession);
+        return count > 0 ? chatSessionMapper.selectChatSessionBySessionId(chatSession.getSessionId()) : null;
     }
 
     /**

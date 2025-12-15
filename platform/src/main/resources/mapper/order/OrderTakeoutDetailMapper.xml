@@ -86,6 +86,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="subtotal != null">subtotal = #{subtotal},</if>
             <if test="goodsSpec != null">goods_spec = #{goodsSpec},</if>
             <if test="goodsTags != null">goods_tags = #{goodsTags},</if>
+            <if test="settleStatus != null">settle_status = #{settleStatus}</if>
         </trim>
         where order_takeout_detail_id = #{orderTakeoutDetailId}
     </update>

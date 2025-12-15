@@ -6,6 +6,7 @@ import com.ruoyi.common.utils.uuid.IdUtils;
 import com.ruoyi.platform.domain.*;
 import com.ruoyi.platform.domain.enums.WalletFlowTypeEnum;
 import com.ruoyi.platform.mapper.*;
+import com.ruoyi.platform.merchant.mapper.MerchantWalletFlowMapper;
 import com.ruoyi.platform.service.IWalletFlowService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,7 +42,7 @@ public class WalletFlowServiceImpl implements IWalletFlowService {
     private MerchantWalletMapper merchantWalletMapper;
 
     @Autowired
-    private MerchantWalletFlowInfoMapper merchantWalletFlowInfoMapper;
+    private MerchantWalletFlowMapper merchantWalletFlowInfoMapper;
 
     @Autowired
     private RiderWalletMapper riderWalletMapper;

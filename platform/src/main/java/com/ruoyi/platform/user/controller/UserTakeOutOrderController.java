@@ -154,7 +154,6 @@ public class UserTakeOutOrderController extends BaseController {
 
         return AjaxResult.success(order);
     }
-    // TODO 查看三种订单详情接口
 
     /**
      * 查询跑腿订单详情

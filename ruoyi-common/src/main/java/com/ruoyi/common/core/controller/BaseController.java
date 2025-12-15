@@ -149,6 +149,10 @@ public class BaseController
         return rows > 0 ? AjaxResult.success() : AjaxResult.error();
     }
 
+    protected AjaxResult toAjax(Long id){
+        return id != null ?AjaxResult.success(id) : AjaxResult.error() ;
+    }
+
     /**
      * 响应返回结果
      * 

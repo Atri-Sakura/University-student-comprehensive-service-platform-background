@@ -58,4 +58,11 @@ public interface IOrderDeliveryService
      * @return 结果
      */
     public int deleteOrderDeliveryByOrderDeliveryId(Long orderDeliveryId);
+
+    /**
+     * 根据订单ID查询订单配送信息
+     * @param orderMainId
+     * @return
+     */
+    public OrderDelivery selectOrderDeliveryByOrderMainId(Long orderMainId);
 }
