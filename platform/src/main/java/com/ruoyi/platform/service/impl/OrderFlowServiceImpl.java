@@ -338,6 +338,8 @@ public class OrderFlowServiceImpl implements IOrderFlowService {
         updateDelivery.setOrderDeliveryId(delivery.getOrderDeliveryId());
         updateDelivery.setPickTime(DateUtils.getNowDate());
         updateDelivery.setDeliveryStatus(2L); // 2-已取货（配送中）
+        updateDelivery.setActualPickLongitude(order.getPickLongitude());
+        updateDelivery.setActualPickLatitude(order.getPickLatitude());
         orderDeliveryMapper.updateOrderDelivery(updateDelivery);
 
         // 6. 记录状态变更日志
@@ -402,6 +404,8 @@ public class OrderFlowServiceImpl implements IOrderFlowService {
         updateDelivery.setOrderDeliveryId(delivery.getOrderDeliveryId());
         updateDelivery.setDeliverTime(DateUtils.getNowDate());
         updateDelivery.setDeliveryStatus(3L); // 3-已送达
+        updateDelivery.setActualDeliverLongitude(order.getDeliverLongitude());
+        updateDelivery.setActualDeliverLatitude(order. getDeliverLatitude());
         orderDeliveryMapper.updateOrderDelivery(updateDelivery);
 
         // 6. 结算给骑手
