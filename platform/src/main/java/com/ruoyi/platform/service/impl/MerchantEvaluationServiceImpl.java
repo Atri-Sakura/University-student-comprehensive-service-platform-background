@@ -107,9 +107,9 @@ public class MerchantEvaluationServiceImpl implements IMerchantEvaluationService
             throw new ServiceException("无权评价非本人的订单");
         }
 
-        // 5. 【状态校验】订单状态验证：只有已完成(4)的订单可以评价
-        // 状态码对照：1-待接单 2-待取货 3-配送中 4-已完成 5-已取消
-        if (order.getOrderStatus() != 4L) {
+        // 5. 【状态校验】订单状态验证：只有已完成(5)的订单可以评价
+        // 状态码对照：订单状态：1-商家待接单 2-骑手待接单 3-骑手待取货 4-配送中 5-已完成 6-已取消 7-异常报备
+        if (order.getOrderStatus() != 5L) {
             throw new ServiceException("订单未完成，暂无法进行评价");
         }
 
