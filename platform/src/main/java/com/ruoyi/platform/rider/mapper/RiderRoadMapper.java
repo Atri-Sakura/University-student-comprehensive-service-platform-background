@@ -12,7 +12,7 @@ import java.util.List;
 public interface RiderRoadMapper {
 
     @Select("select * from order_delivery od left join order_main om on od.order_main_id = om.order_main_id where rider_id = #{riderBaseId} and delivery_status = 1 and om.order_status = 3")
-    List<OrderDelivery> getgetPickupAddress(Long riderBaseId);
+    List<OrderDelivery> getPickupAddress(Long riderBaseId);
 
     @Select("select * from order_delivery od left join order_main om on od.order_main_id = om.order_main_id where rider_id = #{riderBaseId} and delivery_status = 2 and om.order_status = 4")
     List<OrderDelivery> getTargetAddress(Long riderBaseId);

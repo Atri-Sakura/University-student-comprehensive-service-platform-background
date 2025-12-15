@@ -32,7 +32,7 @@ public class RiderRoadController {
         }
 
         // 1. 核心前提：确保原始订单列表本身是有序的（数据库查询建议加排序，比如按订单创建时间/配送时间）
-        List<OrderDelivery> orderDeliveryList = riderRoadMapper.getTargetAddress(riderBaseId);
+        List<OrderDelivery> orderDeliveryList = riderRoadMapper.getPickupAddress(riderBaseId);
         if (CollectionUtils.isEmpty(orderDeliveryList)) {
             return AjaxResult.success("暂无配送订单数据")
                     .put("目的地经纬度", new ArrayList<>())
