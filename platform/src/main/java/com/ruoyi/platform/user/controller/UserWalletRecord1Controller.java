@@ -16,7 +16,6 @@ import java.util.List;
 @RequestMapping("/user/walletRecord")
 @Slf4j
 public class UserWalletRecord1Controller {
-    // TODO: 实现用户钱包流水相关功能
     @Autowired
     private ISysUserWalletRecordService sysUserWalletRecordService;
 

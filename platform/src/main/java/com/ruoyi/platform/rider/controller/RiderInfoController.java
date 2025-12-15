@@ -1,11 +1,11 @@
 package com.ruoyi.platform.rider.controller;
 
 import com.ruoyi.common.config.RuoYiConfig;
-import com.ruoyi.common. core.domain.AjaxResult;
-import com.ruoyi.common. utils.SecurityUtils;
-import com. ruoyi.platform.domain.RiderBase;
+import com.ruoyi.common.core.domain.AjaxResult;
+import com.ruoyi.common.utils.SecurityUtils;
+import com.ruoyi.platform.domain.RiderBase;
 import com.ruoyi.platform.service.IRiderBaseService;
-import org. springframework.beans.factory.annotation. Autowired;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import com.ruoyi.framework.config.FileStorageProperties;
 import com.ruoyi.framework.storage.CloudStorageService;
@@ -43,7 +43,6 @@ public class RiderInfoController {
     public AjaxResult getMyInfo() {
         Long userId = SecurityUtils.getUserId();
 
-        // 根据 userId 查询骑手信息（需要添加新方法）
         RiderBase rider = riderBaseService.selectRiderBaseByUserId(userId);
 
         if (rider == null) {
@@ -60,13 +59,11 @@ public class RiderInfoController {
     public AjaxResult updateMyInfo(@RequestBody RiderBase riderBase) {
         Long userId = SecurityUtils.getUserId();
 
-        // 先查询当前用户对应的骑手信息
         RiderBase currentRider = riderBaseService. selectRiderBaseByUserId(userId);
         if (currentRider == null) {
             return AjaxResult.error("未找到当前骑手信息");
         }
 
-        // 防止越权：只能修改自己的信息
         riderBase.setRiderBaseId(currentRider.getRiderBaseId());
 
         int rows = riderBaseService.updateRiderBaseBasicInfo(riderBase);
@@ -90,13 +87,11 @@ public class RiderInfoController {
             return AjaxResult.error("非法的工作状态参数，应为 0(下线)/1(上线)/2(忙碌)");
         }
 
-        // 先查询当前用户对应的骑手信息
         RiderBase currentRider = riderBaseService.selectRiderBaseByUserId(userId);
         if (currentRider == null) {
             return AjaxResult.error("未找到当前骑手信息");
         }
 
-        // 防止越权：只能修改自己的状态
         riderBase.setRiderBaseId(currentRider. getRiderBaseId());
 
         int rows = riderBaseService.updateRiderWorkStatus(riderBase);
@@ -127,13 +122,12 @@ public class RiderInfoController {
 
         Long userId = SecurityUtils.getUserId();
 
-        // 先查询当前用户对应的骑手信息
         RiderBase currentRider = riderBaseService.selectRiderBaseByUserId(userId);
         if (currentRider == null) {
             return AjaxResult.error("未找到当前骑手信息");
         }
 
-        // -------------------- 文件上传逻辑（本地 or 云端） --------------------
+        // 文件上传逻辑（本地 or 云端）
         String frontUrl;
         String backUrl;
 
@@ -164,7 +158,6 @@ public class RiderInfoController {
             return AjaxResult.error("文件上传失败: " + e.getMessage());
         }
 
-        // 组装认证信息（防止越权：只能修改自己的认证信息）
         RiderBase rider = new RiderBase();
         rider.setRiderBaseId(currentRider.getRiderBaseId());
         rider.setRealName(realName);

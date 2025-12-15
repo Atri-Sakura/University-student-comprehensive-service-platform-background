@@ -252,6 +252,7 @@ public class  SecondhandOrderServiceImpl implements ISecondhandOrderService {
         order.setPickAddress(dto.getTradePlace());
         order.setPickContact(dto.getReceiverName());
         order.setPickPhone(dto.getReceiverPhone());
+        order.setOrderThumbnail(orderMainMapper.selectGoodsMainImage(goods.getSecondhandGoodsId()));
 
 
         order.setOrderStatus(isOfflinePay ? 2L : 1L); // 面付=待线下交付，线上=待支付
@@ -264,7 +265,7 @@ public class  SecondhandOrderServiceImpl implements ISecondhandOrderService {
         detail.setGoodsId(goods.getSecondhandGoodsId());
         detail.setGoodsName(goods.getGoodsName());
         detail.setSellerId(goods.getUserBaseId());
-//        detail.setSellerNickname(goods.getSellerNickname());
+        detail.setSellerNickname(orderMainMapper.selectUserNickName(goods.getUserBaseId()));
         detail.setSellWay(isOfflinePay ? 2L : 1L);
         detail.setDepositAmount(BigDecimal.ZERO);
         orderSecondhandDetailMapper.insertOrderSecondhandDetail(detail);

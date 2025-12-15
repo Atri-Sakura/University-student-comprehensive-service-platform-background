@@ -31,7 +31,6 @@ public class RiderOrderFlowController extends BaseController {
     @Log(title = "骑手接单", businessType = BusinessType.UPDATE)
     @PostMapping("/accept/{orderMainId}")
     public AjaxResult acceptOrder(@PathVariable("orderMainId") Long orderMainId) {
-        // 从SecurityUtils获取当前登录的骑手ID
         Long riderId = SecurityUtils.getRiderBaseId();
 
         // 调用服务层接单方法
@@ -49,7 +48,6 @@ public class RiderOrderFlowController extends BaseController {
     @Log(title = "骑手取货", businessType = BusinessType.UPDATE)
     @PostMapping("/pickup/{orderMainId}")
     public AjaxResult pickupOrder(@PathVariable("orderMainId") Long orderMainId) {
-        // 从SecurityUtils获取当前登录的骑手ID
         Long riderId = SecurityUtils.getRiderBaseId();
 
         // 调用服务层取货方法
@@ -67,7 +65,6 @@ public class RiderOrderFlowController extends BaseController {
     @Log(title = "骑手送达", businessType = BusinessType.UPDATE)
     @PostMapping("/deliver/{orderMainId}")
     public AjaxResult deliverOrder(@PathVariable("orderMainId") Long orderMainId) {
-        // 从SecurityUtils获取当前登录的骑手ID
         Long riderId = SecurityUtils.getRiderBaseId();
 
         // 调用服务层送达方法

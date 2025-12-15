@@ -204,14 +204,11 @@ public class OrderFlowServiceImpl implements IOrderFlowService {
             throw new ServiceException("订单不存在");
         }
 
-        // 2. 状态校验：必须是待取货状态
+        // 2. 状态校验：必须是待接单状态
         if (!OrderStatusEnum.RIDER_PENDING_ACCEPT.getCode().equals(order.getOrderStatus())) {
             throw new ServiceException("订单状态不正确，无法接单");
         }
 
-        if(order.getOrderType().equals(3L)){
-            order.setOrderStatus(OrderStatusEnum.RIDER_PENDING_PICKUP.getCode());
-        }
         // 3. 查询配送记录
         OrderDelivery queryDelivery = new OrderDelivery();
         queryDelivery.setOrderMainId(orderMainId);
@@ -227,7 +224,7 @@ public class OrderFlowServiceImpl implements IOrderFlowService {
             throw new ServiceException("订单已被其他骑手接单");
         }
 
-        // 【关键修复】5. 校验并获取骑手收入（配送费）
+        // 5. 校验并获取骑手收入（配送费）
         BigDecimal riderIncome = delivery.getRiderIncome();
         if (riderIncome == null || riderIncome.compareTo(BigDecimal.ZERO) <= 0) {
             // 如果配送记录中没有配送费，从订单主表获取

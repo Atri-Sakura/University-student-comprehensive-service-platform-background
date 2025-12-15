@@ -1,7 +1,11 @@
 package com.ruoyi.platform.service.impl;
 
+import java.util.Date;
 import java.util.List;
+
+import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.utils.DateUtils;
+import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.common.utils.file.MinioFileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -166,6 +170,24 @@ public class UserBaseServiceImpl implements IUserBaseService
         }
         UserBase userBase = userBaseMapper.selectUserBaseByPhone(phone);
         return userBase != null ? userBase.getNickname() : null;
+    }
+
+
+    /**
+     * 验证支付密码
+     */
+    @Override
+    public boolean verifyPayPassword(Long userBaseId, String payPassword) {
+        UserBase userBase = userBaseMapper.selectUserBaseByUserBaseId(userBaseId);
+        if (userBase == null) {
+            throw new ServiceException("用户不存在");
+        }
+
+        if (userBase.getPayPassword() == null || userBase.getPayPassword().isEmpty()) {
+            throw new ServiceException("请先设置支付密码");
+        }
+
+        return SecurityUtils.matchesPassword(payPassword, userBase.getPayPassword());
     }
 
 }
