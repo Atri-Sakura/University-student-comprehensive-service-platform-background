@@ -576,7 +576,7 @@ public class UserOrderServiceImpl implements IUserOrderService {
     }
 
     /**
-     * ⭐ 内部方法：真正创建外卖订单（带缩略图）
+     * 内部方法：真正创建外卖订单（带缩略图）
      */
     private OrderMain createTakeoutOrderInternal(CreateOrderDTO createOrderDTO, String orderNo, OrderAmountInfo amountInfo) {
         // 1. 查询商家地址（作为取货地址）
@@ -586,7 +586,7 @@ public class UserOrderServiceImpl implements IUserOrderService {
             throw new ServiceException("商家地址不存在");
         }
 
-        // ⭐ 2. 获取订单缩略图（外卖订单：首个商品的主图）
+        // 2. 获取订单缩略图（外卖订单：首个商品的主图）
         String orderThumbnail = null;
         if (createOrderDTO.getItems() != null && ! createOrderDTO.getItems().isEmpty()) {
             Long firstGoodsId = createOrderDTO. getItems().get(0).getGoodsId();
@@ -734,8 +734,7 @@ public class UserOrderServiceImpl implements IUserOrderService {
         orderMain.setPayType(1L); // 默认余额支付
 
         // 订单状态（待接单）
-        orderMain.setOrderStatus(2L);
-        //orderMain.setOrderStatus(OrderStatusEnum.RIDER_PENDING_ACCEPT.getCode());
+        orderMain.setOrderStatus(OrderStatusEnum.RIDER_PENDING_ACCEPT.getCode());
 
         // 取货地址处理（支持帮我买订单：userAddressId 为 null）
         if (userAddressId != null) {
