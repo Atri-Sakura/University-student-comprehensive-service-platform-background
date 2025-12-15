@@ -2,8 +2,10 @@ package com.ruoyi.platform.service. impl;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.utils.DateUtils;
@@ -224,5 +226,32 @@ public class OrderMainServiceImpl implements IOrderMainService
     @Override
     public OrderMain selectByOrderNo(String orderNo) {
         return orderMainMapper.selectByOrderNo(orderNo);
+    }
+
+    /**
+     * 统计商家近30天销量（核心实现）
+     * @param map key: OrderMain 订单主信息, value: 对应商品购买数量
+     * @return 近30天有效销量总和
+     */
+    @Override
+    public int countMonthSaleCounts(HashMap<OrderMain, Long> map) {
+        // 1. 计算30天前的时间（当前时间往前推30天）
+        Date thirtyDaysAgo = new Date(System.currentTimeMillis() - TimeUnit.DAYS.toMillis(30));
+
+        // 2. 流式计算：过滤近30天完成的订单 + 累加销量
+        return map.entrySet().stream()
+                // 过滤条件：订单非空 + 完成时间非空 + 完成时间在近30天内
+                .filter(entry -> {
+                    OrderMain orderMain = entry.getKey();
+                    if (orderMain == null) {
+                        return false;
+                    }
+                    Date completeTime = orderMain.getCompleteTime();
+                    return completeTime != null && completeTime.after(thirtyDaysAgo);
+                })
+                // 空值防护：数量为null时按0处理
+                .mapToInt(entry -> entry.getValue() == null ? 0 : entry.getValue().intValue())
+                // 累加所有符合条件的销量
+                .sum();
     }
 }

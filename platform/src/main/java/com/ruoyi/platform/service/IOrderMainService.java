@@ -2,6 +2,7 @@ package com.ruoyi.platform.service;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -91,4 +92,11 @@ public interface IOrderMainService
     int handleOrderRefund(Long orderMainId, String refundReason);
 
     OrderMain selectByOrderNo(String orderNo);
+
+    /**
+     * 统计商家月销量
+     * @param map
+     * @return
+     */
+    public int countMonthSaleCounts(HashMap<OrderMain,Long> map);
 }

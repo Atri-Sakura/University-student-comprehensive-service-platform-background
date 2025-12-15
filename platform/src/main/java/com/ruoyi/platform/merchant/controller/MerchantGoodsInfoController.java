@@ -38,6 +38,20 @@ public class MerchantGoodsInfoController {
     }
 
     /**
+     * 统计商品销量
+     * @param merchantGoodsId
+     * @return
+     */
+    @GetMapping("/base/monthly/sales/{merchantGoodsId}")
+    public AjaxResult countMerchantGoodsSales(@PathVariable Long merchantGoodsId) {
+        MerchantGoods merchantGoods = merchantGoodsInfoService.selectMerchantGoodsByMerchantGoodsId(merchantGoodsId);
+        int goods = merchantGoodsInfoService.getMonthlySaleCounts(merchantGoodsId);
+        return AjaxResult.success("查询成功",goods);
+    }
+
+
+
+    /**
      * 修改商品基础信息（仅限当前登录商家）
      * @param merchantGoods 商品信息对象
      * @return 操作结果
