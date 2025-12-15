@@ -236,7 +236,20 @@ public class OrderNotifyServiceImpl implements IOrderNotifyService {
     }
 
     // ------------------------------ 订单取消 ------------------------------
-
+    @Override
+    public void cancelOrderNotify(Long orderMainId) {
+        OrderMain orderMain = orderMainService.selectOrderMainByOrderMainId(orderMainId);
+        if(orderMain != null) {
+            ChatMessageProto.ChatMessage merchantMessage = buildChatMessage(
+                    orderMain.getMerchantId(),3,"订单已取消，订单号："+orderMain.getOrderNo()
+            );
+            ChatMessageProto.ChatMessage userMessage = buildChatMessage(
+                    orderMain.getUserId(),1,"订单已取消，订单号："+orderMain.getOrderNo()
+            );
+            sendViaSystemHandler(merchantMessage);
+            sendViaSystemHandler(userMessage);
+        }
+    }
 
 
     // ------------------------------ 通用方法 ------------------------------

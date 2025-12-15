@@ -216,39 +216,39 @@ public class OrderAspect {
     }
 
     // ========== 新增：骑手取货通知逻辑 ==========
-    @AfterReturning(pointcut = "riderPickupOrderPointcut()", returning = "result")
-    public void afterRiderPickupOrder(Object result) {
-        asyncExecutor.execute(() -> {
-            try {
-                if (result instanceof AjaxResult ajaxResult && ajaxResult.isSuccess()) {
-                    // 提取订单ID
-                    Long orderMainId = null;
-                    Object data = ajaxResult.getData();
-                    if (data instanceof Long) {
-                        orderMainId = (Long) data;
-                    }
-
-                    if (orderMainId == null) {
-                        log.warn("骑手取货通知：订单ID为空，返回数据：{}", data);
-                        return;
-                    }
-
-                    // 查询配送信息
-                    OrderDelivery orderDelivery = orderDeliveryMapper.selectOrderDeliveryByOrderMainId(orderMainId);
-                    if (orderDelivery == null || orderDelivery.getRiderId() == null) {
-                        log.warn("骑手取货通知：配送信息异常，订单ID：{}", orderMainId);
-                        return;
-                    }
-
-                    // 发送骑手取货通知
-                    orderNotifyService.sendRiderGetOrderToUserNotify(orderDelivery.getRiderId(), orderMainId);
-                    log.info("AOP异步发送骑手取货通知完成，订单ID：{}，骑手ID：{}", orderMainId, orderDelivery.getRiderId());
-                }
-            } catch (Exception e) {
-                log.error("骑手取货通知发送失败", e);
-            }
-        });
-    }
+//    @AfterReturning(pointcut = "riderPickupOrderPointcut()", returning = "result")
+//    public void afterRiderPickupOrder(Object result) {
+//        asyncExecutor.execute(() -> {
+//            try {
+//                if (result instanceof AjaxResult ajaxResult && ajaxResult.isSuccess()) {
+//                    // 提取订单ID
+//                    Long orderMainId = null;
+//                    Object data = ajaxResult.getData();
+//                    if (data instanceof Long) {
+//                        orderMainId = (Long) data;
+//                    }
+//
+//                    if (orderMainId == null) {
+//                        log.warn("骑手取货通知：订单ID为空，返回数据：{}", data);
+//                        return;
+//                    }
+//
+//                    // 查询配送信息
+//                    OrderDelivery orderDelivery = orderDeliveryMapper.selectOrderDeliveryByOrderMainId(orderMainId);
+//                    if (orderDelivery == null || orderDelivery.getRiderId() == null) {
+//                        log.warn("骑手取货通知：配送信息异常，订单ID：{}", orderMainId);
+//                        return;
+//                    }
+//
+//                    // 发送骑手取货通知
+//                    orderNotifyService.sendRiderGetOrderToUserNotify(orderDelivery.getRiderId(), orderMainId);
+//                    log.info("AOP异步发送骑手取货通知完成，订单ID：{}，骑手ID：{}", orderMainId, orderDelivery.getRiderId());
+//                }
+//            } catch (Exception e) {
+//                log.error("骑手取货通知发送失败", e);
+//            }
+//        });
+//    }
 
     // ========== 新增：用户确认收货（订单完成）通知逻辑 ==========
 //    @AfterReturning(pointcut = "userConfirmReceivePointcut()", returning = "result")

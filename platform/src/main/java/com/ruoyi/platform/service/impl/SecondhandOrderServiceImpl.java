@@ -7,6 +7,7 @@ import com.ruoyi.platform.domain.*;
 import com.ruoyi.platform.domain.dto.SecondhandOrderCreatDTO;
 import com.ruoyi.platform.domain.vo.SecondhandOrderContactDetailVO;
 import com.ruoyi.platform.mapper.*;
+import com.ruoyi.platform.service.IOrderNotifyService;
 import com.ruoyi.platform.service.ISecondhandOrderService;
 import com.ruoyi.platform.utils.OrderNoUtils;
 import org.apache.commons.collections.CollectionUtils;
@@ -37,6 +38,9 @@ public class  SecondhandOrderServiceImpl implements ISecondhandOrderService {
 
     @Autowired
     private UserBaseMapper userBaseMapper;
+
+    @Autowired
+    private IOrderNotifyService orderNotifyService;
 
 
     @Override
@@ -209,6 +213,9 @@ public class  SecondhandOrderServiceImpl implements ISecondhandOrderService {
 
         // 更新商品状态 -> 已售出（status=2）
         int rows2 = secondhandGoodsMapper.updateSecondhandGoodsStatus(goodsId, 2L);
+
+        orderNotifyService.sendOrderFinishNotify(order.getOrderMainId());
+
 
         return rows1 > 0 && rows2 > 0;
     }
