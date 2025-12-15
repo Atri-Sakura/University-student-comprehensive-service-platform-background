@@ -42,7 +42,7 @@ public class SysUserWalletRecordService implements ISysUserWalletRecordService {
     @Override
     public int setPayPassword(Long userId, String oldPayPassword, String newPayPassword) {
         String oldPassword = userWalletRecordMapper.getPayPasswordByUserId(userId);
-        if (oldPassword == null || !oldPassword.equals(oldPayPassword)) {
+        if (!oldPassword.equals(oldPayPassword)) {
             throw new RuntimeException("旧密码错误");
         }
         return userWalletRecordMapper.setPayPassword(userId, newPayPassword);
