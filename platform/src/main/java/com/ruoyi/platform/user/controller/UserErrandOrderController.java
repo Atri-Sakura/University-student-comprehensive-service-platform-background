@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("user/errandOrder")
+@RequestMapping("/user/errandOrder")
 @Slf4j
 public class UserErrandOrderController extends BaseController {
 
@@ -29,8 +29,6 @@ public class UserErrandOrderController extends BaseController {
 
     @Autowired
     private OrderMainMapper orderMainMapper;
-
-
 
     /**
      * 创建跑腿预支付订单
