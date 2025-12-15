@@ -325,9 +325,9 @@ public class OrderFlowServiceImpl implements IOrderFlowService {
             throw new ServiceException("无权操作此订单");
         }
 
-        if (!Long.valueOf(1L).equals(delivery.getDeliveryStatus())) {
-            throw new ServiceException("配送状态不正确");
-        }
+//        if (!Long.valueOf(1L).equals(delivery.getDeliveryStatus())) {
+//            throw new ServiceException("配送状态不正确");
+//        }
 
         // 4. 更新订单状态为配送中
         OrderMain updateOrder = new OrderMain();
