@@ -92,7 +92,7 @@ public class NettyServerChannelInitializer extends ChannelInitializer<SocketChan
                 .addLast(new ChunkedWriteHandler())
                 .addLast(new HttpObjectAggregator(64*1024))
 //                .addLast(new WebSocketServerCompressionHandler())
-                .addLast(new IdleStateHandler(30, 0, 0))
+//                .addLast(new IdleStateHandler(30, 0, 0))
                 .addLast(new WebSocketServerProtocolHandler("/ws", "", true, 64*1024))
 //                .addLast(new BinaryMessagedDecoder())
 //                .addLast(new WebSocketFrameToBinaryMessageDecoder())

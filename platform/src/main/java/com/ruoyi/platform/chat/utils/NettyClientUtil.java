@@ -268,7 +268,7 @@ public class NettyClientUtil {
                 channelRef.get().writeAndFlush(registerMsg).addListener(future -> {
                     if (future.isSuccess()) {
                         resetReconnectAttempts(); // 注册成功，重置重连计数器
-                        startHeartbeatTask();
+//                        startHeartbeatTask();
                         log.info("注册消息发送成功，用户[{}:{}]", userType, userBaseId);
                         pullOfflineMessage(userType, userBaseId);
                     } else {
