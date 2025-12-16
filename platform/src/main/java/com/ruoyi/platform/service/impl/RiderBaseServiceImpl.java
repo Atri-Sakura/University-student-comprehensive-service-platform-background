@@ -158,7 +158,8 @@ public class RiderBaseServiceImpl implements IRiderBaseService
         rider.setPassword(encrypted);
 
         int rows = riderBaseMapper.updateRiderBasePassword(rider);
-        if (rows <= 0) {
+        int rows1 = riderBaseMapper.updateSysUserPassword(rider.getUserId(), encrypted);
+        if (rows + rows1 <= 0) {
             throw new ServiceException("修改密码失败，请稍后重试");
         }
     }
