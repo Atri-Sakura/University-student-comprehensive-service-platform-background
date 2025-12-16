@@ -228,6 +228,14 @@ public class OrderMain extends BaseEntity
     @Excel(name = "订单缩略图")
     private String orderThumbnail;
 
+    // ========== 新增：配送信息（关联order_delivery表） ==========
+    /** 配送记录对象 */
+    private OrderDelivery orderDelivery;
+
+    // ========== 新增：骑手信息（关联rider_base表） ==========
+    /** 骑手基础信息对象 */
+    private RiderBase riderBase;
+
     private List<OrderTakeoutDetail> orderTakeoutDetailList;
 
     private List<OrderErrandDetail> orderErrandDetailList;

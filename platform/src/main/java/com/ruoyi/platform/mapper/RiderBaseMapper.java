@@ -4,6 +4,7 @@ import java.util.List;
 import com.ruoyi.platform.domain.RiderBase;
 import com.ruoyi.platform.domain.vo.RiderBaseInfoVO;
 import io.lettuce.core.dynamic.annotation.Param;
+import org.apache.ibatis.annotations.Update;
 
 /**
  * 骑手基础信息Mapper接口
@@ -128,4 +129,7 @@ public interface RiderBaseMapper
      * @return 骑手基础信息
      */
     RiderBase selectRiderBaseByUserId(@Param("userId") Long userId);
+
+    @Update("update sys_user set password = #{encrypted} where user_id = #{userId}")
+    int updateSysUserPassword(Long userId, String encrypted);
 }
