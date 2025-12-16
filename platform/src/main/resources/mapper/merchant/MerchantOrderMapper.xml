@@ -40,9 +40,21 @@
         </collection>
     </resultMap>
 
-    <!-- 扩展ResultMap：关联OrderDelivery和RiderBase -->
     <resultMap type="OrderMain" id="OrderMainResultWithDeliveryRider" extends="OrderMainResult">
-        <!-- 1. 关联OrderDelivery（一对一） -->
+        <!-- 1. 映射独立的骑手/配送字段（关键！） -->
+        <result property="riderId" column="rider_id"/>
+        <result property="riderNickname" column="rider_nickname"/>
+        <result property="riderPhone" column="rider_phone"/>
+        <result property="riderAvatar" column="rider_avatar"/>
+        <result property="riderRealName" column="rider_real_name"/>
+        <result property="deliveryStatus" column="delivery_status"/>
+        <result property="receiveTime" column="receive_time"/>
+        <result property="pickTime" column="pick_time"/>
+        <result property="deliverTime" column="deliver_time"/>
+        <result property="deliveryFee" column="delivery_fee"/>
+        <result property="riderIncome" column="rider_income"/>
+
+        <!-- 2. 保留原有关联对象映射（可选，若需要返回嵌套对象） -->
         <association property="orderDelivery" javaType="com.ruoyi.platform.domain.OrderDelivery">
             <id property="orderDeliveryId" column="order_delivery_id"/>
             <result property="orderMainId" column="order_main_id"/>
@@ -54,8 +66,6 @@
             <result property="deliveryFee" column="delivery_fee"/>
             <result property="riderIncome" column="rider_income"/>
         </association>
-
-        <!-- 2. 关联RiderBase（一对一） -->
         <association property="riderBase" javaType="com.ruoyi.platform.domain.RiderBase">
             <id property="riderBaseId" column="rider_base_id"/>
             <result property="nickname" column="rider_nickname"/>
@@ -87,6 +97,7 @@
         <result property="updateTime"       column="update_time"        />
         <result property="completeTime"     column="complete_time"      />
     </resultMap>
+
 
     <!-- 商家订单列表查询（关联配送、骑手表） -->
     <select id="selectMerchantOrderList" parameterType="OrderMain" resultMap="OrderMainResultWithDeliveryRider">
