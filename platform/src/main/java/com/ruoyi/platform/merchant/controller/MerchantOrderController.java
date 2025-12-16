@@ -36,7 +36,6 @@ public class MerchantOrderController extends BaseController {
     @GetMapping("/list")
     public TableDataInfo list(OrderMain orderMain) {
         startPage();
-        // 从SecurityUtils获取当前登录的商家ID
         Long merchantId = SecurityUtils.getMerchantBaseId();
         List<OrderMain> list = merchantOrderService.selectMerchantOrderList(merchantId, orderMain);
         return getDataTable(list);
@@ -50,7 +49,6 @@ public class MerchantOrderController extends BaseController {
      */
     @GetMapping("/{orderMainId}")
     public AjaxResult getInfo(@PathVariable("orderMainId") Long orderMainId) {
-        // 从SecurityUtils获取当前登录的商家ID
         Long merchantId = SecurityUtils.getMerchantBaseId();
         OrderMain order = merchantOrderService.selectMerchantOrderById(merchantId, orderMainId);
         return AjaxResult.success(order);
