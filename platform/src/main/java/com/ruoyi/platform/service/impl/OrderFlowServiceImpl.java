@@ -8,12 +8,13 @@ import com.ruoyi.platform.domain.enums.OrderStatusEnum;
 import com.ruoyi.platform.domain.enums.PayStatusEnum;
 import com.ruoyi.platform.mapper.*;
 import com.ruoyi.platform.service.IOrderFlowService;
-import com.ruoyi.platform.service.IOrderNotifyService;
 import com.ruoyi.platform.service.IWalletFlowService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,7 +22,11 @@ import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -38,13 +43,23 @@ public class OrderFlowServiceImpl implements IOrderFlowService {
     // Redis缓存Key前缀
     private static final String CACHE_ORDER_KEY = "order:main:";
     private static final String CACHE_MERCHANT_KEY = "merchant:base:";
-    private static final String CACHE_RIDER_KEY = "rider:base: ";
+    private static final String CACHE_RIDER_KEY = "rider:base:";
     private static final String CACHE_DELIVERY_KEY = "order:delivery:";
     private static final String LOCK_ORDER_KEY = "lock:order:";
 
     // 缓存过期时间
     private static final long CACHE_EXPIRE_SECONDS = 300; // 5分钟
-    private static final long LOCK_EXPIRE_SECONDS = 10; // 分布式锁10秒
+
+    // 分布式锁基础过期时间，看门狗会在此基础上续期
+    private static final long LOCK_EXPIRE_SECONDS = 30;
+
+    private static final DefaultRedisScript<Long> RENEW_SCRIPT;
+    private static final DefaultRedisScript<Long> UNLOCK_SCRIPT;
+
+    static {
+        RENEW_SCRIPT = new DefaultRedisScript<>("if redis.call('get', KEYS[1]) == ARGV[1] then return redis.call('expire', KEYS[1], ARGV[2]) else return 0 end", Long.class);
+        UNLOCK_SCRIPT = new DefaultRedisScript<>("if redis.call('get', KEYS[1]) == ARGV[1] then return redis.call('del', KEYS[1]) else return 0 end", Long.class);
+    }
 
     @Autowired
     private OrderMainMapper orderMainMapper;
@@ -73,52 +88,47 @@ public class OrderFlowServiceImpl implements IOrderFlowService {
     @Autowired
     private RedisTemplate<String, Object> redisTemplate;
 
+    // 注入在 ThreadPoolConfig 中配置的调度线程池
+    @Autowired
+    @Qualifier("scheduledExecutorService")
+    private ScheduledExecutorService scheduledExecutorService;
+
     /**
      * 商家接单（仅外卖单：1->2）
-     *
-     * @param merchantId 商家ID
-     * @param orderMainId 订单ID
-     * @return 结果
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public int merchantAcceptOrder(Long merchantId, Long orderMainId) {
-        // 使用分布式锁防止并发问题
         String lockKey = LOCK_ORDER_KEY + orderMainId;
-        Boolean lockAcquired = redisTemplate.opsForValue().setIfAbsent(lockKey, "1", LOCK_EXPIRE_SECONDS, TimeUnit.SECONDS);
+        String lockValue = UUID.randomUUID().toString();
 
-        if (Boolean.FALSE.equals(lockAcquired)) {
+        // 1. 获取分布式锁（带看门狗续期功能）
+        WatchDog watchDog = lockWithWatchDog(lockKey, lockValue);
+        if (watchDog == null) {
             throw new ServiceException("订单正在处理中，请稍后再试");
         }
 
         try {
-            // 1. 查询订单信息（优先从缓存）
+            // 2. 查询订单信息（优先从缓存）
             OrderMain order = getOrderFromCache(orderMainId);
             if (order == null) {
                 throw new ServiceException("订单不存在");
             }
 
-            // 仅外卖订单允许商家接单
             if (order.getOrderType() == null || !Long.valueOf(1L).equals(order.getOrderType())) {
                 throw new ServiceException("非外卖订单不支持商家接单");
             }
 
-            // 2. 查询明细
-            OrderTakeoutDetail queryDetail = new OrderTakeoutDetail();
-            queryDetail.setOrderMainId(orderMainId);
-            List<OrderTakeoutDetail> details = orderTakeoutDetailMapper.selectOrderTakeoutDetailList(queryDetail);
-
-            // 3. 状态校验：必须是 1-商家待接单
+            // 3. 状态校验
             if (!OrderStatusEnum.MERCHANT_PENDING_ACCEPT.getCode().equals(order.getOrderStatus())) {
                 throw new ServiceException("订单状态不正确，当前状态：" + order.getOrderStatus());
             }
 
-            // 4. 支付状态校验：必须已支付
-            if (! PayStatusEnum.PAID.getCode().equals(order.getPayStatus())) {
+            if (!PayStatusEnum.PAID.getCode().equals(order.getPayStatus())) {
                 throw new ServiceException("订单未支付");
             }
 
-            // 5. 更新订单状态为 2-骑手待接单（核心同步操作）
+            // 4. 更新订单状态
             OrderMain updateOrder = new OrderMain();
             updateOrder.setOrderMainId(orderMainId);
             updateOrder.setOrderStatus(OrderStatusEnum.RIDER_PENDING_ACCEPT.getCode());
@@ -129,18 +139,19 @@ public class OrderFlowServiceImpl implements IOrderFlowService {
                 throw new ServiceException("订单状态更新失败");
             }
 
-            // 6. 更新订单明细结算状态（核心同步操作）
-            for (OrderTakeoutDetail detail : details) {
-                OrderTakeoutDetail updateDetail = new OrderTakeoutDetail();
-                updateDetail.setOrderTakeoutDetailId(detail.getOrderTakeoutDetailId());
-                updateDetail.setSettleStatus(1L);
-                orderTakeoutDetailMapper.updateOrderTakeoutDetail(updateDetail);
+            // 5. 更新明细结算状态
+            OrderTakeoutDetail queryDetail = new OrderTakeoutDetail();
+            queryDetail.setOrderMainId(orderMainId);
+            List<OrderTakeoutDetail> details = orderTakeoutDetailMapper.selectOrderTakeoutDetailList(queryDetail);
+
+            if (!details.isEmpty()) {
+                orderTakeoutDetailMapper.updateBatchSettleStatus(details);
             }
 
-            // 清除订单缓存
+            // 6. 清除缓存
             clearOrderCache(orderMainId);
 
-            // 7. 异步记录状态变更日志（边缘异步操作）
+            // 7. 异步记录日志
             final String merchantName = getMerchantNameFromCache(merchantId);
             executeAfterCommit(() -> asyncSaveStatusLog(
                     orderMainId,
@@ -155,43 +166,37 @@ public class OrderFlowServiceImpl implements IOrderFlowService {
             log.info("商家接单成功，订单号：{}，商家ID：{}", order.getOrderNo(), merchantId);
             return result;
         } finally {
-            // 释放分布式锁
-            redisTemplate.delete(lockKey);
+            // 安全释放锁
+            unlockWithWatchDog(watchDog);
         }
     }
 
     /**
      * 商家拒单
-     *
-     * @param merchantId 商家ID
-     * @param orderMainId 订单ID
-     * @param refuseReason 拒单原因
-     * @return 结果
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public int merchantRejectOrder(Long merchantId, Long orderMainId, String refuseReason) {
-        // 使用分布式锁
         String lockKey = LOCK_ORDER_KEY + orderMainId;
-        Boolean lockAcquired = redisTemplate.opsForValue().setIfAbsent(lockKey, "1", LOCK_EXPIRE_SECONDS, TimeUnit.SECONDS);
+        String lockValue = UUID.randomUUID().toString();
 
-        if (Boolean.FALSE.equals(lockAcquired)) {
+        // 1. 获取分布式锁
+        WatchDog watchDog = lockWithWatchDog(lockKey, lockValue);
+        if (watchDog == null) {
             throw new ServiceException("订单正在处理中，请稍后再试");
         }
 
         try {
-            // 1. 查询订单信息（优先从缓存）
             OrderMain order = getOrderFromCache(orderMainId);
             if (order == null) {
                 throw new ServiceException("订单不存在");
             }
 
-            // 仅外卖订单允许商家拒单
             if (order.getOrderType() == null || !Long.valueOf(1L).equals(order.getOrderType())) {
                 throw new ServiceException("非外卖订单不支持商家拒单");
             }
 
-            // 2. 权限校验
+            // 校验权限
             OrderTakeoutDetail queryDetail = new OrderTakeoutDetail();
             queryDetail.setOrderMainId(orderMainId);
             List<OrderTakeoutDetail> details = orderTakeoutDetailMapper.selectOrderTakeoutDetailList(queryDetail);
@@ -199,12 +204,11 @@ public class OrderFlowServiceImpl implements IOrderFlowService {
                 throw new ServiceException("无权操作此订单");
             }
 
-            // 3. 状态校验：必须是待接单状态
             if (!OrderStatusEnum.MERCHANT_PENDING_ACCEPT.getCode().equals(order.getOrderStatus())) {
                 throw new ServiceException("订单状态不正确，无法拒单");
             }
 
-            // 4. 更新订单状态为已拒单（核心同步操作）
+            // 更新状态
             OrderMain updateOrder = new OrderMain();
             updateOrder.setOrderMainId(orderMainId);
             updateOrder.setOrderStatus(OrderStatusEnum.REJECTED.getCode());
@@ -218,24 +222,22 @@ public class OrderFlowServiceImpl implements IOrderFlowService {
                 throw new ServiceException("订单状态更新失败");
             }
 
-            // 5. 退款给用户（核心同步操作）
+            // 退款逻辑
             walletFlowService.refundUser(order.getUserId(), orderMainId, order.getPayAmount());
 
-            // 6. 更新支付状态为已退款（核心同步操作）
             OrderMain updatePayStatus = new OrderMain();
             updatePayStatus.setOrderMainId(orderMainId);
             updatePayStatus.setPayStatus(PayStatusEnum.REFUNDED.getCode());
             updatePayStatus.setUpdateTime(DateUtils.getNowDate());
             orderMainMapper.updateOrderMain(updatePayStatus);
 
-            // 清除订单缓存
             clearOrderCache(orderMainId);
 
-            // 7. 异步恢复商品库存（边缘异步操作）
+            // 异步恢复库存
             final List<OrderTakeoutDetail> detailsCopy = details;
             executeAfterCommit(() -> asyncRestoreStock(detailsCopy));
 
-            // 8. 异步记录状态变更日志
+            // 异步日志
             final String merchantName = getMerchantNameFromCache(merchantId);
             executeAfterCommit(() -> asyncSaveStatusLog(
                     orderMainId,
@@ -247,107 +249,84 @@ public class OrderFlowServiceImpl implements IOrderFlowService {
                     "商家拒单：" + refuseReason
             ));
 
-            log.info("商家拒单成功，订单号：{}，拒单原因：{}", order.getOrderNo(), refuseReason);
             return result;
         } finally {
-            // 释放分布式锁
-            redisTemplate.delete(lockKey);
+            unlockWithWatchDog(watchDog);
         }
     }
 
     /**
      * 骑手接单（外卖/跑腿：2->3）
-     *
-     * @param riderId 骑手ID
-     * @param orderMainId 订单ID
-     * @return 结果
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public int riderAcceptOrder(Long riderId, Long orderMainId) {
-        // 使用分布式锁
         String lockKey = LOCK_ORDER_KEY + orderMainId;
-        Boolean lockAcquired = redisTemplate.opsForValue().setIfAbsent(lockKey, "1", LOCK_EXPIRE_SECONDS, TimeUnit.SECONDS);
+        String lockValue = UUID.randomUUID().toString();
 
-        if (Boolean.FALSE. equals(lockAcquired)) {
+        WatchDog watchDog = lockWithWatchDog(lockKey, lockValue);
+        if (watchDog == null) {
             throw new ServiceException("订单正在处理中，请稍后再试");
         }
 
         try {
-            // 1. 查询订单信息（优先从缓存）
             OrderMain order = getOrderFromCache(orderMainId);
             if (order == null) {
                 throw new ServiceException("订单不存在");
             }
 
-            // 2. 状态校验：必须是 2-骑手待接单
             if (!OrderStatusEnum.RIDER_PENDING_ACCEPT.getCode().equals(order.getOrderStatus())) {
                 throw new ServiceException("订单状态不正确，无法接单");
             }
 
-            // 3. 查询配送记录（优先从缓存）
             OrderDelivery delivery = getDeliveryFromCache(orderMainId);
             if (delivery == null) {
                 throw new ServiceException("配送记录不存在");
             }
 
-            // 4. 校验是否已被其他骑手接单
-            if (delivery.getRiderId() != null && ! delivery.getRiderId().equals(riderId)) {
+            if (delivery.getRiderId() != null && !delivery.getRiderId().equals(riderId)) {
                 throw new ServiceException("订单已被其他骑手接单");
             }
 
-            // 5. 校验并获取骑手收入（配送费）
+            // 费用处理
             BigDecimal riderIncome = delivery.getRiderIncome();
             if (riderIncome == null || riderIncome.compareTo(BigDecimal.ZERO) <= 0) {
                 riderIncome = order.getDeliveryFeeAmount();
                 if (riderIncome == null || riderIncome.compareTo(BigDecimal.ZERO) <= 0) {
-                    log.error("配送费异常，订单ID：{}，配送记录ID：{}", orderMainId, delivery.getOrderDeliveryId());
-                    throw new ServiceException("配送费信息异常，无法接单");
+                    // 容错处理
+                    riderIncome = BigDecimal.ZERO;
                 }
 
-                // 修复配送记录费用字段
+                // 修复数据
                 OrderDelivery updateFee = new OrderDelivery();
                 updateFee.setOrderDeliveryId(delivery.getOrderDeliveryId());
                 updateFee.setDeliveryFee(riderIncome);
                 updateFee.setDeliveryFeeFromUser(riderIncome);
                 updateFee.setRiderIncome(riderIncome);
                 orderDeliveryMapper.updateOrderDelivery(updateFee);
-
-                log.info("自动修复配送费，订单ID：{}，配送费：{}", orderMainId, riderIncome);
             }
 
-            // 6. 获取骑手信息（优先从缓存）
             String riderNickname = getRiderNicknameFromCache(riderId);
 
-            // 7. 更新配送记录（核心同步操作）
+            // 更新配送记录
             OrderDelivery updateDelivery = new OrderDelivery();
             updateDelivery.setOrderDeliveryId(delivery.getOrderDeliveryId());
             updateDelivery.setRiderId(riderId);
             updateDelivery.setRiderNickname(riderNickname);
             updateDelivery.setReceiveTime(DateUtils.getNowDate());
-            updateDelivery.setDeliveryStatus(1L); // 1-已接单
-            int deliveryResult = orderDeliveryMapper.updateOrderDelivery(updateDelivery);
+            updateDelivery.setDeliveryStatus(1L);
+            orderDeliveryMapper.updateOrderDelivery(updateDelivery);
 
-            if (deliveryResult == 0) {
-                throw new ServiceException("配送记录更新失败");
-            }
-
-            // 8. 更新订单状态为 3-骑手待取货（核心同步操作）
+            // 更新订单状态
             OrderMain updateOrder = new OrderMain();
             updateOrder.setOrderMainId(orderMainId);
             updateOrder.setOrderStatus(OrderStatusEnum.RIDER_PENDING_PICKUP.getCode());
             updateOrder.setUpdateTime(DateUtils.getNowDate());
             int orderResult = orderMainMapper.updateOrderMain(updateOrder);
 
-            if (orderResult == 0) {
-                throw new ServiceException("订单状态更新失败");
-            }
-
-            // 清除缓存
             clearOrderCache(orderMainId);
             clearDeliveryCache(orderMainId);
 
-            // 9. 异步记录状态变更日志
             final BigDecimal finalRiderIncome = riderIncome;
             executeAfterCommit(() -> {
                 asyncSaveStatusLog(
@@ -364,8 +343,7 @@ public class OrderFlowServiceImpl implements IOrderFlowService {
 
             return orderResult;
         } finally {
-            // 释放分布式锁
-            redisTemplate.delete(lockKey);
+            unlockWithWatchDog(watchDog);
         }
     }
 
@@ -375,61 +353,48 @@ public class OrderFlowServiceImpl implements IOrderFlowService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public int riderPickupOrder(Long riderId, Long orderMainId) {
-        // 使用分布式锁
         String lockKey = LOCK_ORDER_KEY + orderMainId;
-        Boolean lockAcquired = redisTemplate.opsForValue().setIfAbsent(lockKey, "1", LOCK_EXPIRE_SECONDS, TimeUnit.SECONDS);
+        String lockValue = UUID.randomUUID().toString();
 
-        if (Boolean.FALSE.equals(lockAcquired)) {
+        WatchDog watchDog = lockWithWatchDog(lockKey, lockValue);
+        if (watchDog == null) {
             throw new ServiceException("订单正在处理中，请稍后再试");
         }
 
         try {
-            // 1. 查询订单信息（优先从缓存）
             OrderMain order = getOrderFromCache(orderMainId);
-            if (order == null) {
-                throw new ServiceException("订单不存在");
-            }
+            if (order == null) throw new ServiceException("订单不存在");
 
-            // 2. 状态校验：必须是"骑手待取货"状态
             if (!OrderStatusEnum.RIDER_PENDING_PICKUP.getCode().equals(order.getOrderStatus())) {
-                throw new ServiceException("订单状态不正确，无法取货，当前状态：" + order.getOrderStatus());
+                throw new ServiceException("订单状态不正确，无法取货");
             }
 
-            // 3. 查询配送记录并校验权限（优先从缓存）
             OrderDelivery delivery = getDeliveryFromCache(orderMainId);
-            if (delivery == null) {
-                throw new ServiceException("配送记录不存在");
-            }
+            if (delivery == null) throw new ServiceException("配送记录不存在");
 
             if (!riderId.equals(delivery.getRiderId())) {
                 throw new ServiceException("无权操作此订单");
             }
 
-            // 4. 更新订单状态为配送中（核心同步操作）
+            // 更新订单状态
             OrderMain updateOrder = new OrderMain();
             updateOrder.setOrderMainId(orderMainId);
             updateOrder.setOrderStatus(OrderStatusEnum.DELIVERING.getCode());
             updateOrder.setUpdateTime(DateUtils.getNowDate());
             int result = orderMainMapper.updateOrderMain(updateOrder);
 
-            if (result == 0) {
-                throw new ServiceException("订单状态更新失败");
-            }
-
-            // 5. 更新配送记录（核心同步操作）
+            // 更新配送状态
             OrderDelivery updateDelivery = new OrderDelivery();
             updateDelivery.setOrderDeliveryId(delivery.getOrderDeliveryId());
             updateDelivery.setPickTime(DateUtils.getNowDate());
-            updateDelivery.setDeliveryStatus(2L); // 2-已取货（配送中）
+            updateDelivery.setDeliveryStatus(2L);
             updateDelivery.setActualPickLongitude(order.getPickLongitude());
             updateDelivery.setActualPickLatitude(order.getPickLatitude());
             orderDeliveryMapper.updateOrderDelivery(updateDelivery);
 
-            // 清除缓存
             clearOrderCache(orderMainId);
             clearDeliveryCache(orderMainId);
 
-            // 6. 异步记录状态变更日志
             final String riderNickname = getRiderNicknameFromCache(riderId);
             executeAfterCommit(() -> {
                 asyncSaveStatusLog(
@@ -441,13 +406,11 @@ public class OrderFlowServiceImpl implements IOrderFlowService {
                         riderNickname,
                         "骑手取货"
                 );
-                log.info("骑手取货成功，订单号：{}，骑手ID：{}", order.getOrderNo(), riderId);
             });
 
             return result;
         } finally {
-            // 释放分布式锁
-            redisTemplate. delete(lockKey);
+            unlockWithWatchDog(watchDog);
         }
     }
 
@@ -457,41 +420,30 @@ public class OrderFlowServiceImpl implements IOrderFlowService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public int riderDeliverOrder(Long riderId, Long orderMainId) {
-        // 使用分布式锁
         String lockKey = LOCK_ORDER_KEY + orderMainId;
-        Boolean lockAcquired = redisTemplate.opsForValue().setIfAbsent(lockKey, "1", LOCK_EXPIRE_SECONDS, TimeUnit.SECONDS);
+        String lockValue = UUID.randomUUID().toString();
 
-        if (Boolean.FALSE. equals(lockAcquired)) {
+        WatchDog watchDog = lockWithWatchDog(lockKey, lockValue);
+        if (watchDog == null) {
             throw new ServiceException("订单正在处理中，请稍后再试");
         }
 
         try {
-            // 1. 查询订单信息（优先从缓存）
             OrderMain order = getOrderFromCache(orderMainId);
-            if (order == null) {
-                throw new ServiceException("订单不存在");
-            }
+            if (order == null) throw new ServiceException("订单不存在");
 
-            // 2. 状态校验
             if (!OrderStatusEnum.DELIVERING.getCode().equals(order.getOrderStatus())) {
-                throw new ServiceException("订单状态不正确，无法完成配送，当前状态：" + order.getOrderStatus());
+                throw new ServiceException("订单状态不正确，无法完成配送");
             }
 
-            // 3. 查询配送记录并校验权限（优先从缓存）
             OrderDelivery delivery = getDeliveryFromCache(orderMainId);
-            if (delivery == null) {
-                throw new ServiceException("配送记录不存在");
-            }
+            if (delivery == null) throw new ServiceException("配送记录不存在");
 
             if (!riderId.equals(delivery.getRiderId())) {
                 throw new ServiceException("无权操作此订单");
             }
 
-            if (!Long.valueOf(2L).equals(delivery.getDeliveryStatus())) {
-                throw new ServiceException("配送状态不正确，当前状态：" + delivery. getDeliveryStatus());
-            }
-
-            // 4. 更新订单状态为已完成（核心同步操作）
+            // 更新订单状态
             OrderMain updateOrder = new OrderMain();
             updateOrder.setOrderMainId(orderMainId);
             updateOrder.setOrderStatus(OrderStatusEnum.COMPLETED.getCode());
@@ -499,53 +451,41 @@ public class OrderFlowServiceImpl implements IOrderFlowService {
             updateOrder.setUpdateTime(DateUtils.getNowDate());
             int result = orderMainMapper.updateOrderMain(updateOrder);
 
-            if (result == 0) {
-                throw new ServiceException("订单状态更新失败");
-            }
-
-            // 5. 更新配送记录（核心同步操作）
+            // 更新配送状态
             OrderDelivery updateDelivery = new OrderDelivery();
             updateDelivery.setOrderDeliveryId(delivery.getOrderDeliveryId());
             updateDelivery.setDeliverTime(DateUtils.getNowDate());
-            updateDelivery.setDeliveryStatus(3L); // 3-已送达
+            updateDelivery.setDeliveryStatus(3L);
             updateDelivery.setActualDeliverLongitude(order.getDeliverLongitude());
             updateDelivery.setActualDeliverLatitude(order.getDeliverLatitude());
             orderDeliveryMapper.updateOrderDelivery(updateDelivery);
 
-            // 6. 结算给骑手（核心同步操作）
+            // 结算逻辑
             BigDecimal riderIncome = order.getDeliveryFeeAmount();
-            if (riderIncome == null || riderIncome.compareTo(BigDecimal.ZERO) <= 0) {
-                log.warn("配送费为空或为0，订单ID：{}", orderMainId);
-                riderIncome = BigDecimal.ZERO;
-            }
+            if (riderIncome == null) riderIncome = BigDecimal.ZERO;
 
             try {
                 walletFlowService.settleRider(riderId, orderMainId, riderIncome);
-                log.info("骑手结算成功，订单ID：{}，骑手ID：{}，配送费：{}", orderMainId, riderId, riderIncome);
 
-                // 更新配送记录的收入发放状态
                 OrderDelivery updateIncomeStatus = new OrderDelivery();
                 updateIncomeStatus.setOrderDeliveryId(delivery.getOrderDeliveryId());
                 updateIncomeStatus.setIncomeStatus(1L);
                 orderDeliveryMapper.updateOrderDelivery(updateIncomeStatus);
-
             } catch (Exception e) {
-                log.error("骑手结算失败，订单ID：{}，骑手ID：{}", orderMainId, riderId, e);
+                log.error("骑手结算失败", e);
                 throw new ServiceException("骑手结算失败：" + e.getMessage());
             }
 
-            // 清除缓存
             clearOrderCache(orderMainId);
             clearDeliveryCache(orderMainId);
 
-            // 7. 异步结算给商家（边缘异步操作）
+            // 商家结算
             if (order.getOrderType() == 1L && order.getMerchantId() != null) {
                 final Long merchantId = order.getMerchantId();
                 final BigDecimal goodsAmount = order.getGoodsAmount();
                 executeAfterCommit(() -> asyncSettleMerchant(merchantId, orderMainId, goodsAmount));
             }
 
-            // 8. 异步记录状态变更日志
             final String riderNickname = getRiderNicknameFromCache(riderId);
             executeAfterCommit(() -> {
                 asyncSaveStatusLog(
@@ -557,19 +497,95 @@ public class OrderFlowServiceImpl implements IOrderFlowService {
                         riderNickname,
                         "骑手送达"
                 );
-                log.info("订单送达成功，订单号：{}，骑手ID：{}", order.getOrderNo(), riderId);
             });
 
             return result;
         } finally {
-            // 释放分布式锁
-            redisTemplate. delete(lockKey);
+            unlockWithWatchDog(watchDog);
         }
     }
 
     /**
-     * 从缓存获取订单信息
+     * 核心方法：加锁并启动看门狗
      */
+    private WatchDog lockWithWatchDog(String lockKey, String lockValue) {
+        // 尝试加锁
+        Boolean lockAcquired = redisTemplate.opsForValue().setIfAbsent(lockKey, lockValue, LOCK_EXPIRE_SECONDS, TimeUnit.SECONDS);
+
+        if (Boolean.TRUE.equals(lockAcquired)) {
+            // 加锁成功，启动看门狗线程
+            WatchDog watchDog = new WatchDog(lockKey, lockValue);
+            watchDog.start();
+            return watchDog;
+        }
+        return null;
+    }
+
+    /**
+     * 核心方法：停止看门狗并安全释放锁
+     */
+    private void unlockWithWatchDog(WatchDog watchDog) {
+        if (watchDog != null) {
+            // 1. 停止续期任务
+            watchDog.stop();
+
+            // 2. 使用Lua脚本安全释放锁（校验UUID，只删除自己的锁）
+            String script = "if redis.call('get', KEYS[1]) == ARGV[1] then return redis.call('del', KEYS[1]) else return 0 end";
+            DefaultRedisScript<Long> redisScript = new DefaultRedisScript<>();
+            redisScript.setScriptText(script);
+            redisScript.setResultType(Long.class);
+
+            redisTemplate.execute(redisScript, Collections.singletonList(watchDog.key), watchDog.value);
+        }
+    }
+
+    /**
+     * 看门狗内部类：负责锁的自动续期
+     */
+    private class WatchDog {
+        private final String key;
+        private final String value;
+        private ScheduledFuture<?> future;
+
+        public WatchDog(String key, String value) {
+            this.key = key;
+            this.value = value;
+        }
+
+        public void start() {
+            // 在过期时间的 1/3 处进行续期（例如30秒过期，每10秒续期一次）
+            long period = LOCK_EXPIRE_SECONDS / 3;
+
+            this.future = scheduledExecutorService.scheduleAtFixedRate(() -> {
+                try {
+                    // 使用 Lua 脚本进行续期：检查值是否匹配，匹配则重置过期时间
+                    String script = "if redis.call('get', KEYS[1]) == ARGV[1] then return redis.call('expire', KEYS[1], ARGV[2]) else return 0 end";
+                    DefaultRedisScript<Long> redisScript = new DefaultRedisScript<>();
+                    redisScript.setScriptText(script);
+                    redisScript.setResultType(Long.class);
+
+                    Long result = redisTemplate.execute(redisScript, Collections.singletonList(key), value, LOCK_EXPIRE_SECONDS);
+
+                    // 如果返回0，说明锁已经不在了（可能Redis重启或被手动删除了），停止续期
+                    if (result != null && result == 0) {
+                        this.stop();
+                    }
+                } catch (Exception e) {
+                    log.error("分布式锁续期失败，Key: {}", key, e);
+                    // 续期失败不抛出异常，以免影响主业务，但记录日志
+                }
+            }, period, period, TimeUnit.SECONDS);
+        }
+
+        public void stop() {
+            if (this.future != null && !this.future.isCancelled()) {
+                this.future.cancel(true);
+            }
+        }
+    }
+
+    // ================= 以下为辅助方法和缓存操作 =================
+
     private OrderMain getOrderFromCache(Long orderMainId) {
         String cacheKey = CACHE_ORDER_KEY + orderMainId;
         OrderMain order = (OrderMain) redisTemplate.opsForValue().get(cacheKey);
@@ -577,16 +593,12 @@ public class OrderFlowServiceImpl implements IOrderFlowService {
         if (order == null) {
             order = orderMainMapper.selectOrderMainByOrderMainId(orderMainId);
             if (order != null) {
-                redisTemplate. opsForValue().set(cacheKey, order, CACHE_EXPIRE_SECONDS, TimeUnit.SECONDS);
+                redisTemplate.opsForValue().set(cacheKey, order, CACHE_EXPIRE_SECONDS, TimeUnit.SECONDS);
             }
         }
-
         return order;
     }
 
-    /**
-     * 从缓存获取配送记录
-     */
     private OrderDelivery getDeliveryFromCache(Long orderMainId) {
         String cacheKey = CACHE_DELIVERY_KEY + orderMainId;
         OrderDelivery delivery = (OrderDelivery) redisTemplate.opsForValue().get(cacheKey);
@@ -598,70 +610,44 @@ public class OrderFlowServiceImpl implements IOrderFlowService {
 
             if (!deliveries.isEmpty()) {
                 delivery = deliveries.get(0);
-                redisTemplate.opsForValue().set(cacheKey, delivery, CACHE_EXPIRE_SECONDS, TimeUnit. SECONDS);
+                redisTemplate.opsForValue().set(cacheKey, delivery, CACHE_EXPIRE_SECONDS, TimeUnit.SECONDS);
             }
         }
-
         return delivery;
     }
 
-    /**
-     * 从缓存获取商家名称
-     */
     private String getMerchantNameFromCache(Long merchantId) {
         String cacheKey = CACHE_MERCHANT_KEY + merchantId;
         String merchantName = (String) redisTemplate.opsForValue().get(cacheKey);
 
         if (merchantName == null) {
             MerchantBase merchant = merchantBaseMapper.selectMerchantBaseByMerchantBaseId(merchantId);
-            if (merchant != null) {
-                merchantName = merchant.getMerchantName();
-                redisTemplate.opsForValue().set(cacheKey, merchantName, CACHE_EXPIRE_SECONDS, TimeUnit.SECONDS);
-            } else {
-                merchantName = "商家";
-            }
+            merchantName = (merchant != null) ? merchant.getMerchantName() : "商家";
+            redisTemplate.opsForValue().set(cacheKey, merchantName, CACHE_EXPIRE_SECONDS, TimeUnit.SECONDS);
         }
-
         return merchantName;
     }
 
-    /**
-     * 从缓存获取骑手昵称
-     */
     private String getRiderNicknameFromCache(Long riderId) {
         String cacheKey = CACHE_RIDER_KEY + riderId;
         String riderNickname = (String) redisTemplate.opsForValue().get(cacheKey);
 
         if (riderNickname == null) {
             RiderBase rider = riderBaseMapper.selectRiderBaseByRiderBaseId(riderId);
-            if (rider != null) {
-                riderNickname = rider. getNickname();
-                redisTemplate.opsForValue().set(cacheKey, riderNickname, CACHE_EXPIRE_SECONDS, TimeUnit.SECONDS);
-            } else {
-                riderNickname = "骑手";
-            }
+            riderNickname = (rider != null) ? rider.getNickname() : "骑手";
+            redisTemplate.opsForValue().set(cacheKey, riderNickname, CACHE_EXPIRE_SECONDS, TimeUnit.SECONDS);
         }
-
         return riderNickname;
     }
 
-    /**
-     * 清除订单缓存
-     */
     private void clearOrderCache(Long orderMainId) {
         redisTemplate.delete(CACHE_ORDER_KEY + orderMainId);
     }
 
-    /**
-     * 清除配送记录缓存
-     */
     private void clearDeliveryCache(Long orderMainId) {
         redisTemplate.delete(CACHE_DELIVERY_KEY + orderMainId);
     }
 
-    /**
-     * 异步保存订单状态变更日志
-     */
     @Async
     public void asyncSaveStatusLog(Long orderMainId, Long oldStatus, Long newStatus,
                                    OperatorTypeEnum operatorType, Long operatorId,
@@ -676,44 +662,31 @@ public class OrderFlowServiceImpl implements IOrderFlowService {
             statusLog.setOperatorName(operatorName);
             statusLog.setRemark(remark);
             orderStatusLogMapper.insertOrderStatusLog(statusLog);
-            log.debug("订单状态日志记录成功，订单ID：{}", orderMainId);
         } catch (Exception e) {
             log.error("订单状态日志记录失败，订单ID：{}", orderMainId, e);
         }
     }
 
-    /**
-     * 异步恢复商品库存
-     */
     @Async
     public void asyncRestoreStock(List<OrderTakeoutDetail> details) {
         try {
             for (OrderTakeoutDetail detail : details) {
                 merchantGoodsMapper.increaseStock(detail.getGoodsId(), detail.getQuantity());
             }
-            log.debug("商品库存恢复成功，商品数量：{}", details.size());
         } catch (Exception e) {
             log.error("商品库存恢复失败", e);
         }
     }
 
-    /**
-     * 异步结算给商家
-     */
     @Async
     public void asyncSettleMerchant(Long merchantId, Long orderMainId, BigDecimal goodsAmount) {
         try {
             walletFlowService.settleMerchant(merchantId, orderMainId, goodsAmount);
-            log.info("商家结算成功，订单ID：{}，商家ID：{}，金额：{}", orderMainId, merchantId, goodsAmount);
         } catch (Exception e) {
             log.error("商家结算失败，订单ID：{}，商家ID：{}", orderMainId, merchantId, e);
-            // 商家结算失败不影响骑手结算，只记录日志
         }
     }
 
-    /**
-     * 事务提交后执行
-     */
     private void executeAfterCommit(Runnable runnable) {
         if (TransactionSynchronizationManager.isSynchronizationActive()) {
             TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
@@ -723,7 +696,6 @@ public class OrderFlowServiceImpl implements IOrderFlowService {
                 }
             });
         } else {
-            // 如果没有事务，直接执行
             runnable.run();
         }
     }

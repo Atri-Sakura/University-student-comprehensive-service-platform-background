@@ -6,7 +6,6 @@ spring:
         druid:
             # 主库数据源
             master:
-#                url: jdbc:mysql://182.254.228.15:3306/ry-vue?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8
                 url: jdbc:mysql://182.254.228.15:3306/ry-vue?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=Asia/Shanghai
                 username: root
                 password: AAATTTRRRIII
@@ -14,17 +13,17 @@ spring:
             slave:
                 # 从数据源开关/默认关闭
                 enabled: false
-                url: 
-                username: 
-                password: 
-            # 初始连接数
-            initialSize: 5
-            # 最小连接池数量
-            minIdle: 10
-            # 最大连接池数量
-            maxActive: 20
+                url:
+                username:
+                password:
+            # 优化：初始连接数增加，避免启动慢
+            initialSize: 20
+            # 优化：最小空闲连接提升，应对并发波动
+            minIdle: 20
+            # 优化：最大活跃连接数大幅提升，适应高并发场景（原20太小）
+            maxActive: 100
             # 配置获取连接等待超时的时间
-            maxWait: 60000
+            maxWait: 5000
             # 配置连接超时时间
             connectTimeout: 30000
             # 配置网络超时时间
@@ -40,7 +39,7 @@ spring:
             testWhileIdle: true
             testOnBorrow: false
             testOnReturn: false
-            webStatFilter: 
+            webStatFilter:
                 enabled: true
             statViewServlet:
                 enabled: true

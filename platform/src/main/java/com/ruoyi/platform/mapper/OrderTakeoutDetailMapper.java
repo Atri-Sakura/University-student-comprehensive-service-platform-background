@@ -2,6 +2,7 @@ package com.ruoyi.platform.mapper;
 
 import java.util.List;
 import com.ruoyi.platform.domain.OrderTakeoutDetail;
+import io.lettuce.core.dynamic.annotation.Param;
 
 /**
  * 外卖订单明细（不含地址信息）Mapper接口
@@ -58,4 +59,12 @@ public interface OrderTakeoutDetailMapper
      * @return 结果
      */
     public int deleteOrderTakeoutDetailByOrderTakeoutDetailIds(Long[] orderTakeoutDetailIds);
+
+    /**
+     * 批量插入订单明细
+     */
+    int batchInsert(List<OrderTakeoutDetail> details);
+
+    // 添加批量更新接口
+    int updateBatchSettleStatus(@Param("list") List<OrderTakeoutDetail> list);
 }

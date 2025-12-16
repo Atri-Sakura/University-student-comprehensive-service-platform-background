@@ -23,6 +23,7 @@ import com.ruoyi.common.utils.map.AMapGeocodeUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -56,7 +57,13 @@ public class UserOrderServiceImpl implements IUserOrderService {
     private static final String CACHE_MERCHANT_KEY = "merchant:info:";
     private static final String CACHE_USER_ADDRESS_KEY = "user:address: ";
     private static final String CACHE_GOODS_KEY = "goods:info:";
-    private static final String CACHE_MERCHANT_ADDRESS_KEY = "merchant:address: ";
+    private static final String CACHE_MERCHANT_ADDRESS_KEY = "merchant:address:";
+
+    /** 缓存空对象标记（防止缓存穿透） */
+
+    private static final String NULL_CACHE_VALUE = "NULL_VAL";
+
+    private static final int NULL_CACHE_EXPIRE_MINUTES = 5;
 
     /** 缓存过期时间（小时） */
     private static final int CACHE_EXPIRE_HOURS = 2;
@@ -90,6 +97,9 @@ public class UserOrderServiceImpl implements IUserOrderService {
 
     @Autowired
     private RedisCache redisCache;
+
+    @Autowired
+    private RedisTemplate<String, Object> redisTemplate;
 
     @Autowired
     private UserAddressMapper userAddressMapper;
@@ -240,7 +250,7 @@ public class UserOrderServiceImpl implements IUserOrderService {
 
         try {
             // 7. 创建真正的订单（扣减库存）
-            OrderMain order = createTakeoutOrderInternal(createOrderDTO, orderNo, amountInfo);
+            OrderMain order = createTakeoutOrderInternal(createOrderDTO, generateOrderNo(), amountInfo);
 
             // 8. 更新订单支付状态为已支付
             order.setPayStatus(PayStatusEnum.PAID.getCode());
@@ -1126,27 +1136,52 @@ public class UserOrderServiceImpl implements IUserOrderService {
         return com.ruoyi.platform.chat.utils.SnowflakeIdGenerator.getInstance().nextId();
     }
 
-    // Redis 缓存方法
-
     /**
-     * 批量获取商品信息（使用Redis缓存）
+     * 批量获取商品信息（使用Redis Pipeline/MultiGet 优化）
+     * 优化点：解决了N+1次网络请求问题，解决了缓存穿透问题
      */
     private Map<Long, MerchantGoods> batchGetGoodsByIds(List<Long> goodsIds) {
+        if (goodsIds == null || goodsIds.isEmpty()) {
+            return new HashMap<>();
+        }
+
+        // 去重
+        List<Long> distinctIds = goodsIds.stream().distinct().collect(Collectors.toList());
+        List<String> keys = distinctIds.stream()
+                .map(id -> CACHE_GOODS_KEY + id)
+                .collect(Collectors.toList());
+
+        // 1. 批量获取缓存 (性能优化：一次网络IO)
+        List<Object> cachedObjects = redisTemplate.opsForValue().multiGet(keys);
+
         Map<Long, MerchantGoods> result = new HashMap<>();
+        List<Long> missIds = new ArrayList<>();
 
-        for (Long goodsId :  goodsIds) {
-            String cacheKey = CACHE_GOODS_KEY + goodsId;
-            MerchantGoods goods = redisCache.getCacheObject(cacheKey);
+        for (int i = 0; i < distinctIds.size(); i++) {
+            Long goodsId = distinctIds.get(i);
+            Object obj = (cachedObjects != null && cachedObjects.size() > i) ? cachedObjects.get(i) : null;
 
-            if (goods == null) {
-                goods = merchantGoodsMapper.selectMerchantGoodsByMerchantGoodsId(goodsId);
-                if (goods != null) {
-                    redisCache.setCacheObject(cacheKey, goods, CACHE_EXPIRE_HOURS, TimeUnit.HOURS);
-                }
+            if (obj instanceof MerchantGoods) {
+                result.put(goodsId, (MerchantGoods) obj);
+            } else if (NULL_CACHE_VALUE.equals(obj)) {
+                // 命中空缓存，不做处理，视为商品不存在
+            } else {
+                missIds.add(goodsId);
             }
+        }
 
-            if (goods != null) {
-                result.put(goodsId, goods);
+        // 2. 只有缓存缺失的才查库
+        if (!missIds.isEmpty()) {
+            for (Long id : missIds) {
+                MerchantGoods goods = merchantGoodsMapper.selectMerchantGoodsByMerchantGoodsId(id);
+                String cacheKey = CACHE_GOODS_KEY + id;
+                if (goods != null) {
+                    result.put(id, goods);
+                    redisCache.setCacheObject(cacheKey, goods, CACHE_EXPIRE_HOURS, TimeUnit.HOURS);
+                } else {
+                    // 解决缓存穿透：缓存空值
+                    redisCache.setCacheObject(cacheKey, NULL_CACHE_VALUE, NULL_CACHE_EXPIRE_MINUTES, TimeUnit.MINUTES);
+                }
             }
         }
 
@@ -1155,43 +1190,56 @@ public class UserOrderServiceImpl implements IUserOrderService {
 
     /**
      * 从缓存获取商家配送费
+     * 优化点：增加空值缓存
      */
     private BigDecimal getCachedMerchantDeliveryFee(Long merchantId) {
         String cacheKey = CACHE_MERCHANT_KEY + merchantId;
-        MerchantBase merchant = redisCache.getCacheObject(cacheKey);
+        Object cacheObj = redisCache.getCacheObject(cacheKey);
+
+        if (NULL_CACHE_VALUE.equals(cacheObj)) {
+            return new BigDecimal("5.00"); // 默认值
+        }
+
+        MerchantBase merchant = (MerchantBase) cacheObj;
 
         if (merchant == null) {
             merchant = merchantInfoMapper.selectMerchantBaseByMerchantBaseId(merchantId);
             if (merchant != null) {
                 redisCache.setCacheObject(cacheKey, merchant, CACHE_EXPIRE_HOURS, TimeUnit.HOURS);
+            } else {
+                // 防止缓存穿透
+                redisCache.setCacheObject(cacheKey, NULL_CACHE_VALUE, NULL_CACHE_EXPIRE_MINUTES, TimeUnit.MINUTES);
             }
         }
 
         if (merchant == null) {
-            log.warn("商家不存在，使用默认配送费，商家ID：{}", merchantId);
             return new BigDecimal("5.00");
         }
 
         BigDecimal deliveryFee = merchant.getDeliveryFee();
-        if (deliveryFee == null) {
-            log.warn("商家配送费为空，使用默认配送费，商家ID：{}", merchantId);
-            return new BigDecimal("5.00");
-        }
-
-        return deliveryFee;
+        return deliveryFee != null ? deliveryFee : new BigDecimal("5.00");
     }
 
     /**
      * 从缓存获取商家地址
+     * 优化点：增加空值缓存
      */
     private MerchantAddress getCachedMerchantAddress(Long merchantId) {
         String cacheKey = CACHE_MERCHANT_ADDRESS_KEY + merchantId;
-        MerchantAddress address = redisCache.getCacheObject(cacheKey);
+        Object cacheObj = redisCache.getCacheObject(cacheKey);
+
+        if (NULL_CACHE_VALUE.equals(cacheObj)) {
+            return null;
+        }
+
+        MerchantAddress address = (MerchantAddress) cacheObj;
 
         if (address == null) {
             address = merchantAddressInfoMapper.selectMerchantAddressByMerchantBaseId(merchantId);
             if (address != null) {
-                redisCache.setCacheObject(cacheKey, address, CACHE_EXPIRE_HOURS, TimeUnit. HOURS);
+                redisCache.setCacheObject(cacheKey, address, CACHE_EXPIRE_HOURS, TimeUnit.HOURS);
+            } else {
+                redisCache.setCacheObject(cacheKey, NULL_CACHE_VALUE, NULL_CACHE_EXPIRE_MINUTES, TimeUnit.MINUTES);
             }
         }
 
@@ -1203,6 +1251,7 @@ public class UserOrderServiceImpl implements IUserOrderService {
      */
     private UserAddress getCachedUserAddress(Long addressId) {
         String cacheKey = CACHE_USER_ADDRESS_KEY + addressId;
+        // 同样可以加上空值判断
         UserAddress address = redisCache.getCacheObject(cacheKey);
 
         if (address == null) {

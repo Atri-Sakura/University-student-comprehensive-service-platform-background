@@ -101,4 +101,22 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             #{orderTakeoutDetailId}
         </foreach>
     </delete>
+
+    <update id="updateBatchSettleStatus" parameterType="java.util.List">
+        update order_takeout_detail
+        set settle_status = 1
+        where order_takeout_detail_id in
+        <foreach collection="list" item="item" open="(" separator="," close=")">
+            #{item.orderTakeoutDetailId}
+        </foreach>
+    </update>
+
+    <insert id="batchInsert" parameterType="java.util.List">
+        insert into order_takeout_detail
+        (order_takeout_detail_id, order_main_id, merchant_id, merchant_name, goods_id, goods_name, goods_price, quantity, subtotal, goods_spec, goods_tags, settle_status)
+        values
+        <foreach collection="list" item="item" index="index" separator=",">
+            (#{item.orderTakeoutDetailId}, #{item.orderMainId}, #{item.merchantId}, #{item.merchantName}, #{item.goodsId}, #{item.goodsName}, #{item.goodsPrice}, #{item.quantity}, #{item.subtotal}, #{item.goodsSpec}, #{item.goodsTags}, #{item.settleStatus})
+        </foreach>
+    </insert>
 </mapper>
