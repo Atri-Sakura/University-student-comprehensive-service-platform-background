@@ -35,7 +35,7 @@ public class RiderRoadController {
         List<OrderDelivery> orderDeliveryList = riderRoadMapper.getPickupAddress(riderBaseId);
         if (CollectionUtils.isEmpty(orderDeliveryList)) {
             return AjaxResult.success("暂无配送订单数据")
-                    .put("目的地经纬度", new ArrayList<>())
+                    .put("取货地经纬度", new ArrayList<>())
                     .put("配送时间", new ArrayList<>())
                     .put("用户手机号", new ArrayList<>());
         }
@@ -83,7 +83,7 @@ public class RiderRoadController {
         }
 
         return AjaxResult.success("获取订单信息成功")
-                .put("目的地经纬度", latLngList)
+                .put("取货地经纬度", latLngList)
                 .put("配送时间", deliveryTimeList)
                 .put("用户信息", phoneList);
     }
