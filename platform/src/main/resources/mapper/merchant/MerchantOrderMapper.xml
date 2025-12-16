@@ -40,6 +40,30 @@
         </collection>
     </resultMap>
 
+    <!-- 扩展ResultMap：关联OrderDelivery和RiderBase -->
+    <resultMap type="OrderMain" id="OrderMainResultWithDeliveryRider" extends="OrderMainResult">
+        <!-- 1. 关联OrderDelivery（一对一） -->
+        <association property="orderDelivery" javaType="com.ruoyi.platform.domain.OrderDelivery">
+            <id property="orderDeliveryId" column="order_delivery_id"/>
+            <result property="orderMainId" column="order_main_id"/>
+            <result property="riderId" column="rider_id"/>
+            <result property="deliveryStatus" column="delivery_status"/>
+            <result property="receiveTime" column="receive_time"/>
+            <result property="pickTime" column="pick_time"/>
+            <result property="deliverTime" column="deliver_time"/>
+            <result property="deliveryFee" column="delivery_fee"/>
+            <result property="riderIncome" column="rider_income"/>
+        </association>
+
+        <!-- 2. 关联RiderBase（一对一） -->
+        <association property="riderBase" javaType="com.ruoyi.platform.domain.RiderBase">
+            <id property="riderBaseId" column="rider_base_id"/>
+            <result property="nickname" column="rider_nickname"/>
+            <result property="phone" column="rider_phone"/>
+            <result property="avatar" column="rider_avatar"/>
+            <result property="realName" column="rider_real_name"/>
+        </association>
+    </resultMap>
     <resultMap type="OrderMain" id="OrderMainResult">
         <id     property="orderMainId"      column="order_main_id"      />
         <result property="orderNo"          column="order_no"           />
@@ -64,10 +88,31 @@
         <result property="completeTime"     column="complete_time"      />
     </resultMap>
 
-    <!-- 商家订单列表查询 -->
-    <select id="selectMerchantOrderList" parameterType="OrderMain" resultMap="OrderMainResult">
-        SELECT DISTINCT om.* FROM order_main om
+    <!-- 商家订单列表查询（关联配送、骑手表） -->
+    <select id="selectMerchantOrderList" parameterType="OrderMain" resultMap="OrderMainResultWithDeliveryRider">
+        SELECT
+        om.*,
+        -- 配送表字段
+        od.order_delivery_id,
+        od.rider_id,
+        od.delivery_status,
+        od.receive_time,
+        od.pick_time,
+        od.deliver_time,
+        od.delivery_fee,
+        od.rider_income,
+        -- 骑手表字段
+        rb.rider_base_id,
+        rb.nickname AS rider_nickname,
+        rb.phone AS rider_phone,
+        rb.avatar AS rider_avatar,
+        rb.real_name AS rider_real_name
+        FROM order_main om
         INNER JOIN order_takeout_detail otd ON om.order_main_id = otd.order_main_id
+        -- 关联配送表
+        LEFT JOIN order_delivery od ON om.order_main_id = od.order_main_id
+        -- 关联骑手表
+        LEFT JOIN rider_base rb ON od.rider_id = rb.rider_base_id
         <where>
             <if test="params.merchantId != null">
                 AND otd.merchant_id = #{params.merchantId}
