@@ -27,9 +27,6 @@ public class MerchantOrderController extends BaseController {
     @Autowired
     private IMerchantOrderService merchantOrderService;
 
-    @Autowired
-    private IOrderFlowService orderFlowService;
-
     /**
      * 查询商家订单列表
      *
@@ -60,7 +57,7 @@ public class MerchantOrderController extends BaseController {
     }
 
     /**
-     * 商家接单（推荐使用新版本 /accept-v2）
+     * 商家接单
      *
      * @param orderMainId 订单ID
      * @return 结果
@@ -69,31 +66,13 @@ public class MerchantOrderController extends BaseController {
     @Log(title = "商家接单", businessType = BusinessType.UPDATE)
     @PutMapping("/accept/{orderMainId}")
     public AjaxResult accept(@PathVariable Long orderMainId) {
-        // 从SecurityUtils获取当前登录的商家ID
         Long merchantId = SecurityUtils.getMerchantBaseId();
         return toAjax(merchantOrderService.acceptOrder(merchantId, orderMainId));
     }
 
-    /**
-     * 商家接单（新版本，使用订单流转服务）
-     *
-     * @param orderMainId 订单ID
-     * @return 结果
-     */
-    @Log(title = "商家接单", businessType = BusinessType.UPDATE)
-    @PostMapping("/accept-v2/{orderMainId}")
-    public AjaxResult acceptOrderV2(@PathVariable("orderMainId") Long orderMainId) {
-        // 从SecurityUtils获取当前登录的商家ID
-        Long merchantId = SecurityUtils.getMerchantBaseId();
-
-        // 调用订单流转服务的接单方法
-        int result = orderFlowService.merchantAcceptOrder(merchantId, orderMainId);
-
-        return AjaxResult.success("接单成功",orderMainId);
-    }
 
     /**
-     * 商家拒单（旧版本）
+     * 商家拒单
      *
      * @param orderMainId 订单ID
      * @return 结果
@@ -103,27 +82,7 @@ public class MerchantOrderController extends BaseController {
     @PutMapping("/reject/{orderMainId}")
     public AjaxResult reject(@PathVariable Long orderMainId) {
         Long merchantId = SecurityUtils.getMerchantBaseId();
-        String operator = "merchant"; // 或获取当前商家名称
+        String operator = "merchant";
         return toAjax(merchantOrderService.rejectOrder(merchantId, orderMainId, operator));
-    }
-
-    /**
-     * 商家拒单（新版本，使用订单流转服务）
-     *
-     * @param orderMainId 订单ID
-     * @param refuseReason 拒单原因
-     * @return 结果
-     */
-    @Log(title = "商家拒单", businessType = BusinessType.UPDATE)
-    @PostMapping("/reject-v2/{orderMainId}")
-    public AjaxResult rejectOrderV2(@PathVariable("orderMainId") Long orderMainId,
-                                    @RequestParam("refuseReason") String refuseReason) {
-        // 从SecurityUtils获取当前登录的商家ID
-        Long merchantId = SecurityUtils.getMerchantBaseId();
-
-        // 调用订单流转服务的拒单方法
-        int result = orderFlowService.merchantRejectOrder(merchantId, orderMainId, refuseReason);
-
-        return toAjax(result);
     }
 }
