@@ -170,7 +170,7 @@ public class MerchantInfoController {
     public AjaxResult createMerchantAddress(@RequestBody @Validated MerchantAddress merchantAddress) {
         Long merchantBaseId = SecurityUtils.getMerchantBaseId();
 
-        // 检查该商家是否已有地址（根据业务需求，可能一个商家只能有一个地址）
+        // 检查该商家是否已有地址（根据业务需求，一个商家只能有一个地址）
         MerchantAddress existingAddress = merchantAddressInfoService.selectMerchantAddressByMerchantBaseId(merchantBaseId);
         if (existingAddress != null) {
             return AjaxResult.error("该商家已有地址信息，请使用修改接口");
@@ -241,7 +241,7 @@ public class MerchantInfoController {
             return AjaxResult.error("未找到钱包信息，请先初始化钱包");
         }
 
-        // 构建详细信息（可选：添加额外统计数据）
+        // 构建详细信息
         Map<String, Object> detail = new HashMap<>();
         detail.put("merchantWalletId", wallet.getMerchantWalletId());
         detail.put("merchantBaseId", wallet.getMerchantBaseId());
