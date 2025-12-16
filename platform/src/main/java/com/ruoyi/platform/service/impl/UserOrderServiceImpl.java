@@ -23,15 +23,17 @@ import com.ruoyi.common.utils.map.AMapGeocodeUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.math.BigDecimal;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * 用户订单服务实现类
@@ -49,6 +51,15 @@ public class UserOrderServiceImpl implements IUserOrderService {
 
     /** 地球半径（公里） */
     private static final double EARTH_RADIUS = 6371.0;
+
+    /** Redis缓存Key前缀 */
+    private static final String CACHE_MERCHANT_KEY = "merchant:info:";
+    private static final String CACHE_USER_ADDRESS_KEY = "user:address: ";
+    private static final String CACHE_GOODS_KEY = "goods:info:";
+    private static final String CACHE_MERCHANT_ADDRESS_KEY = "merchant:address: ";
+
+    /** 缓存过期时间（小时） */
+    private static final int CACHE_EXPIRE_HOURS = 2;
 
     @Autowired
     private OrderMainMapper orderMainMapper;
@@ -106,9 +117,15 @@ public class UserOrderServiceImpl implements IUserOrderService {
         // 1. 参数校验
         validateOrderParams(createOrderDTO);
 
-        // 2. 校验商品库存并使用数据库价格（但不扣减）
+        // 2. 批量查询商品并校验库存（使用Redis缓存）
+        List<Long> goodsIds = createOrderDTO.getItems().stream()
+                .map(OrderItemDTO::getGoodsId)
+                .collect(Collectors.toList());
+
+        Map<Long, MerchantGoods> goodsMap = batchGetGoodsByIds(goodsIds);
+
         for (OrderItemDTO item : createOrderDTO.getItems()) {
-            MerchantGoods goods = merchantGoodsMapper.selectMerchantGoodsByMerchantGoodsId(item.getGoodsId());
+            MerchantGoods goods = goodsMap.get(item.getGoodsId());
             if (goods == null) {
                 throw new ServiceException("商品不存在：" + item.getGoodsId());
             }
@@ -121,7 +138,7 @@ public class UserOrderServiceImpl implements IUserOrderService {
             item.setGoodsName(goods.getGoodsName());
         }
 
-        // 3. 计算订单金额（包含从数据库获取的配送费）
+        // 3. 计算订单金额（使用缓存的商家配送费）
         OrderAmountInfo amountInfo = calculateOrderAmount(createOrderDTO);
 
         // 4. 生成预订单号
@@ -150,13 +167,8 @@ public class UserOrderServiceImpl implements IUserOrderService {
 
     /**
      * 验证支付密码（仅余额支付时需要）
-     *
-     * @param userId 用户ID
-     * @param payType 支付方式
-     * @param payPassword 支付密码
      */
     private void validatePayPassword(Long userId, Long payType, String payPassword) {
-        // 只有余额支付（payType = 1）才需要验证支付密码
         if (payType != 1L) {
             log.info("非余额支付，跳过支付密码验证，用户ID：{}，支付方式：{}", userId, payType);
             return;
@@ -164,23 +176,19 @@ public class UserOrderServiceImpl implements IUserOrderService {
 
         log.info("余额支付，开始验证支付密码，用户ID：{}", userId);
 
-        // 余额支付必须提供支付密码
         if (payPassword == null || payPassword.trim().isEmpty()) {
             throw new ServiceException("余额支付需要输入支付密码");
         }
 
-        // 查询用户信息
         UserBase user = userBaseMapper.selectUserBaseByUserBaseId(userId);
         if (user == null) {
             throw new ServiceException("用户不存在");
         }
 
-        // 检查用户是否设置了支付密码
         if (user.getPayPassword() == null || user.getPayPassword().isEmpty()) {
             throw new ServiceException("请先设置支付密码");
         }
 
-        // 验证支付密码是否正确（使用BCrypt验证）
         if (!SecurityUtils.matchesPassword(payPassword, user.getPayPassword())) {
             log.warn("支付密码验证失败，用户ID：{}", userId);
             throw new ServiceException("支付密码错误");
@@ -215,7 +223,7 @@ public class UserOrderServiceImpl implements IUserOrderService {
         OrderAmountInfo amountInfo = calculateOrderAmount(createOrderDTO);
 
         // 4. 校验支付金额
-        if (payOrderDTO.getPayAmount().compareTo(amountInfo.getPayAmount()) != 0) {
+        if(payOrderDTO.getPayAmount().compareTo(amountInfo.getPayAmount()) != 0){
             throw new ServiceException("支付金额不正确");
         }
 
@@ -243,11 +251,11 @@ public class UserOrderServiceImpl implements IUserOrderService {
             // 9. 删除预订单缓存
             redisCache.deleteObject(cacheKey);
 
-            // 10. 记录支付日志
-            UserBase user = userBaseMapper.selectUserBaseByUserBaseId(userId);
-            saveStatusLog(order.getOrderMainId(), null, OrderStatusEnum.MERCHANT_PENDING_ACCEPT.getCode(),
-                    OperatorTypeEnum.USER, userId,
-                    user.getNickname(), "用户支付并创建订单");
+            // 10. 异步记录支付日志（事务提交后执行）
+            Long orderMainId = order.getOrderMainId();
+            registerAfterCommitTask(() -> asyncSaveStatusLog(orderMainId, null,
+                    OrderStatusEnum.MERCHANT_PENDING_ACCEPT.getCode(),
+                    OperatorTypeEnum.USER, userId, "用户支付并创建订单"));
 
             log.info("用户支付并创建订单成功，订单号：{}，用户ID：{}，配送费：{}",
                     order.getOrderNo(), userId, amountInfo.getDeliveryFee());
@@ -255,7 +263,6 @@ public class UserOrderServiceImpl implements IUserOrderService {
             return order;
 
         } catch (Exception e) {
-            // 如果订单创建失败，退款
             log.error("订单创建失败，开始退款，预订单号：{}，用户ID：{}", preOrderNo, userId, e);
             try {
                 // TODO: 实现退款逻辑
@@ -321,19 +328,20 @@ public class UserOrderServiceImpl implements IUserOrderService {
             // 9. 删除预订单缓存
             redisCache.deleteObject(cacheKey);
 
-            // 10. 记录支付日志
-            UserBase user = userBaseMapper.selectUserBaseByUserBaseId(userId);
-            saveStatusLog(order.getOrderMainId(), null, OrderStatusEnum.MERCHANT_PENDING_ACCEPT.getCode(),
-                    OperatorTypeEnum.USER, userId,
-                    user.getNickname(), "用户支付并创建跑腿订单");
-            orderNotifyService.sendUserOrderSuccessNotify(order, userId);
+            // 10. 异步记录日志和发送通知（事务提交后执行）
+            Long orderMainId = order.getOrderMainId();
+            registerAfterCommitTask(() -> {
+                asyncSaveStatusLog(orderMainId, null, OrderStatusEnum.MERCHANT_PENDING_ACCEPT.getCode(),
+                        OperatorTypeEnum.USER, userId, "用户支付并创建跑腿订单");
+                orderNotifyService.sendUserOrderSuccessNotify(order, userId);
+            });
+
             log.info("用户支付并创建跑腿订单成功，订单号：{}，用户ID：{}，配送费：{}",
                     order.getOrderNo(), userId, amountInfo.getDeliveryFee());
 
             return order;
 
         } catch (Exception e) {
-            // 如果订单创建失败，退款
             log.error("跑腿订单创建失败，开始退款，预订单号：{}，用户ID：{}", preOrderNo, userId, e);
             try {
                 // TODO: 实现退款逻辑
@@ -380,19 +388,16 @@ public class UserOrderServiceImpl implements IUserOrderService {
      */
     @Override
     public boolean cancelPrePayOrder(Long userId, String preOrderNo) {
-        // 1. 从 Redis 获取预订单信息
         String cacheKey = getPreOrderCacheKey(preOrderNo);
         CreateOrderDTO createOrderDTO = redisCache.getCacheObject(cacheKey);
         if (createOrderDTO == null) {
             throw new ServiceException("预订单不存在或已过期");
         }
 
-        // 2. 校验用户ID是否匹配
         if (!createOrderDTO.getUserId().equals(userId)) {
             throw new ServiceException("无权操作此订单");
         }
 
-        // 3. 删除预订单缓存
         redisCache.deleteObject(cacheKey);
 
         log.info("取消预支付订单成功，预订单号：{}，用户ID：{}", preOrderNo, userId);
@@ -405,19 +410,16 @@ public class UserOrderServiceImpl implements IUserOrderService {
      */
     @Override
     public boolean cancelPrePayErrandOrder(Long userId, String preOrderNo) {
-        // 1. 从 Redis 获取预订单信息
         String cacheKey = getPreOrderCacheKey(preOrderNo);
         CreateErrandOrderDto createOrderDTO = redisCache.getCacheObject(cacheKey);
         if (createOrderDTO == null) {
             throw new ServiceException("预订单不存在或已过期");
         }
 
-        // 2. 校验用户ID是否匹配
         if (!createOrderDTO.getUserId().equals(userId)) {
             throw new ServiceException("无权操作此订单");
         }
 
-        // 3. 删除预订单缓存
         redisCache.deleteObject(cacheKey);
 
         log.info("取消跑腿预支付订单成功，预订单号：{}，用户ID：{}", preOrderNo, userId);
@@ -468,13 +470,14 @@ public class UserOrderServiceImpl implements IUserOrderService {
                 throw new ServiceException("退款失败，请联系客服");
             }
 
-            // 7. 记录状态变更日志
-            UserBase user = userBaseMapper.selectUserBaseByUserBaseId(userId);
-            saveStatusLog(orderMainId, OrderStatusEnum.MERCHANT_PENDING_ACCEPT.getCode(),
-                    OrderStatusEnum.CANCELED.getCode(),
-                    OperatorTypeEnum.USER, userId,
-                    user.getNickname(), "用户取消订单：" + cancelReason);
-            orderNotifyService.cancelOrderNotify(orderMainId);
+            // 7. 异步记录状态变更日志和发送通知（事务提交后执行）
+            registerAfterCommitTask(() -> {
+                asyncSaveStatusLog(orderMainId, OrderStatusEnum.MERCHANT_PENDING_ACCEPT.getCode(),
+                        OrderStatusEnum.CANCELED.getCode(), OperatorTypeEnum.USER, userId,
+                        "用户取消订单：" + cancelReason);
+                orderNotifyService.cancelOrderNotify(orderMainId);
+            });
+
             log.info("用户取消订单成功，订单ID：{}，用户ID：{}", orderMainId, userId);
         }
 
@@ -520,13 +523,14 @@ public class UserOrderServiceImpl implements IUserOrderService {
                 log.error("结算给商家失败，订单ID：{}，商家ID：{}", orderMainId, order.getMerchantId(), e);
             }
 
-            // 6. 记录状态变更日志
-            UserBase user = userBaseMapper.selectUserBaseByUserBaseId(userId);
-            saveStatusLog(orderMainId, OrderStatusEnum.DELIVERING.getCode(),
-                    OrderStatusEnum.COMPLETED.getCode(),
-                    OperatorTypeEnum.USER, userId,
-                    user.getNickname(), "用户确认收货");
-            orderNotifyService.sendOrderFinishNotify(orderMainId);
+            // 6. 异步记录状态变更日志和发送通知（事务提交后执行）
+            registerAfterCommitTask(() -> {
+                asyncSaveStatusLog(orderMainId, OrderStatusEnum.DELIVERING.getCode(),
+                        OrderStatusEnum.COMPLETED.getCode(), OperatorTypeEnum.USER, userId,
+                        "用户确认收货");
+                orderNotifyService.sendOrderFinishNotify(orderMainId);
+            });
+
             log.info("用户确认收货成功，订单ID：{}，用户ID：{}", orderMainId, userId);
         }
 
@@ -551,11 +555,6 @@ public class UserOrderServiceImpl implements IUserOrderService {
             throw new ServiceException("无权操作此订单");
         }
 
-        // 3. 校验订单状态（必须是配送中状态）
-//        if (!OrderStatusEnum.DELIVERING.getCode().equals(order.getOrderStatus())) {
-//            throw new ServiceException("订单状态不正确");
-//        }
-
         // 4. 更新订单状态为已完成
         OrderMain updateOrder = new OrderMain();
         updateOrder.setOrderMainId(orderMainId);
@@ -568,13 +567,14 @@ public class UserOrderServiceImpl implements IUserOrderService {
             // 5. 结算给骑手（不捕获异常，让异常向上传播）
             walletFlowService.settleRider(riderId, orderMainId, order.getDeliveryFeeAmount());
 
-            // 6. 记录状态变更日志
-            UserBase user = userBaseMapper.selectUserBaseByUserBaseId(userId);
-            saveStatusLog(orderMainId, OrderStatusEnum.DELIVERING.getCode(),
-                    OrderStatusEnum.COMPLETED.getCode(),
-                    OperatorTypeEnum.USER, userId,
-                    user.getNickname(), "用户确认收货");
-            orderNotifyService.sendOrderFinishNotify(orderMainId);
+            // 6. 异步记录状态变更日志和发送通知（事务提交后执行）
+            registerAfterCommitTask(() -> {
+                asyncSaveStatusLog(orderMainId, OrderStatusEnum.DELIVERING.getCode(),
+                        OrderStatusEnum.COMPLETED.getCode(), OperatorTypeEnum.USER, userId,
+                        "用户确认收货");
+                orderNotifyService.sendOrderFinishNotify(orderMainId);
+            });
+
             log.info("用户确认收货成功，订单ID：{}，用户ID：{}", orderMainId, userId);
         }
 
@@ -582,12 +582,11 @@ public class UserOrderServiceImpl implements IUserOrderService {
     }
 
     /**
-     * 内部方法：真正创建外卖订单（带缩略图）
+     * 内部方法：真正创建外卖订单（带缓存优化）
      */
     private OrderMain createTakeoutOrderInternal(CreateOrderDTO createOrderDTO, String orderNo, OrderAmountInfo amountInfo) {
-        // 查询商家地址（取货地址）并转换经纬度
-        MerchantAddress merchantAddress = merchantAddressInfoMapper
-                .selectMerchantAddressByMerchantBaseId(createOrderDTO.getMerchantId());
+        // 1. 从缓存获取商家地址
+        MerchantAddress merchantAddress = getCachedMerchantAddress(createOrderDTO.getMerchantId());
         if (merchantAddress == null) {
             throw new ServiceException("商家地址不存在");
         }
@@ -595,69 +594,38 @@ public class UserOrderServiceImpl implements IUserOrderService {
         String merchantFullAddress = merchantAddress.getProvince() + merchantAddress.getCity()
                 + merchantAddress.getDistrict() + merchantAddress.getDetailAddress();
 
-        // 调用高德地图API获取商家经纬度
-        BigDecimal pickLongitude = null;
-        BigDecimal pickLatitude = null;
-        try {
-            BigDecimal[] location = aMapGeocodeUtil. geocode(merchantFullAddress, merchantAddress.getCity());
-            if (location != null && location.length == 2) {
-                pickLongitude = location[0];
-                pickLatitude = location[1];
-                log.info("商家地址转经纬度成功，商家ID：{}，经度：{}，纬度：{}",
-                        createOrderDTO.getMerchantId(), pickLongitude, pickLatitude);
-            } else {
-                log.warn("商家地址转经纬度失败，将使用空值，商家ID：{}", createOrderDTO.getMerchantId());
-            }
-        } catch (Exception e) {
-            log.error("商家地址转经纬度异常，商家ID：{}", createOrderDTO.getMerchantId(), e);
-        }
-
-        // 查询用户收货地址（关键修改：从数据库查询）
-        UserAddress userAddress = userAddressMapper.selectUserAddressByUserAddressId(
-                createOrderDTO.getDeliverAddressId());
+        // 2. 从缓存获取用户收货地址
+        UserAddress userAddress = getCachedUserAddress(createOrderDTO.getDeliverAddressId());
         if (userAddress == null) {
             throw new ServiceException("收货地址不存在，地址ID：" + createOrderDTO.getDeliverAddressId());
         }
 
-        // 优先使用数据库中的经纬度
-        BigDecimal deliverLongitude = userAddress. getLongitude();
-        BigDecimal deliverLatitude = userAddress.getLatitude();
+        // 3. 异步获取经纬度
+        CompletableFuture<BigDecimal[]> pickLocationFuture = CompletableFuture.supplyAsync(() ->
+                getOrConvertLocation(merchantFullAddress, merchantAddress.getCity(), null, null)
+        );
 
-        // 如果数据库没有经纬度，调用高德地图API获取
-        if (deliverLongitude == null || deliverLatitude == null) {
-            String userFullAddress = userAddress.getProvince() + userAddress.getCity()
-                    + userAddress. getDistrict() + userAddress.getDetailAddress();
+        CompletableFuture<BigDecimal[]> deliverLocationFuture = CompletableFuture.supplyAsync(() ->
+                getOrConvertLocation(
+                        userAddress.getProvince() + userAddress.getCity() + userAddress.getDistrict() + userAddress.getDetailAddress(),
+                        userAddress.getCity(),
+                        userAddress.getUserAddressId(),
+                        userAddress
+                )
+        );
 
-            try {
-                BigDecimal[] location = aMapGeocodeUtil.geocode(userFullAddress, userAddress.getCity());
-                if (location != null && location.length == 2) {
-                    deliverLongitude = location[0];
-                    deliverLatitude = location[1];
-                    log.info("用户地址转经纬度成功，地址ID：{}，经度：{}，纬度：{}",
-                            createOrderDTO.getDeliverAddressId(), deliverLongitude, deliverLatitude);
-
-                    // 更新数据库中的经纬度（避免下次再调API）
-                    UserAddress updateAddress = new UserAddress();
-                    updateAddress.setUserAddressId(userAddress.getUserAddressId());
-                    updateAddress.setLongitude(deliverLongitude);
-                    updateAddress.setLatitude(deliverLatitude);
-                    userAddressMapper.updateUserAddress(updateAddress);
-                } else {
-                    log.warn("用户地址转经纬度失败，地址ID：{}", createOrderDTO.getDeliverAddressId());
-                }
-            } catch (Exception e) {
-                log.error("用户地址转经纬度异常，地址ID：{}", createOrderDTO.getDeliverAddressId(), e);
-            }
-        }
-
-        // 获取订单缩略图
+        // 4. 获取订单缩略图
         String orderThumbnail = null;
         if (createOrderDTO.getItems() != null && !createOrderDTO.getItems().isEmpty()) {
             Long firstGoodsId = createOrderDTO.getItems().get(0).getGoodsId();
             orderThumbnail = getGoodsMainImage(firstGoodsId);
         }
 
-        // 创建订单主表记录
+        // 5. 等待经纬度转换完成
+        BigDecimal[] pickLocation = pickLocationFuture.join();
+        BigDecimal[] deliverLocation = deliverLocationFuture.join();
+
+        // 6. 创建订单主表记录
         OrderMain orderMain = new OrderMain();
         orderMain.setOrderMainId(com.ruoyi.platform.chat.utils.SnowflakeIdGenerator.getInstance().nextId());
         orderMain.setOrderNo(orderNo);
@@ -690,25 +658,19 @@ public class UserOrderServiceImpl implements IUserOrderService {
         orderMain.setPickAddress(merchantFullAddress);
         orderMain.setPickContact(merchantAddress.getContactPerson());
         orderMain.setPickPhone(merchantAddress.getContactPhone());
-        orderMain.setPickLongitude(pickLongitude);
-        orderMain.setPickLatitude(pickLatitude);
+        orderMain.setPickLongitude(pickLocation[0]);
+        orderMain.setPickLatitude(pickLocation[1]);
 
         // 送货地址（从数据库查询的用户地址）
         orderMain.setDeliverAddressId(userAddress.getUserAddressId());
-
-        // 拼接完整送货地址
         orderMain.setDeliverAddress(
                 userAddress.getProvince() + userAddress.getCity() +
                         userAddress.getDistrict() + userAddress.getDetailAddress()
         );
-
-        // 设置送货联系人和电话
-        orderMain.setDeliverContact(userAddress. getReceiver());
+        orderMain.setDeliverContact(userAddress.getReceiver());
         orderMain.setDeliverPhone(userAddress.getPhone());
-
-        // 设置送货经纬度
-        orderMain.setDeliverLongitude(deliverLongitude);
-        orderMain.setDeliverLatitude(deliverLatitude);
+        orderMain.setDeliverLongitude(deliverLocation[0]);
+        orderMain.setDeliverLatitude(deliverLocation[1]);
 
         orderMain.setRemark(createOrderDTO.getRemark());
         orderMain.setCreateTime(new Date());
@@ -720,7 +682,8 @@ public class UserOrderServiceImpl implements IUserOrderService {
             throw new ServiceException("创建订单失败");
         }
 
-        // 创建订单明细并扣减库存
+        // 7. 批量创建订单明细并扣减库存
+        List<OrderTakeoutDetail> detailList = new ArrayList<>();
         for (OrderItemDTO item : createOrderDTO.getItems()) {
             MerchantGoods goods = merchantGoodsMapper.selectMerchantGoodsByMerchantGoodsId(item.getGoodsId());
             if (goods == null) {
@@ -748,10 +711,13 @@ public class UserOrderServiceImpl implements IUserOrderService {
             detail.setGoodsTags(item.getGoodsTags());
             detail.setSettleStatus(0L);
 
-            orderTakeoutDetailMapper.insertOrderTakeoutDetail(detail);
+            detailList.add(detail);
         }
 
-        // 创建配送记录
+        // 批量插入订单明细
+        detailList.forEach(orderTakeoutDetailMapper::insertOrderTakeoutDetail);
+
+        // 8. 创建配送记录
         OrderDelivery delivery = new OrderDelivery();
         delivery.setOrderDeliveryId(generateLongId());
         delivery.setOrderMainId(orderMain.getOrderMainId());
@@ -761,10 +727,14 @@ public class UserOrderServiceImpl implements IUserOrderService {
         delivery.setIncomeStatus(0L);
         delivery.setAssignTime(new Date());
         delivery.setDeliveryStatus(0L);
+        delivery. setActualPickLongitude(orderMain.getPickLongitude());
+        delivery.setActualPickLatitude(orderMain.getPickLatitude());
+        delivery.setActualDeliverLongitude(orderMain.getDeliverLongitude());
+        delivery.setActualDeliverLatitude(orderMain.getDeliverLatitude());
 
         orderDeliveryMapper.insertOrderDelivery(delivery);
 
-        // 记录订单创建日志
+        // 9. 记录订单创建日志（同步，因为需要立即记录）
         saveStatusLog(orderMain.getOrderMainId(), null, OrderStatusEnum.MERCHANT_PENDING_ACCEPT.getCode(),
                 OperatorTypeEnum.USER, createOrderDTO.getUserId(),
                 createOrderDTO.getUserNickname(), "用户支付并创建订单");
@@ -773,102 +743,57 @@ public class UserOrderServiceImpl implements IUserOrderService {
     }
 
     /**
-     * 内部方法：创建跑腿订单
+     * 内部方法：创建跑腿订单（带缓存优化）
      */
     private OrderMain createErrandOrderInternal(CreateErrandOrderDto createOrderDTO, String orderNo,
                                                 OrderAmountInfo amountInfo, Long userAddressId) {
 
-        // 处理取货地址和经纬度（前端传详细地址）
-        // 拼接完整取货地址
+        // 1. 拼接完整取货地址
         String pickFullAddress = createOrderDTO.getPickProvince()
                 + createOrderDTO.getPickCity()
                 + createOrderDTO.getPickDistrict()
-                + createOrderDTO. getPickDetailAddress();
+                + createOrderDTO.getPickDetailAddress();
 
-        // 调用高德API转换取货地址经纬度
-        BigDecimal pickLongitude = null;
-        BigDecimal pickLatitude = null;
-
-        try {
-            BigDecimal[] location = aMapGeocodeUtil.geocodeByFullAddress(
-                    createOrderDTO.getPickProvince(),
-                    createOrderDTO.getPickCity(),
-                    createOrderDTO.getPickDistrict(),
-                    createOrderDTO.getPickDetailAddress()
-            );
-
-            if (location != null && location. length == 2) {
-                pickLongitude = location[0];
-                pickLatitude = location[1];
-                log.info("取货地址转经纬度成功，地址：{}，经度：{}，纬度：{}",
-                        pickFullAddress, pickLongitude, pickLatitude);
-            } else {
-                log.warn("取货地址转经纬度失败，地址：{}", pickFullAddress);
-                // 跑腿订单取货地址经纬度非必需，允许为空
-            }
-        } catch (Exception e) {
-            log.error("取货地址转经纬度异常，地址：{}", pickFullAddress, e);
-            // 异常时不中断流程，继续创建订单
-        }
-
-        // 2. 处理送货地址和经纬度（前端传地址ID）
-
-        // 从数据库查询送货地址
-        UserAddress deliverAddress = userAddressMapper.selectUserAddressByUserAddressId(
-                createOrderDTO.getDeliverAddressId());
-
+        // 2. 从缓存获取送货地址
+        UserAddress deliverAddress = getCachedUserAddress(createOrderDTO.getDeliverAddressId());
         if (deliverAddress == null) {
             throw new ServiceException("收货地址不存在，地址ID：" + createOrderDTO.getDeliverAddressId());
         }
 
-        // 拼接完整送货地址
         String deliverFullAddress = deliverAddress.getProvince()
                 + deliverAddress.getCity()
                 + deliverAddress.getDistrict()
                 + deliverAddress.getDetailAddress();
 
-        // 优先使用数据库中的送货地址经纬度
-        BigDecimal deliverLongitude = deliverAddress.getLongitude();
-        BigDecimal deliverLatitude = deliverAddress.getLatitude();
+        // 3. 异步获取经纬度
+        CompletableFuture<BigDecimal[]> pickLocationFuture = CompletableFuture.supplyAsync(() ->
+                aMapGeocodeUtil.geocodeByFullAddress(
+                        createOrderDTO.getPickProvince(),
+                        createOrderDTO.getPickCity(),
+                        createOrderDTO.getPickDistrict(),
+                        createOrderDTO.getPickDetailAddress()
+                )
+        );
 
-        // 如果数据库没有经纬度，调用高德API
-        if (deliverLongitude == null || deliverLatitude == null) {
-            try {
-                BigDecimal[] location = aMapGeocodeUtil.geocodeByFullAddress(
-                        deliverAddress.getProvince(),
-                        deliverAddress.getCity(),
-                        deliverAddress.getDistrict(),
-                        deliverAddress.getDetailAddress()
-                );
+        CompletableFuture<BigDecimal[]> deliverLocationFuture = CompletableFuture.supplyAsync(() ->
+                getOrConvertLocation(deliverFullAddress, deliverAddress.getCity(),
+                        deliverAddress.getUserAddressId(), deliverAddress)
+        );
 
-                if (location != null && location.length == 2) {
-                    deliverLongitude = location[0];
-                    deliverLatitude = location[1];
+        // 4. 等待经纬度转换完成
+        BigDecimal[] pickLocation = pickLocationFuture. join();
+        BigDecimal[] deliverLocation = deliverLocationFuture.join();
 
-                    // 更新数据库中的经纬度（避免下次再调API）
-                    UserAddress updateAddress = new UserAddress();
-                    updateAddress.setUserAddressId(deliverAddress.getUserAddressId());
-                    updateAddress.setLongitude(deliverLongitude);
-                    updateAddress.setLatitude(deliverLatitude);
-                    userAddressMapper.updateUserAddress(updateAddress);
-
-                    log.info("送货地址转经纬度成功，地址ID：{}，经度：{}，纬度：{}",
-                            createOrderDTO.getDeliverAddressId(), deliverLongitude, deliverLatitude);
-                } else {
-                    log.warn("送货地址转经纬度失败，地址ID：{}", createOrderDTO.getDeliverAddressId());
-                }
-            } catch (Exception e) {
-                log.error("送货地址转经纬度异常，地址ID：{}", createOrderDTO.getDeliverAddressId(), e);
-            }
+        if (pickLocation == null || pickLocation.length != 2) {
+            log.warn("取货地址转经纬度失败，地址：{}", pickFullAddress);
+            pickLocation = new BigDecimal[]{null, null};
         }
 
-        // 校验送货地址经纬度
-        if (deliverLongitude == null || deliverLatitude == null) {
+        if (deliverLocation == null || deliverLocation.length != 2) {
             throw new ServiceException("送货地址经纬度转换失败，请检查地址是否准确");
         }
 
-        // 3. 创建订单主表记录
-
+        // 5. 创建订单主表记录
         OrderMain orderMain = new OrderMain();
         orderMain.setOrderMainId(com.ruoyi.platform.chat.utils.SnowflakeIdGenerator.getInstance().nextId());
         orderMain.setOrderNo(orderNo);
@@ -895,19 +820,19 @@ public class UserOrderServiceImpl implements IUserOrderService {
         // 订单状态（待接单）
         orderMain.setOrderStatus(OrderStatusEnum.RIDER_PENDING_ACCEPT.getCode());
 
-        // 取货地址（前端传入的详细地址）
-        orderMain.setPickAddressId(null); // 跑腿订单取货地址无ID
+        // 取货地址（前端传入的详细地址 + 联系方式）
+        orderMain.setPickAddressId(null);
         orderMain.setPickAddress(pickFullAddress);
-        orderMain.setPickLongitude(pickLongitude);
-        orderMain.setPickLatitude(pickLatitude);
+        orderMain.setPickLongitude(pickLocation[0]);
+        orderMain.setPickLatitude(pickLocation[1]);
 
         // 送货地址（从数据库查询的用户地址）
         orderMain.setDeliverAddressId(deliverAddress.getUserAddressId());
         orderMain.setDeliverAddress(deliverFullAddress);
         orderMain.setDeliverContact(deliverAddress.getReceiver());
-        orderMain.setDeliverPhone(deliverAddress. getPhone());
-        orderMain.setDeliverLongitude(deliverLongitude);
-        orderMain.setDeliverLatitude(deliverLatitude);
+        orderMain.setDeliverPhone(deliverAddress.getPhone());
+        orderMain.setDeliverLongitude(deliverLocation[0]);
+        orderMain.setDeliverLatitude(deliverLocation[1]);
 
         orderMain.setRemark(createOrderDTO.getRemark());
         orderMain.setCreateTime(new Date());
@@ -919,22 +844,18 @@ public class UserOrderServiceImpl implements IUserOrderService {
             throw new ServiceException("创建订单失败");
         }
 
-        // 4. 创建跑腿订单明细
-
+        // 6. 创建跑腿订单明细
         Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.MINUTE, 30); // 期望30分钟后送达
+        calendar.add(Calendar.MINUTE, 30);
 
         OrderErrandDetail orderErrandDetail = new OrderErrandDetail();
         orderErrandDetail.setOrderMainId(orderMain.getOrderMainId());
         orderErrandDetail.setOrderErrandDetailId(
-                com.ruoyi.platform. chat.utils.SnowflakeIdGenerator.getInstance().nextId()
+                com.ruoyi.platform.chat.utils.SnowflakeIdGenerator.getInstance().nextId()
         );
-
-        // 判断订单类型：有商品金额 → 帮我买（2），否则 → 帮我送（1）
         orderErrandDetail.setErrandType(
-                amountInfo.getGoodsAmount().compareTo(BigDecimal. ZERO) > 0 ? 2L : 1L
+                amountInfo.getGoodsAmount().compareTo(BigDecimal.ZERO) > 0 ? 2L : 1L
         );
-
         orderErrandDetail.setGoodsDesc(createOrderDTO.getGoodsDesc());
         orderErrandDetail.setExpectedTime(calendar.getTime());
         orderErrandDetail.setAdvanceAmount(orderMain.getGoodsAmount());
@@ -942,26 +863,28 @@ public class UserOrderServiceImpl implements IUserOrderService {
 
         orderErrandDetailMapper.insertOrderErrandDetail(orderErrandDetail);
 
-        // 5. 创建配送记录
-
+        // 7. 创建配送记录
         OrderDelivery delivery = new OrderDelivery();
         delivery.setOrderDeliveryId(generateLongId());
         delivery.setOrderMainId(orderMain.getOrderMainId());
         delivery.setDeliveryFee(amountInfo.getDeliveryFee());
         delivery.setDeliveryFeeFromUser(amountInfo.getDeliveryFee());
         delivery.setRiderIncome(amountInfo.getDeliveryFee());
-        delivery.setIncomeStatus(0L); // 未发放
+        delivery.setIncomeStatus(0L);
         delivery.setAssignTime(new Date());
-        delivery.setDeliveryStatus(0L); // 待分配
+        delivery.setDeliveryStatus(0L);
+        delivery.setActualPickLongitude(orderMain.getPickLongitude());
+        delivery.setActualPickLatitude(orderMain.getPickLatitude());
+        delivery.setActualDeliverLongitude(orderMain.getDeliverLongitude());
+        delivery.setActualDeliverLatitude(orderMain.getDeliverLatitude());
 
         orderDeliveryMapper.insertOrderDelivery(delivery);
 
-        // 6. 记录订单创建日志
-
+        // 8. 记录订单创建日志（同步）
         saveStatusLog(
                 orderMain.getOrderMainId(),
                 null,
-                OrderStatusEnum. RIDER_PENDING_ACCEPT.getCode(),
+                OrderStatusEnum.RIDER_PENDING_ACCEPT.getCode(),
                 OperatorTypeEnum.USER,
                 createOrderDTO.getUserId(),
                 createOrderDTO.getUserNickname(),
@@ -983,7 +906,6 @@ public class UserOrderServiceImpl implements IUserOrderService {
         }
 
         try {
-            // 查询商品图片表，获取主图
             MerchantGoodsImage image = merchantGoodsImageMapper.selectMainImageByGoodsId(goodsId);
             return image != null ? image.getImageUrl() : null;
         } catch (Exception e) {
@@ -1001,7 +923,6 @@ public class UserOrderServiceImpl implements IUserOrderService {
         }
 
         try {
-            // 查询二手商品图片表，获取主图
             SecondhandGoodsImage image = secondhandGoodsImageMapper. selectMainImageByGoodsId(goodsId);
             return image != null ? image.getImageUrl() : null;
         } catch (Exception e) {
@@ -1014,12 +935,10 @@ public class UserOrderServiceImpl implements IUserOrderService {
      * 恢复商品库存（取消订单时调用）
      */
     private void restoreGoodsStock(Long orderMainId) {
-        // 查询订单明细
         OrderTakeoutDetail queryDetail = new OrderTakeoutDetail();
         queryDetail.setOrderMainId(orderMainId);
         List<OrderTakeoutDetail> details = orderTakeoutDetailMapper.selectOrderTakeoutDetailList(queryDetail);
 
-        // 恢复每个商品的库存
         for (OrderTakeoutDetail detail : details) {
             int result = merchantGoodsMapper.increaseStock(detail.getGoodsId(), detail.getQuantity());
             if (result > 0) {
@@ -1056,11 +975,10 @@ public class UserOrderServiceImpl implements IUserOrderService {
             throw new ServiceException("用户ID不能为空");
         }
 
-        // 校验取货地址（前端传详细地址）
         if (createOrderDTO.getPickProvince() == null || createOrderDTO.getPickProvince().trim().isEmpty()) {
             throw new ServiceException("取货省份不能为空");
         }
-        if (createOrderDTO.getPickCity() == null || createOrderDTO. getPickCity().trim().isEmpty()) {
+        if (createOrderDTO.getPickCity() == null || createOrderDTO.getPickCity().trim().isEmpty()) {
             throw new ServiceException("取货城市不能为空");
         }
         if (createOrderDTO.getPickDistrict() == null || createOrderDTO.getPickDistrict().trim().isEmpty()) {
@@ -1070,14 +988,13 @@ public class UserOrderServiceImpl implements IUserOrderService {
             throw new ServiceException("取货详细地址不能为空");
         }
 
-        // 校验送货地址（前端传地址ID）
         if (createOrderDTO.getDeliverAddressId() == null) {
             throw new ServiceException("送货地址不能为空");
         }
     }
 
     /**
-     * 计算订单金额（从数据库获取配送费）
+     * 计算订单金额（使用缓存的商家配送费）
      */
     private OrderAmountInfo calculateOrderAmount(CreateOrderDTO createOrderDTO) {
         OrderAmountInfo info = new OrderAmountInfo();
@@ -1089,32 +1006,8 @@ public class UserOrderServiceImpl implements IUserOrderService {
             goodsAmount = goodsAmount.add(itemAmount);
         }
 
-        // 2. 从数据库获取商家配送费
-        BigDecimal deliveryFee = BigDecimal.ZERO;
-        try {
-            MerchantBase merchant = merchantInfoMapper.selectMerchantBaseByMerchantBaseId(
-                    createOrderDTO.getMerchantId());
-
-            if (merchant == null) {
-                log.warn("商家不存在，使用默认配送费，商家ID：{}", createOrderDTO.getMerchantId());
-                deliveryFee = new BigDecimal("5.00");
-            } else {
-                // 从数据库获取配送费
-                deliveryFee = merchant. getDeliveryFee();
-
-                // 如果数据库配送费为空，使用默认值
-                if (deliveryFee == null) {
-                    log.warn("商家配送费为空，使用默认配送费，商家ID：{}", createOrderDTO.getMerchantId());
-                    deliveryFee = new BigDecimal("5.00");
-                }
-            }
-
-            log.info("获取商家配送费成功，商家ID：{}，配送费：{}", createOrderDTO.getMerchantId(), deliveryFee);
-
-        } catch (Exception e) {
-            log.error("查询商家配送费失败，使用默认配送费，商家ID：{}", createOrderDTO.getMerchantId(), e);
-            deliveryFee = new BigDecimal("5.00");
-        }
+        // 2. 从缓存获取商家配送费
+        BigDecimal deliveryFee = getCachedMerchantDeliveryFee(createOrderDTO.getMerchantId());
 
         // 3. 计算优惠金额（暂时为0，后续可扩展）
         BigDecimal discountAmount = BigDecimal.ZERO;
@@ -1136,41 +1029,30 @@ public class UserOrderServiceImpl implements IUserOrderService {
 
     /**
      * 跑腿专用
-     * @param createOrderDTO
-     * @return
      */
     private OrderAmountInfo calculateErrandOrderAmount(CreateErrandOrderDto createOrderDTO) {
         OrderAmountInfo info = new OrderAmountInfo();
 
-        // 1. 商品金额：null 时兜底为 0（避免 NPE，同时符合金额计算逻辑）
         BigDecimal goodsAmount = Optional.ofNullable(createOrderDTO.getGoodsPrice())
                 .orElse(BigDecimal.ZERO);
-        // 校验商品金额合法性（非负，避免负数金额）
         if (goodsAmount.compareTo(BigDecimal.ZERO) < 0) {
             throw new RuntimeException("商品金额不能为负数");
         }
 
-        // 2. 配送费：null 时兜底为 0，同时校验合法性
         BigDecimal deliveryFee = Optional.ofNullable(createOrderDTO.getDeliverAmount())
                 .orElse(BigDecimal.ZERO);
         if (deliveryFee.compareTo(BigDecimal.ZERO) < 0) {
             throw new RuntimeException("配送费不能为负数");
         }
 
-        // 3. 优惠金额（暂时为0，后续扩展时同样需判空）
         BigDecimal discountAmount = BigDecimal.ZERO;
-
-        // 4. 总金额 = 商品金额 + 配送费（此时已确保两个值非 null）
         BigDecimal totalAmount = goodsAmount.add(deliveryFee);
-
-        // 5. 实付金额 = 总金额 - 优惠金额（优惠金额不能超过总金额）
         BigDecimal payAmount = totalAmount.subtract(discountAmount);
-        // 兜底：实付金额不能为负数
+
         if (payAmount.compareTo(BigDecimal.ZERO) < 0) {
             payAmount = BigDecimal.ZERO;
         }
 
-        // 赋值返回
         info.setGoodsAmount(goodsAmount);
         info.setDeliveryFee(deliveryFee);
         info.setDiscountAmount(discountAmount);
@@ -1184,7 +1066,6 @@ public class UserOrderServiceImpl implements IUserOrderService {
      * 生成预订单编号
      */
     private String generatePreOrderNo() {
-        // 预订单号格式：PRE + yyyyMMddHHmmss + 6位随机数
         String timestamp = DateUtils.dateTimeNow("yyyyMMddHHmmss");
         String random = String.format("%06d", (int)(Math.random() * 1000000));
         return "PRE" + timestamp + random;
@@ -1194,7 +1075,6 @@ public class UserOrderServiceImpl implements IUserOrderService {
      * 生成正式订单编号
      */
     private String generateOrderNo() {
-        // 订单号格式：TO + yyyyMMddHHmmss + 6位随机数
         String timestamp = DateUtils.dateTimeNow("yyyyMMddHHmmss");
         String random = String.format("%06d", (int)(Math.random() * 1000000));
         return "TO" + timestamp + random;
@@ -1208,7 +1088,7 @@ public class UserOrderServiceImpl implements IUserOrderService {
     }
 
     /**
-     * 保存订单状态变更日志
+     * 保存订单状态变更日志（同步方法）
      */
     private void saveStatusLog(Long orderMainId, Long oldStatus, Long newStatus,
                                OperatorTypeEnum operatorType, Long operatorId,
@@ -1225,10 +1105,174 @@ public class UserOrderServiceImpl implements IUserOrderService {
     }
 
     /**
+     * 异步保存订单状态变更日志
+     */
+    @Async
+    protected void asyncSaveStatusLog(Long orderMainId, Long oldStatus, Long newStatus,
+                                      OperatorTypeEnum operatorType, Long operatorId, String remark) {
+        try {
+            UserBase user = userBaseMapper.selectUserBaseByUserBaseId(operatorId);
+            String operatorName = user != null ? user.getNickname() : "未知用户";
+            saveStatusLog(orderMainId, oldStatus, newStatus, operatorType, operatorId, operatorName, remark);
+        } catch (Exception e) {
+            log.error("异步保存状态日志失败，订单ID：{}", orderMainId, e);
+        }
+    }
+
+    /**
      * 生成Long类型的唯一ID
      */
     private Long generateLongId() {
         return com.ruoyi.platform.chat.utils.SnowflakeIdGenerator.getInstance().nextId();
+    }
+
+    // Redis 缓存方法
+
+    /**
+     * 批量获取商品信息（使用Redis缓存）
+     */
+    private Map<Long, MerchantGoods> batchGetGoodsByIds(List<Long> goodsIds) {
+        Map<Long, MerchantGoods> result = new HashMap<>();
+
+        for (Long goodsId :  goodsIds) {
+            String cacheKey = CACHE_GOODS_KEY + goodsId;
+            MerchantGoods goods = redisCache.getCacheObject(cacheKey);
+
+            if (goods == null) {
+                goods = merchantGoodsMapper.selectMerchantGoodsByMerchantGoodsId(goodsId);
+                if (goods != null) {
+                    redisCache.setCacheObject(cacheKey, goods, CACHE_EXPIRE_HOURS, TimeUnit.HOURS);
+                }
+            }
+
+            if (goods != null) {
+                result.put(goodsId, goods);
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * 从缓存获取商家配送费
+     */
+    private BigDecimal getCachedMerchantDeliveryFee(Long merchantId) {
+        String cacheKey = CACHE_MERCHANT_KEY + merchantId;
+        MerchantBase merchant = redisCache.getCacheObject(cacheKey);
+
+        if (merchant == null) {
+            merchant = merchantInfoMapper.selectMerchantBaseByMerchantBaseId(merchantId);
+            if (merchant != null) {
+                redisCache.setCacheObject(cacheKey, merchant, CACHE_EXPIRE_HOURS, TimeUnit.HOURS);
+            }
+        }
+
+        if (merchant == null) {
+            log.warn("商家不存在，使用默认配送费，商家ID：{}", merchantId);
+            return new BigDecimal("5.00");
+        }
+
+        BigDecimal deliveryFee = merchant.getDeliveryFee();
+        if (deliveryFee == null) {
+            log.warn("商家配送费为空，使用默认配送费，商家ID：{}", merchantId);
+            return new BigDecimal("5.00");
+        }
+
+        return deliveryFee;
+    }
+
+    /**
+     * 从缓存获取商家地址
+     */
+    private MerchantAddress getCachedMerchantAddress(Long merchantId) {
+        String cacheKey = CACHE_MERCHANT_ADDRESS_KEY + merchantId;
+        MerchantAddress address = redisCache.getCacheObject(cacheKey);
+
+        if (address == null) {
+            address = merchantAddressInfoMapper.selectMerchantAddressByMerchantBaseId(merchantId);
+            if (address != null) {
+                redisCache.setCacheObject(cacheKey, address, CACHE_EXPIRE_HOURS, TimeUnit. HOURS);
+            }
+        }
+
+        return address;
+    }
+
+    /**
+     * 从缓存获取用户地址
+     */
+    private UserAddress getCachedUserAddress(Long addressId) {
+        String cacheKey = CACHE_USER_ADDRESS_KEY + addressId;
+        UserAddress address = redisCache.getCacheObject(cacheKey);
+
+        if (address == null) {
+            address = userAddressMapper.selectUserAddressByUserAddressId(addressId);
+            if (address != null) {
+                redisCache.setCacheObject(cacheKey, address, CACHE_EXPIRE_HOURS, TimeUnit.HOURS);
+            }
+        }
+
+        return address;
+    }
+
+    /**
+     * 获取或转换地理位置（带缓存和数据库更新）
+     */
+    private BigDecimal[] getOrConvertLocation(String fullAddress, String city, Long addressId, UserAddress userAddress) {
+        // 如果用户地址已有经纬度，直接返回
+        if (userAddress != null && userAddress.getLongitude() != null && userAddress.getLatitude() != null) {
+            return new BigDecimal[]{userAddress.getLongitude(), userAddress.getLatitude()};
+        }
+
+        // 调用高德API转换
+        try {
+            BigDecimal[] location = aMapGeocodeUtil.geocode(fullAddress, city);
+            if (location != null && location.length == 2) {
+                log.info("地址转经纬度成功，地址：{}，经度：{}，纬度：{}", fullAddress, location[0], location[1]);
+
+                // 异步更新数据库中的经纬度（如果有addressId）
+                if (addressId != null && userAddress != null) {
+                    CompletableFuture. runAsync(() -> {
+                        try {
+                            UserAddress updateAddress = new UserAddress();
+                            updateAddress.setUserAddressId(addressId);
+                            updateAddress.setLongitude(location[0]);
+                            updateAddress.setLatitude(location[1]);
+                            userAddressMapper.updateUserAddress(updateAddress);
+
+                            // 更新缓存
+                            String cacheKey = CACHE_USER_ADDRESS_KEY + addressId;
+                            redisCache.deleteObject(cacheKey);
+                        } catch (Exception e) {
+                            log.error("异步更新用户地址经纬度失败，地址ID：{}", addressId, e);
+                        }
+                    });
+                }
+
+                return location;
+            }
+        } catch (Exception e) {
+            log.error("地址转经纬度异常，地址：{}", fullAddress, e);
+        }
+
+        return new BigDecimal[]{null, null};
+    }
+
+    /**
+     * 注册事务提交后执行的任务
+     */
+    private void registerAfterCommitTask(Runnable task) {
+        if (TransactionSynchronizationManager.isSynchronizationActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    task. run();
+                }
+            });
+        } else {
+            // 如果没有事务，直接执行
+            task.run();
+        }
     }
 
     /**
