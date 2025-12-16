@@ -245,7 +245,7 @@ public class  SecondhandOrderServiceImpl implements ISecondhandOrderService {
 
         if (!payResult) {
             // 模拟支付失败 → 标记为无效订单
-            orderMainMapper.updateOrderStatus(orderNo, 5L, 0L, "支付失败");
+            orderMainMapper.updateOrderStatus(orderNo, 6L, 0L, "支付失败");
             return false;
         }
         // 支付成功 → 更新订单支付状态
