@@ -4,7 +4,7 @@ import com.ruoyi.platform.domain.OrderMain;
 import com.ruoyi.platform.domain.dto.CreateOrderDTO;
 import com.ruoyi.platform.domain.dto.PayOrderDTO;
 import com.ruoyi.platform.domain.dto.PrePayOrderDTO;
-import com.ruoyi.platform.domain.vo.CreateErrandOrderDto;
+import com.ruoyi.platform.domain.dto.CreateErrandOrderDto;
 
 /**
  * 用户订单服务接口

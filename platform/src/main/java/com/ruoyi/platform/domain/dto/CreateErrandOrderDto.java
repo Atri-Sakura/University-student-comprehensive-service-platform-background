@@ -1,6 +1,8 @@
-package com.ruoyi.platform.domain.vo;
+package com.ruoyi.platform.domain.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 import java.math.BigDecimal;
@@ -24,7 +26,20 @@ public class CreateErrandOrderDto {
     /** 商家名称（冗余） */
     private String merchantName;
 
+    @NotBlank(message = "取货省份不能为空")
+    private String pickProvince;
+
+    @NotBlank(message = "取货城市不能为空")
+    private String pickCity;
+
+    @NotBlank(message = "取货区县不能为空")
+    private String pickDistrict;
+
+    @NotBlank(message = "取货详细地址不能为空")
+    private String pickDetailAddress;
+
     /** 送货地址ID */
+    @NotNull(message = "收货地址ID不能为空")
     private Long deliverAddressId;
 
     /** 送货地址文本 */
@@ -41,16 +56,6 @@ public class CreateErrandOrderDto {
 
     /** 运费 */
     private BigDecimal deliverAmount;
-
-    private BigDecimal pickLongitude;
-
-    private BigDecimal pickLatitude;
-
-    /** 送货经度 */
-    private BigDecimal deliverLongitude;
-
-    /** 送货纬度 */
-    private BigDecimal deliverLatitude;
 
     /** 订单备注 */
     private String remark;

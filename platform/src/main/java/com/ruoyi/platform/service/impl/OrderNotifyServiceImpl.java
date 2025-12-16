@@ -8,7 +8,7 @@ import com.ruoyi.platform.chat.utils.SnowflakeIdGenerator;
 import com.ruoyi.platform.domain.OrderDelivery;
 import com.ruoyi.platform.domain.OrderMain;
 import com.ruoyi.platform.domain.dto.CreateOrderDTO;
-import com.ruoyi.platform.domain.vo.CreateErrandOrderDto;
+import com.ruoyi.platform.domain.dto.CreateErrandOrderDto;
 import com.ruoyi.platform.service.IOrderDeliveryService;
 import com.ruoyi.platform.service.IOrderMainService;
 import com.ruoyi.platform.service.IOrderNotifyService;
