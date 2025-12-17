@@ -509,11 +509,10 @@ public class OrderFlowServiceImpl implements IOrderFlowService {
      * 核心方法：加锁并启动看门狗
      */
     private WatchDog lockWithWatchDog(String lockKey, String lockValue) {
-        // 尝试加锁
-        Boolean lockAcquired = redisTemplate.opsForValue().setIfAbsent(lockKey, lockValue, LOCK_EXPIRE_SECONDS, TimeUnit.SECONDS);
+        Boolean lockAcquired = redisTemplate.opsForValue()
+                .setIfAbsent(lockKey, lockValue, LOCK_EXPIRE_SECONDS, TimeUnit.SECONDS);
 
         if (Boolean.TRUE.equals(lockAcquired)) {
-            // 加锁成功，启动看门狗线程
             WatchDog watchDog = new WatchDog(lockKey, lockValue);
             watchDog.start();
             return watchDog;
@@ -530,12 +529,13 @@ public class OrderFlowServiceImpl implements IOrderFlowService {
             watchDog.stop();
 
             // 2. 使用Lua脚本安全释放锁（校验UUID，只删除自己的锁）
-            String script = "if redis.call('get', KEYS[1]) == ARGV[1] then return redis.call('del', KEYS[1]) else return 0 end";
-            DefaultRedisScript<Long> redisScript = new DefaultRedisScript<>();
-            redisScript.setScriptText(script);
-            redisScript.setResultType(Long.class);
-
-            redisTemplate.execute(redisScript, Collections.singletonList(watchDog.key), watchDog.value);
+            // UNLOCK_SCRIPT 已经在类的静态块中初始化，直接复用以提高性能
+            try {
+                redisTemplate.execute(UNLOCK_SCRIPT, Collections.singletonList(watchDog.getKey()), watchDog.getValue());
+            } catch (Exception e) {
+                log.error("释放分布式锁失败，Key: {}", watchDog.getKey(), e);
+                // 此时业务已完成，释放失败可能是Redis波动，通常不抛出异常打断业务，依赖过期时间兜底
+            }
         }
     }
 
@@ -545,11 +545,22 @@ public class OrderFlowServiceImpl implements IOrderFlowService {
     private class WatchDog {
         private final String key;
         private final String value;
-        private ScheduledFuture<?> future;
+        // 使用 volatile 保证多线程可见性
+        private volatile ScheduledFuture<?> future;
+        // 标记是否已经停止，防止重复操作
+        private volatile boolean stopped = false;
 
         public WatchDog(String key, String value) {
             this.key = key;
             this.value = value;
+        }
+
+        public String getKey() {
+            return key;
+        }
+
+        public String getValue() {
+            return value;
         }
 
         public void start() {
@@ -557,34 +568,45 @@ public class OrderFlowServiceImpl implements IOrderFlowService {
             long period = LOCK_EXPIRE_SECONDS / 3;
 
             this.future = scheduledExecutorService.scheduleAtFixedRate(() -> {
+                // 如果已经停止，直接返回
+                if (stopped) {
+                    return;
+                }
+
                 try {
-                    // 使用 Lua 脚本进行续期：检查值是否匹配，匹配则重置过期时间
-                    String script = "if redis.call('get', KEYS[1]) == ARGV[1] then return redis.call('expire', KEYS[1], ARGV[2]) else return 0 end";
-                    DefaultRedisScript<Long> redisScript = new DefaultRedisScript<>();
-                    redisScript.setScriptText(script);
-                    redisScript.setResultType(Long.class);
+                    // 使用预加载的 RENEW_SCRIPT 脚本进行续期
+                    Long result = redisTemplate.execute(RENEW_SCRIPT, Collections.singletonList(key), value, LOCK_EXPIRE_SECONDS);
 
-                    Long result = redisTemplate.execute(redisScript, Collections.singletonList(key), value, LOCK_EXPIRE_SECONDS);
-
-                    // 如果返回0，说明锁已经不在了（可能Redis重启或被手动删除了），停止续期
+                    // result == 1 表示续期成功，result == 0 表示锁已不存在或不属于当前线程
                     if (result != null && result == 0) {
+                        log.warn("分布式锁续期检测到锁丢失，停止看门狗。Key: {}", key);
                         this.stop();
                     }
                 } catch (Exception e) {
-                    log.error("分布式锁续期失败，Key: {}", key, e);
-                    // 续期失败不抛出异常，以免影响主业务，但记录日志
+                    // 必须捕获所有异常，防止定时任务线程因为异常而终止后续调度
+                    log.error("分布式锁续期发生异常，Key: {}", key, e);
                 }
             }, period, period, TimeUnit.SECONDS);
         }
 
         public void stop() {
-            if (this.future != null && !this.future.isCancelled()) {
-                this.future.cancel(true);
+            // 设置标志位，配合双重检查防止并发调用
+            if (stopped) {
+                return;
+            }
+            stopped = true;
+
+            if (this.future != null) {
+                // false 表示如果任务正在运行，不强制中断它，让它自然完成（因为任务里有 Redis 操作）
+                // 但如果是 sleep 等待中则可以中断
+                boolean cancelResult = this.future.cancel(false);
+                if (!cancelResult && !this.future.isDone()) {
+                    log.debug("看门狗任务取消失败或仍在运行中，Key: {}", key);
+                }
             }
         }
     }
 
-    // ================= 以下为辅助方法和缓存操作 =================
 
     private OrderMain getOrderFromCache(Long orderMainId) {
         String cacheKey = CACHE_ORDER_KEY + orderMainId;

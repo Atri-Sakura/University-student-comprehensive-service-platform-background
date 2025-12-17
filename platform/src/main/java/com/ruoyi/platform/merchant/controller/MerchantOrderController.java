@@ -9,6 +9,7 @@ import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.platform.domain.OrderMain;
 import com.ruoyi.platform.merchant.service.IMerchantOrderService;
 import com.ruoyi.platform.service.IOrderFlowService;
+import com.ruoyi.platform.service.impl.OrderFlowServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,6 +27,8 @@ public class MerchantOrderController extends BaseController {
 
     @Autowired
     private IMerchantOrderService merchantOrderService;
+    @Autowired
+    private OrderFlowServiceImpl orderFlowServiceImpl;
 
     /**
      * 查询商家订单列表
@@ -65,7 +68,9 @@ public class MerchantOrderController extends BaseController {
     @PutMapping("/accept/{orderMainId}")
     public AjaxResult accept(@PathVariable Long orderMainId) {
         Long merchantId = SecurityUtils.getMerchantBaseId();
-        return toAjax(merchantOrderService.acceptOrder(merchantId, orderMainId));
+
+        int result = orderFlowServiceImpl.merchantAcceptOrder(merchantId, orderMainId);
+        return AjaxResult.success(result);
     }
 
 
@@ -73,14 +78,15 @@ public class MerchantOrderController extends BaseController {
      * 商家拒单
      *
      * @param orderMainId 订单ID
+     * @param refuseReason 拒单原因
      * @return 结果
      */
     @Deprecated
     @Log(title = "商家拒单", businessType = BusinessType.UPDATE)
     @PutMapping("/reject/{orderMainId}")
-    public AjaxResult reject(@PathVariable Long orderMainId) {
+    public AjaxResult reject(@PathVariable Long orderMainId, String refuseReason) {
         Long merchantId = SecurityUtils.getMerchantBaseId();
-        String operator = "merchant";
-        return toAjax(merchantOrderService.rejectOrder(merchantId, orderMainId, operator));
+        int result = orderFlowServiceImpl.merchantRejectOrder(merchantId, orderMainId, refuseReason);
+        return AjaxResult.success(result);
     }
 }
